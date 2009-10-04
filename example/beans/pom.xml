@@ -39,8 +39,8 @@
 						<id>make-dir-assembly</id>
 						<phase>package</phase>
 						<goals>
-							<goal>directory-single</goal>
 							<goal>single</goal>
+							<goal>directory-single</goal>
 						</goals>
 					</execution>															
 				</executions>
@@ -57,7 +57,7 @@
 						<configuration>
 							<tasks>
 								<copy todir="${jboss.home}/server/${node}/deploy">
-									<fileset dir="target/${build.finalName}-beans.dir">
+									<fileset dir="${project.build.directory}/${build.finalName}-beans">
 										<include name="${build.finalName}/**" />
 									</fileset>
 								</copy>
