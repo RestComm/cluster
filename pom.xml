@@ -3,20 +3,20 @@
 	
 	<parent>
 		<groupId>org.mobicents</groupId>
-		<artifactId>mobicents</artifactId>
-		<version>12</version>
+		<artifactId>mobicents-parent</artifactId>
+		<version>2.0-SNAPSHOT</version>
 	</parent>
 	
 	<groupId>org.mobicents.cluster</groupId>
-	<artifactId>parent</artifactId>
+	<artifactId>mobicents-cluster</artifactId>
 	<version>1.0.0BETA1-SNAPSHOT</version>
 	
 	<packaging>pom</packaging>
 		
 	<scm>
-		<connection>scm:svn:https://mobicents.googlecode.com/svn/trunk/servers/jain-slee/core</connection>
-		<developerConnection>scm:svn:https://mobicents.googlecode.com/svn/trunk/servers/jain-slee/core</developerConnection>
-		<url>http://mobicents.googlecode.com/svn/trunk/servers/jain-slee/core</url>
+		<connection>scm:svn:https://mobicents.googlecode.com/svn/trunk/servers/cluster</connection>
+		<developerConnection>scm:svn:https://mobicents.googlecode.com/svn/trunk/servers/cluster</developerConnection>
+		<url>http://mobicents.googlecode.com/svn/trunk/servers/cluster</url>
 	</scm>
 
 	<modules>
@@ -31,18 +31,6 @@
 		<jboss.version>5.1.0.GA</jboss.version>
 		<mobicents.tools.mavenplugin.eclipse.version>1.0.0.BETA2</mobicents.tools.mavenplugin.eclipse.version>
 	</properties>
-	
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.jboss.jbossas</groupId>
-				<artifactId>jboss-as-component-matrix</artifactId>
-				<version>${jboss.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 			
 	<profiles>
 		<profile>
@@ -72,6 +60,15 @@
 	</profiles>
 	
 	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<version>2.2-beta-4</version>
+				</plugin>								
+			</plugins>
+		</pluginManagement>
 		<plugins>
 			<plugin>
 				<artifactId>maven-eclipse-plugin</artifactId>
