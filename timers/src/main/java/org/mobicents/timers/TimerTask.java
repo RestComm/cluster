@@ -45,7 +45,7 @@ public abstract class TimerTask implements Runnable {
 	 * Retrieves the tx action to set the timer when the tx commits, not used in a non tx environment.
 	 * @return
 	 */
-	SetTimerAfterTxCommitRunnable getSetTimerTransactionalAction() {
+	protected SetTimerAfterTxCommitRunnable getSetTimerTransactionalAction() {
 		return action;
 	}
 
@@ -62,7 +62,7 @@ public abstract class TimerTask implements Runnable {
 	 * Retrieves the schedule future object that returns from the task scheduling.
 	 * @return
 	 */
-	ScheduledFuture<?> getScheduledFuture() {
+	protected ScheduledFuture<?> getScheduledFuture() {
 		return scheduledFuture;
 	}
 	
@@ -70,7 +70,7 @@ public abstract class TimerTask implements Runnable {
 	 * Sets the schedule future object that returns from the task scheduling.
 	 * @param scheduledFuture
 	 */
-	void setScheduledFuture(ScheduledFuture<?> scheduledFuture) {
+	protected void setScheduledFuture(ScheduledFuture<?> scheduledFuture) {
 		this.scheduledFuture = scheduledFuture;
 	}
 	

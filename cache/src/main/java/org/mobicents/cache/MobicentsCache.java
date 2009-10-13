@@ -44,15 +44,22 @@ public class MobicentsCache {
 		startCache();
 	}
 	
+	public MobicentsCache(Cache cache, String cacheName) {
+		this.jBossCache = cache;
+		this.managedCache = true;									
+		startCache();
+	}
+	
 	private void startCache() {
 		if (jBossCache.getConfiguration().getCacheMode() == CacheMode.LOCAL) {
 			localMode = true;
 		}
-		final Region rootRegion = jBossCache.getRegion(Fqn.ROOT, true);
-		rootRegion.registerContextClassLoader(Thread.currentThread().getContextClassLoader());
-		jBossCache.start();
-		rootRegion.activate();
-		
+		if (!managedCache) {
+			final Region rootRegion = jBossCache.getRegion(Fqn.ROOT, true);
+			rootRegion.registerContextClassLoader(Thread.currentThread().getContextClassLoader());
+			jBossCache.start();
+			rootRegion.activate();
+		}
 		if (logger.isInfoEnabled()) {
 			logger.info("Mobicents Cache started, status: " + this.jBossCache.getCacheStatus() + ", Mode: " + this.jBossCache.getConfiguration().getCacheModeString());
 		}
