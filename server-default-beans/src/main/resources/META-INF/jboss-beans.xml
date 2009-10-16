@@ -16,7 +16,7 @@
       <property name="cacheMode">LOCAL</property>
       <property name="lockParentForChildInsertRemove">false</property>
       <property name="lockAcquisitionTimeout">15000</property>
-      <property name="concurrencyLevel">10000</property>
+      <property name="useLockStriping">false</property>
       
       <demand>RealTransactionManager</demand>
    </bean>
