@@ -63,13 +63,17 @@ public class CacheData {
 	/**
 	 * Removes node that holds data in cache
 	 */
-	public void remove() {
+	public boolean remove() {
 		if (exists() && !isRemoved()) {
 			isRemoved = true;
-			node.getParent().removeChild(nodeFqn.getLastElement());	
+			node.getParent().removeChild(nodeFqn.getLastElement());
 			if (logger.isDebugEnabled()) {
 				logger.debug("removed cache node "+nodeFqn);
-			}
+			}	
+			return true;
+		}
+		else {
+			return false;
 		}
 	}
 	
