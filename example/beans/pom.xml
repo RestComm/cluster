@@ -17,6 +17,21 @@
 	<dependencies>	
 		<dependency>
 			<groupId>${pom.groupId}</groupId>
+			<artifactId>cache</artifactId>
+			<version>${pom.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${pom.groupId}</groupId>
+			<artifactId>timers</artifactId>
+			<version>${pom.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${pom.groupId}</groupId>
+			<artifactId>core</artifactId>
+			<version>${pom.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${pom.groupId}</groupId>
            		<artifactId>example-jar</artifactId>
            	<version>${pom.version}</version>           	
 		</dependency>
