@@ -22,7 +22,7 @@ public class MobicentsCache {
 	private final Cache jBossCache;
 	private boolean localMode;
 	private final boolean managedCache;
-	
+
 	@SuppressWarnings("unchecked")
 	public MobicentsCache(Configuration cacheConfiguration) {
 		this.jBossCache = new DefaultCacheFactory().createCache(cacheConfiguration,false);
@@ -55,10 +55,7 @@ public class MobicentsCache {
 			localMode = true;
 		}
 		if (!managedCache) {
-			final Region rootRegion = jBossCache.getRegion(Fqn.ROOT, true);
-			rootRegion.registerContextClassLoader(Thread.currentThread().getContextClassLoader());
 			jBossCache.start();
-			rootRegion.activate();
 		}
 		if (logger.isInfoEnabled()) {
 			logger.info("Mobicents Cache started, status: " + this.jBossCache.getCacheStatus() + ", Mode: " + this.jBossCache.getConfiguration().getCacheModeString());
@@ -77,10 +74,62 @@ public class MobicentsCache {
 	}
 
 	/**
-	 *  
+	 * Indicates if the cache is not in a cluster environment. 
 	 * @return the localMode
 	 */
 	public boolean isLocalMode() {
 		return localMode;
+	}
+	
+	/**
+	 * Sets the class loader to be used on serialization operations, for data
+	 * stored in the specified fqn and child nodes. Note that if another class
+	 * loader is set for a specific child node tree, the cache will use instead
+	 * that class loader.
+	 * 
+	 * @param regionFqn
+	 * @param classLoader
+	 */
+	public void setReplicationClassLoader(Fqn regionFqn, ClassLoader classLoader) {
+		if (!isLocalMode()) {
+			final Region region = jBossCache.getRegion(regionFqn, true);
+			region.registerContextClassLoader(classLoader);
+			region.activate();
+		}
+	}
+	
+	/**
+	 * Sets the class loader to be used on serialization operations, for all
+	 * data stored. Note that if another class loader is set for a specific
+	 * child node tree, the cache will use instead that class loader.
+	 * 
+	 * @param classLoader
+	 */
+	public void setReplicationClassLoader(ClassLoader classLoader) {
+		setReplicationClassLoader(Fqn.ROOT, classLoader);
+	}
+	
+	/**
+	 * Unsets the class loader to be used on serialization operations, for data
+	 * stored in the specified fqn and child nodes.
+	 * @param regionFqn
+	 * @param classLoader
+	 */
+	public void unsetReplicationClassLoader(Fqn regionFqn, ClassLoader classLoader) {
+		if (!isLocalMode()) {
+			final Region region = jBossCache.getRegion(regionFqn, true);
+			region.unregisterContextClassLoader();
+			region.deactivate();
+			
+		}
+	}
+	
+	/**
+	 * Unsets the class loader to be used on serialization operations, for all
+	 * data stored.
+	 * @param classLoader
+	 */
+	public void unsetReplicationClassLoader(ClassLoader classLoader) {
+		unsetReplicationClassLoader(Fqn.ROOT,classLoader);
 	}
 }
