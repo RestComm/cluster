@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.mobicents.cluster</groupId>
 		<artifactId>mobicents-cluster</artifactId>
-		<version>1.0.0BETA1-SNAPSHOT</version>
+		<version>1.0</version>
 	</parent>
 
 	<artifactId>cache</artifactId>
