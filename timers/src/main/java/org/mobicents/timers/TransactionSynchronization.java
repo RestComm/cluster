@@ -11,26 +11,23 @@ import javax.transaction.Synchronization;
  *
  */
 public class TransactionSynchronization implements Synchronization {
-
-	/**
-	 * 
-	 */
-	private final Runnable commitAction;
 	
-	/**
-	 * 
-	 */
+	private final Runnable beforeCommitAction;
+	private final Runnable commitAction;
 	private final Runnable rollbackAction;
 	
 	/**
+	 * @param beforeCommitAction
 	 * @param commitAction
 	 * @param rollbackAction
 	 */
-	TransactionSynchronization(Runnable commitAction,
+	TransactionSynchronization(Runnable beforeCommitAction,Runnable commitAction,
 			Runnable rollbackAction) {
+		this.beforeCommitAction = beforeCommitAction;
 		this.commitAction = commitAction;
 		this.rollbackAction = rollbackAction;
 	}
+
 
 	/*
 	 * (non-Javadoc)
@@ -57,7 +54,9 @@ public class TransactionSynchronization implements Synchronization {
 	 * @see javax.transaction.Synchronization#beforeCompletion()
 	 */
 	public void beforeCompletion() {			
-		
+		if (beforeCommitAction != null) {
+			beforeCommitAction.run();
+		}
 	}
 	
 }

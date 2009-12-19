@@ -12,6 +12,7 @@ import javax.transaction.TransactionManager;
 
 import org.apache.log4j.Logger;
 import org.jboss.cache.Fqn;
+import org.jboss.cache.transaction.TransactionContext;
 import org.jgroups.Address;
 import org.mobicents.cluster.MobicentsCluster;
 import org.mobicents.cluster.cache.ClusteredCacheData;
@@ -187,23 +188,40 @@ public class FaultTolerantScheduler {
 		localRunningTasks.put(taskID, task);
 		
 		// store the task and data
-		TimerTaskCacheData timerTaskCacheData = new TimerTaskCacheData(taskID, baseFqn, cluster);
+		final TimerTaskCacheData timerTaskCacheData = new TimerTaskCacheData(taskID, baseFqn, cluster);
 		if (timerTaskCacheData.create()) {
 			timerTaskCacheData.setTaskData(taskData);
 		}
 				
 		// schedule task
-		SetTimerAfterTxCommitRunnable setTimerAction = new SetTimerAfterTxCommitRunnable(task, this);
+		final SetTimerAfterTxCommitRunnable setTimerAction = new SetTimerAfterTxCommitRunnable(task, this);
 		if (txManager != null) {
 			try {
 				Transaction tx = txManager.getTransaction();
 				if (tx != null) {
-					Runnable rollbackAction = new Runnable() {				
+					// action that before commit, adds a the synchronization
+					// that schedules the timer on commit, to the jboss cache
+					// handler
+					// so it is executed after all data, which the timer may
+					// depend, is already processed by jboss cache
+					final TransactionContext tc = cluster.getMobicentsCache()
+							.getJBossCache().getInvocationContext().getTransactionContext();
+					final Runnable beforeCommitAction = new Runnable() {
 						public void run() {
-							localRunningTasks.remove(taskID);					
+							// add the set timer action to jboss cache
+							// synchronization handler
+							tc.getOrderedSynchronizationHandler()
+								.registerAtTail(new TransactionSynchronization(null,setTimerAction,null));
 						}
 					};
-					tx.registerSynchronization(new TransactionSynchronization(setTimerAction,rollbackAction));
+					// action that cancels the schedule if the tx rollbacks
+					final Runnable rollbackAction = new Runnable() {
+						public void run() {
+							localRunningTasks.remove(taskID);
+						}
+					};
+					tx.registerSynchronization(new TransactionSynchronization(
+							beforeCommitAction, null, rollbackAction));
 					task.setSetTimerTransactionalAction(setTimerAction);
 				}
 				else {
@@ -249,7 +267,7 @@ public class FaultTolerantScheduler {
 					try {
 						Transaction tx = txManager.getTransaction();
 						if (tx != null) {
-							tx.registerSynchronization(new TransactionSynchronization(cancelAction,null));
+							tx.registerSynchronization(new TransactionSynchronization(null,cancelAction,null));
 						}
 						else {
 							cancelAction.run();
