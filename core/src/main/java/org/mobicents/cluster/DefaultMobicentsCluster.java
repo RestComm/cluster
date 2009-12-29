@@ -28,7 +28,7 @@ import org.mobicents.cluster.election.SingletonElector;
  * current node as owner(this is semi-gravitation behavior (we don't delete, we
  * just mark)). 
  * 
- * Indexing is only at node level, i.e., there is not
+ * Indexing is only at node level, i.e., there is no
  * reverse indexing, so it has to iterate through whole resource group data FQNs to check which
  * nodes should be taken over.
  * 
@@ -52,7 +52,7 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 	public DefaultMobicentsCluster(MobicentsCache watchedCache, TransactionManager txMgr, SingletonElector elector) {
 		this.localListeners = Collections.synchronizedSortedSet(new TreeSet<ClientLocalListener>(new ClientLocalListenerComparator()));
 		this.mobicentsCache = watchedCache;
-		final Cache cache = watchedCache.getJBossCache();
+		final Cache<?,?> cache = watchedCache.getJBossCache();
 		if (!cache.getConfiguration().getCacheMode().equals(CacheMode.LOCAL)) {
 			// get current cluster members
 			currentView = new ArrayList<Address>(cache.getConfiguration().getRuntimeConfig().getChannel().getView().getMembers());
@@ -79,12 +79,12 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 			return Collections.unmodifiableList(currentView);
 		}
 		else {
-			Address localAddress = getLocalAddress();
+			final Address localAddress = getLocalAddress();
 			if (localAddress == null) {
 				return Collections.emptyList();
 			}
 			else {
-				List<Address> list = new ArrayList<Address>();
+				final List<Address> list = new ArrayList<Address>();
 				list.add(localAddress);
 				return Collections.unmodifiableList(list);
 			}
@@ -99,6 +99,21 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 		if (localAddress != null) {
 			final List<Address> clusterMembers = getClusterMembers();
 			return !clusterMembers.isEmpty() && clusterMembers.get(0).equals(localAddress);
+		}
+		else {
+			return true;
+		}
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.mobicents.cluster.MobicentsCluster#isSingleMember()
+	 */
+	public boolean isSingleMember() {
+		final Address localAddress = getLocalAddress();
+		if (localAddress != null) {
+			final List<Address> clusterMembers = getClusterMembers();
+			return clusterMembers.size() == 1;
 		}
 		else {
 			return true;
@@ -145,6 +160,7 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 	/**
 	 * 
 	 */
+	@SuppressWarnings("unchecked")
 	private void performTakeOver(Address lostMember, Address localAddress) {
 	
 		if (logger.isDebugEnabled()) {
@@ -180,6 +196,13 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 							// change ownership
 							clusteredCacheData.setClusterNodeAddress(localAddress);							
 						}					
+					}else
+					{
+						//FIXME: debug?
+						if(logger.isDebugEnabled())
+						{
+							logger.debug(" Attempt to index: "+Fqn.fromRelativeElements(rootFqnOfChanges, childName)+" failed, node does not exist.");
+						}
 					}
 				}
 				doRollback = false;

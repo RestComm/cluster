@@ -21,7 +21,6 @@ public interface SingletonElector {
 
 	
 	public Address elect(List<Address> list);
-	
 	//FIXME: add conf methods here
 	
 }

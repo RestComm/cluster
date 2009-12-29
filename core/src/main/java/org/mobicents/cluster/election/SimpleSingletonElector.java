@@ -1,43 +1,56 @@
 package org.mobicents.cluster.election;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import org.jgroups.Address;
 
 /**
+ * Simplest of elector. Use reminder of fixed index to determine master.
  * 
  * @author <a href="mailto:baranowb@gmail.com">Bartosz Baranowski </a>
  * @author martins
  */
-public class SimpleSingletonElector implements SingletonElector {
+public class SimpleSingletonElector implements SingletonElector{
 
-	/* (non-Javadoc)
+	protected int shift = 5; // lets set default to something other than zero
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.mobicents.ftf.election.SingletonElector#elect(java.util.List)
 	 */
 	public Address elect(List<Address> list) {
-		//FIXME: add something better
-		Collections.sort(list, new Comparator<Address>(){
+		//Jgroups return addresses always in sorted order, jbcache does not change it.
+		//For buddies its ok, since we get list from failing node :) 
+		// in case shift is bigger than size
+		int size = list.size();
+		int index = (this.shift % size) +size;
+		index = index % size;
 
-			public int compare(Address o1, Address o2) {
-				if(o1 == null)
-				{
-					return -1;
-				}
-				if(o2 == null)
-				{
-					return 1;
-				}
-				
-				if(o1 == o2)
-				{
-					return 0;
-				}
-				return o1.toString().compareTo(o2.toString());
-			}});
-		return list.get(0);
-		
+		return list.get(index);
+
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.mobicents.cluster.election.SimpleSingletonElectorMBean#getPosition()
+	 */
+	public int getPosition() {
+		return this.shift;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.mobicents.cluster.election.SimpleSingletonElectorMBean#setPosition
+	 * (int)
+	 */
+	public void setPosition(int shift) {
+		this.shift = shift;
+
 	}
 
 }

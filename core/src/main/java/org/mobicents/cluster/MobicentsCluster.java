@@ -40,10 +40,22 @@ public interface MobicentsCluster {
 	public List<Address> getClusterMembers();
 	
 	/**
-	 * Indicates if the local node is the master/head of the cluster.
+	 * Indicates if the local node is the head of the cluster. If true it is safe to asume that we can perform cluster wide operations.
 	 * @return
 	 */
 	public boolean isHeadMember();
+	
+	/**
+	 * Method to determine if this node is single node in the cluster.
+	 * 
+	 * @return <ul>
+	 *         <li><b>true</b> - cache mode is local || clusterMembers == 1
+	 *         <li>
+	 *         <li><b>false</b> - otherwise
+	 *         <li>
+	 *         </ul>
+	 */
+	public boolean isSingleMember();
 	
 	/**
 	 *  
