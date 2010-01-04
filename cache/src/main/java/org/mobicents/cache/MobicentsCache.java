@@ -3,6 +3,7 @@ package org.mobicents.cache;
 import org.apache.log4j.Logger;
 import org.jboss.cache.Cache;
 import org.jboss.cache.CacheManager;
+import org.jboss.cache.CacheStatus;
 import org.jboss.cache.DefaultCacheFactory;
 import org.jboss.cache.Fqn;
 import org.jboss.cache.Region;
@@ -36,11 +37,18 @@ public class MobicentsCache {
 		this.managedCache = false;
 		startCache();	
 	}
-
+	@Deprecated
 	public MobicentsCache(CacheManager haCacheManager, String cacheName) throws Exception {
 		this.jBossCache = haCacheManager.getCache(cacheName, true);
 		this.jBossCache.create();
 		this.managedCache = true;
+		startCache();
+	}
+	
+	public MobicentsCache(CacheManager haCacheManager, String cacheName, boolean managedCache) throws Exception {
+		this.jBossCache = haCacheManager.getCache(cacheName, true);
+		this.jBossCache.create();
+		this.managedCache = managedCache;
 		startCache();
 	}
 	
@@ -50,11 +58,11 @@ public class MobicentsCache {
 		startCache();
 	}
 	
-	private void startCache() {
+	protected void startCache() {
 		if (jBossCache.getConfiguration().getCacheMode() == CacheMode.LOCAL) {
 			localMode = true;
 		}
-		if (!managedCache) {
+		if (!managedCache && !(CacheStatus.STARTED == jBossCache.getCacheStatus())) {
 			jBossCache.start();
 		}
 		if (logger.isInfoEnabled()) {
