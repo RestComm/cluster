@@ -62,7 +62,7 @@ public abstract class TimerTask implements Runnable {
 	 * Retrieves the schedule future object that returns from the task scheduling.
 	 * @return
 	 */
-	protected ScheduledFuture<?> getScheduledFuture() {
+	public ScheduledFuture<?> getScheduledFuture() {
 		return scheduledFuture;
 	}
 	
