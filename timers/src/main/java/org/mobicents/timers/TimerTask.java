@@ -72,6 +72,24 @@ public abstract class TimerTask implements Runnable {
 	 */
 	protected void setScheduledFuture(ScheduledFuture<?> scheduledFuture) {
 		this.scheduledFuture = scheduledFuture;
+		// it may happen that the cancel() is invoked before this is 
+		// invoked 
+		if (cancel) {
+			this.scheduledFuture.cancel(false);
+		}
+	}
+
+	private transient boolean cancel; 
+	
+	/**
+	 * Cancels the execution of the task.
+	 * Note, this doesn't remove the task from the scheduler.
+	 */
+	protected void cancel() {
+		cancel = true;
+		if (scheduledFuture != null) {
+			scheduledFuture.cancel(false);
+		}
 	}
 	
 	/**
