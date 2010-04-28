@@ -80,7 +80,6 @@
 			<!-- cluster local listener priority -->
 			<parameter>10</parameter>
 			<parameter><inject bean="RealTransactionManager"/></parameter>
-			<parameter>true</parameter>				
 		</constructor>		
 	</bean>
 	

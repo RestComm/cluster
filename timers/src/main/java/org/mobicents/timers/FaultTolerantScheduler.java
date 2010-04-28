@@ -79,20 +79,14 @@ public class FaultTolerantScheduler {
 	
 	/**
 	 * 
-	 */
-	private final boolean removeRemoteTasks; 
-	
-	/**
-	 * 
 	 * @param name
 	 * @param corePoolSize
 	 * @param cluster
 	 * @param priority
 	 * @param txManager
 	 * @param timerTaskFactory
-	 * @param removeRemoteTasks
 	 */
-	public FaultTolerantScheduler(String name, int corePoolSize, MobicentsCluster cluster, byte priority, TransactionManager txManager,TimerTaskFactory timerTaskFactory, boolean removeRemoteTasks) {
+	public FaultTolerantScheduler(String name, int corePoolSize, MobicentsCluster cluster, byte priority, TransactionManager txManager,TimerTaskFactory timerTaskFactory) {
 		this.name = name;
 		this.executor = new ScheduledThreadPoolExecutor(corePoolSize);
 		this.baseFqn = Fqn.fromElements(name);
@@ -105,10 +99,7 @@ public class FaultTolerantScheduler {
 		this.txManager = txManager;		
 		clusterClientLocalListener = new ClientLocalListener(priority);
 		cluster.addFailOverListener(clusterClientLocalListener);
-		this.removeRemoteTasks = removeRemoteTasks;
-		if(removeRemoteTasks) {
-			cluster.addDataRemovalListener(clusterClientLocalListener);
-		}
+		cluster.addDataRemovalListener(clusterClientLocalListener);
 	}
 
 	/**
@@ -297,10 +288,8 @@ public class FaultTolerantScheduler {
 			}		
 		}
 		else {
-			if(removeRemoteTasks) {
-				// not found locally, we remove it froim the cache still in case it is present
-				remove(taskID, true);
-			}
+			// not found locally, we remove it from the cache still in case it is present
+			remove(taskID, true);
 		}
 		
 		return task;
@@ -336,10 +325,8 @@ public class FaultTolerantScheduler {
 			logger.debug("Shutdown now.");
 		}
 		cluster.removeFailOverListener(clusterClientLocalListener);
-		if(removeRemoteTasks) {
-			cluster.removeDataRemovalListener(clusterClientLocalListener);
-		}
-			
+		cluster.removeDataRemovalListener(clusterClientLocalListener);
+		
 		executor.shutdownNow();
 		localRunningTasks.clear();
 	}
