@@ -95,7 +95,7 @@ public class FaultTolerantTimerTimerTask extends TimerTask {
 	}
 	
 	private Integer _getTaskStatus(java.util.TimerTask timerTask) {
-		Class cc = java.util.TimerTask.class;
+		Class<?> cc = java.util.TimerTask.class;
 		try {
 			Field stateField=cc.getDeclaredField("state");
 			stateField.setAccessible(true);
@@ -103,9 +103,7 @@ public class FaultTolerantTimerTimerTask extends TimerTask {
 			stateField.setAccessible(false);
 			return taskStatus;
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			throw new RuntimeException("Fialed to get status");
+			throw new RuntimeException("Fialed to get status",e);
 		}
 	}
 	
@@ -116,7 +114,7 @@ public class FaultTolerantTimerTimerTask extends TimerTask {
 	private void setPeriod(final java.util.TimerTask javaUtilTimerTask,final long period) {
 		if(System.getSecurityManager()!=null)
 		{
-			 AccessController.doPrivileged(new PrivilegedAction(){
+			 AccessController.doPrivileged(new PrivilegedAction<Object>(){
 
 				public Object run() {
 					_setPeriod(javaUtilTimerTask,period);
@@ -135,7 +133,7 @@ public class FaultTolerantTimerTimerTask extends TimerTask {
 	 * @param period
 	 */
 	private void _setPeriod(java.util.TimerTask javaUtilTimerTask, long period) {
-		Class cc = java.util.TimerTask.class;
+		Class<?> cc = java.util.TimerTask.class;
 		try {
 			Field stateField=cc.getDeclaredField("period");
 			stateField.setAccessible(true);
@@ -143,7 +141,7 @@ public class FaultTolerantTimerTimerTask extends TimerTask {
 			stateField.setAccessible(false);
 			return;
 		} catch (Throwable e) {
-			throw new RuntimeException("Failed to set task period");
+			throw new RuntimeException("Failed to set task period",e);
 		}
 		
 	}

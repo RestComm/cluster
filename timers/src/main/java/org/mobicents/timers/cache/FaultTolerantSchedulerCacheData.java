@@ -24,6 +24,7 @@ public class FaultTolerantSchedulerCacheData extends CacheData {
 	 * @param txManager 
 	 * @param txManager
 	 */
+	@SuppressWarnings("unchecked")
 	public FaultTolerantSchedulerCacheData(Fqn baseFqn, MobicentsCluster cluster) {
 		super(baseFqn,cluster.getMobicentsCache());
 	}

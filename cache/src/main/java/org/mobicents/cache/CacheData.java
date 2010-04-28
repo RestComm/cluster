@@ -13,12 +13,15 @@ public class CacheData {
 
 	private static final Logger logger = Logger.getLogger(CacheData.class);
 	
+	@SuppressWarnings("unchecked")
 	private Node node;
+	@SuppressWarnings("unchecked")
 	private final Fqn nodeFqn;
 	
 	private boolean isRemoved;
 	private final MobicentsCache mobicentsCache;
 	
+	@SuppressWarnings("unchecked")
 	public CacheData(Fqn nodeFqn, MobicentsCache mobicentsCache) {		
 		this.nodeFqn = nodeFqn;	
 		this.mobicentsCache = mobicentsCache;
@@ -83,6 +86,7 @@ public class CacheData {
 	 * 
 	 * Throws {@link IllegalStateException} if remove() was invoked
 	 */
+	@SuppressWarnings("unchecked")
 	protected Node getNode() {
 		if (isRemoved()) {
 			throw new IllegalStateException();
@@ -102,6 +106,7 @@ public class CacheData {
 	 * Retrieves the node fqn
 	 * @return the nodeFqn
 	 */
+	@SuppressWarnings("unchecked")
 	public Fqn getNodeFqn() {
 		return nodeFqn;
 	}

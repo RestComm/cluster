@@ -3,6 +3,7 @@ package org.mobicents.cluster;
 import org.jboss.cache.Fqn;
 import org.jgroups.Address;
 import org.mobicents.cluster.cache.ClusteredCacheData;
+import org.mobicents.cluster.election.ClientLocalListenerElector;
 
 /**
  * 
@@ -14,13 +15,22 @@ import org.mobicents.cluster.cache.ClusteredCacheData;
  * @author martins
  * 
  */
-public interface ClientLocalListener {
+public interface FailOverListener {
 
 	/**
 	 * Retrieves the base fqn the listener has interest.
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public Fqn getBaseFqn();
+	
+	/**
+	 * Retrieves the listener's elector, used to elect the node which does
+	 * failover of specific data.
+	 * 
+	 * @return
+	 */
+	public ClientLocalListenerElector getElector();
 	
 	/**
 	 * Retrieves the priority of the listener.
@@ -45,5 +55,4 @@ public interface ClientLocalListener {
 	 * @param clusteredCacheData
 	 */
 	public void lostOwnership(ClusteredCacheData clusteredCacheData);
-
 }

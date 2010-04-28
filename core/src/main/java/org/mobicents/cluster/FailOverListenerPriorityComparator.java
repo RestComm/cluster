@@ -9,12 +9,12 @@ import java.util.Comparator;
  * @author martins
  *
  */
-public class ClientLocalListenerComparator implements Comparator<ClientLocalListener> {
+public class FailOverListenerPriorityComparator implements Comparator<FailOverListener> {
 
 	/* (non-Javadoc)
 	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
 	 */
-	public int compare(ClientLocalListener o1, ClientLocalListener o2) {
+	public int compare(FailOverListener o1, FailOverListener o2) {
 		if (o1.equals(o2)) {
 			return 0;
 		}

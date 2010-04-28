@@ -26,15 +26,25 @@ public class TimerTaskCacheData extends ClusteredCacheData {
 	/**
 	 * 
 	 */
+	@SuppressWarnings("unchecked")
 	public TimerTaskCacheData(Serializable taskID, Fqn baseFqn, MobicentsCluster mobicentsCluster) {
 		super(Fqn.fromRelativeElements(baseFqn, taskID),mobicentsCluster);
 	}
 
 	/**
+	 * 
+	 */
+	@SuppressWarnings("unchecked")
+	public TimerTaskCacheData(Fqn fqn, MobicentsCluster mobicentsCluster) {
+		super(fqn,mobicentsCluster);
+	}
+	
+	/**
 	 * Sets the task data.
 	 * 
 	 * @param taskData
 	 */
+	@SuppressWarnings("unchecked")
 	public void setTaskData(TimerTaskData taskData) {
 		getNode().put(CACHE_NODE_MAP_KEY,taskData);
 	}
@@ -43,6 +53,7 @@ public class TimerTaskCacheData extends ClusteredCacheData {
 	 * Retrieves the task data
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public TimerTaskData getTaskData() {
 		return (TimerTaskData) getNode().get(CACHE_NODE_MAP_KEY);		
 	}

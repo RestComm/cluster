@@ -17,7 +17,7 @@ import org.jgroups.Address;
  * @author <a href="mailto:baranowb@gmail.com">Bartosz Baranowski
  *         </a>
  */
-public interface SingletonElector {
+public interface ClusterElector {
 
 	
 	public Address elect(List<Address> list);

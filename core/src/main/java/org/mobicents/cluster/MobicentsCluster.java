@@ -15,17 +15,30 @@ import org.mobicents.cluster.cache.ClusteredCacheDataIndexingHandler;
 public interface MobicentsCluster {
 
 	/**
-	 * Adds the specified client local listener.
-	 * @param localListener
+	 * Adds the specified fail over listener.
+	 * @param listener
 	 */
-	public boolean addLocalListener(ClientLocalListener localListener);
+	public boolean addFailOverListener(FailOverListener listener);
 	
 	/**
-	 * Removes the specified client local listener.
-	 * @param localListener
+	 * Removes the specified fail over listener.
+	 * @param listener
 	 * @return
 	 */
-	public boolean removeLocalListener(ClientLocalListener localListener);
+	public boolean removeFailOverListener(FailOverListener listener);
+	
+	/**
+	 * Adds the specified data removal listener.
+	 * @param listener
+	 */
+	public boolean addDataRemovalListener(DataRemovalListener listener);
+	
+	/**
+	 * Removes the specified data removal listener.
+	 * @param listener
+	 * @return
+	 */
+	public boolean removeDataRemovalListener(DataRemovalListener listener);
 	
 	/**
 	 * Retrieves the local address of the cluster node.

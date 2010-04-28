@@ -34,12 +34,15 @@ public class FaultTolerantTimer extends java.util.Timer {
 	
 	/**
 	 * 
-	 * @param cacheData
+	 * @param name
+	 * @param cluster
+	 * @param priority
 	 * @param txManager
+	 * @param removeRemoteTasks
 	 */
-	public FaultTolerantTimer(String name, MobicentsCluster cluster, byte priority, TransactionManager txManager) {
+	public FaultTolerantTimer(String name, MobicentsCluster cluster, byte priority, TransactionManager txManager, boolean removeRemoteTasks) {
 		timerTaskFactory = new FaultTolerantTimerTimerTaskFactory();
-		scheduler = new FaultTolerantScheduler(name,16, cluster, priority, txManager, timerTaskFactory);
+		scheduler = new FaultTolerantScheduler(name,16, cluster, priority, txManager, timerTaskFactory, removeRemoteTasks);
 		timerTaskFactory.setScheduler(scheduler);
 	}
 	

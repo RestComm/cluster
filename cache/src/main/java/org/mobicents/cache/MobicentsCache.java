@@ -20,6 +20,7 @@ public class MobicentsCache {
 
 	private static Logger logger = Logger.getLogger(MobicentsCache.class);
 
+	@SuppressWarnings("unchecked")
 	private final Cache jBossCache;
 	private boolean localMode;
 	private final boolean managedCache;
@@ -52,6 +53,7 @@ public class MobicentsCache {
 		startCache();
 	}
 	
+	@SuppressWarnings("unchecked")
 	public MobicentsCache(Cache cache, String cacheName) {
 		this.jBossCache = cache;
 		this.managedCache = true;									
@@ -70,6 +72,7 @@ public class MobicentsCache {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	public Cache getJBossCache() {
 		return jBossCache;
 	}
@@ -98,6 +101,7 @@ public class MobicentsCache {
 	 * @param regionFqn
 	 * @param classLoader
 	 */
+	@SuppressWarnings("unchecked")
 	public void setReplicationClassLoader(Fqn regionFqn, ClassLoader classLoader) {
 		if (!isLocalMode()) {
 			final Region region = jBossCache.getRegion(regionFqn, true);
@@ -123,6 +127,7 @@ public class MobicentsCache {
 	 * @param regionFqn
 	 * @param classLoader
 	 */
+	@SuppressWarnings("unchecked")
 	public void unsetReplicationClassLoader(Fqn regionFqn, ClassLoader classLoader) {
 		if (!isLocalMode()) {
 			final Region region = jBossCache.getRegion(regionFqn, true);

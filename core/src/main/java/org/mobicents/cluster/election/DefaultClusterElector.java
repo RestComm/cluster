@@ -10,7 +10,7 @@ import org.jgroups.Address;
  * @author <a href="mailto:baranowb@gmail.com">Bartosz Baranowski </a>
  * @author martins
  */
-public class SimpleSingletonElector implements SingletonElector{
+public class DefaultClusterElector implements ClusterElector{
 
 	protected int shift = 5; // lets set default to something other than zero
 
