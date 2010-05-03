@@ -257,8 +257,8 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 
 	@NodeRemoved
 	public void onNodeRemovedEvent(NodeRemovedEvent event) {
-		if(!event.isOriginLocal()) {
-			final DataRemovalListener dataRemovalListener = dataRemovalListeners.get(event.getFqn());
+		if(!event.isOriginLocal()) {			
+			final DataRemovalListener dataRemovalListener = dataRemovalListeners.get(event.getFqn().getParent());
 			if (dataRemovalListener != null) {
 				dataRemovalListener.dataRemoved(event.getFqn());
 			}
