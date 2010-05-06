@@ -42,13 +42,15 @@ public class CacheData {
 	private boolean isRemoved;
 	private final MobicentsCache mobicentsCache;
 	
+	private final static boolean doTraceLogs = logger.isTraceEnabled();  
+	
 	@SuppressWarnings("unchecked")
 	public CacheData(Fqn nodeFqn, MobicentsCache mobicentsCache) {		
 		this.nodeFqn = nodeFqn;	
 		this.mobicentsCache = mobicentsCache;
 		this.node = mobicentsCache.getJBossCache().getRoot().getChild(nodeFqn);
-		if (logger.isDebugEnabled()) {
-			logger.debug("cache node "+nodeFqn+" retrieved. node: "+this.node);
+		if (doTraceLogs) {
+			logger.trace("cache node "+nodeFqn+" retrieved, result = "+this.node);
 		}
 	}
 	
@@ -66,8 +68,8 @@ public class CacheData {
 	public boolean create() {
 		if (!exists()) {
 			node = mobicentsCache.getJBossCache().getRoot().addChild(nodeFqn);
-			if (logger.isDebugEnabled()) {
-				logger.debug("created cache node "+nodeFqn);
+			if (doTraceLogs) {
+				logger.trace("created cache node "+nodeFqn);
 			}
 			return true;
 		}
@@ -91,8 +93,8 @@ public class CacheData {
 		if (exists() && !isRemoved()) {
 			isRemoved = true;
 			node.getParent().removeChild(nodeFqn.getLastElement());
-			if (logger.isDebugEnabled()) {
-				logger.debug("removed cache node "+nodeFqn);
+			if (doTraceLogs) {
+				logger.trace("removed cache node "+nodeFqn);
 			}	
 			return true;
 		}
