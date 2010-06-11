@@ -24,6 +24,8 @@ package org.mobicents.cluster;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,10 +35,13 @@ import javax.transaction.TransactionManager;
 import org.apache.log4j.Logger;
 import org.jboss.cache.Cache;
 import org.jboss.cache.Fqn;
+import org.jboss.cache.Node;
 import org.jboss.cache.config.Configuration.CacheMode;
+import org.jboss.cache.notifications.annotation.BuddyGroupChanged;
 import org.jboss.cache.notifications.annotation.CacheListener;
 import org.jboss.cache.notifications.annotation.NodeRemoved;
 import org.jboss.cache.notifications.annotation.ViewChanged;
+import org.jboss.cache.notifications.event.BuddyGroupChangedEvent;
 import org.jboss.cache.notifications.event.NodeRemovedEvent;
 import org.jboss.cache.notifications.event.ViewChangedEvent;
 import org.jgroups.Address;
@@ -63,6 +68,10 @@ import org.mobicents.cluster.election.ClusterElector;
 
 @CacheListener(sync = false)
 public class DefaultMobicentsCluster implements MobicentsCluster {
+
+	private static final String FQN_SEPARATOR = "/";
+
+	private static final String BUDDY_BACKUP_FQN_ROOT = "/_BUDDY_BACKUP_/";
 
 	private static final Logger logger = Logger.getLogger(DefaultMobicentsCluster.class);
 
@@ -219,6 +228,36 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 			boolean doRollback = true;
 			
 			try {
+				if (txMgr != null && txMgr.getTransaction() == null) {
+					txMgr.begin();
+					createdTx = true;
+				}
+				if(jbossCache.getConfiguration().getBuddyReplicationConfig().isEnabled()) {     
+					// replace column to underscore in the couple ipaddress:port of the jgroups address
+					// to match the BUDDY GROUP Fqn pattern in the cache
+					String lostMemberFqnizied = lostMember.toString().replace(":", "_");
+					String fqn = BUDDY_BACKUP_FQN_ROOT + lostMemberFqnizied  + localListener.getBaseFqn();					
+					
+					Node buddyGroupRootNode = jbossCache.getNode(Fqn.fromString(fqn));					
+					Set<Node> children = buddyGroupRootNode.getChildren();
+					if(logger.isDebugEnabled()) {
+						logger.debug("Fqn : " + fqn + " : children " + children);						
+					}
+					//force data gravitation for each node under the base fqn we want to retrieve from the buddy that died
+					for(Node child : children) {
+						Fqn childFqn = Fqn.fromString(localListener.getBaseFqn().toString() + FQN_SEPARATOR + child.getFqn().getLastElementAsString());
+						if(logger.isDebugEnabled()) {
+							logger.debug("forcing data gravitation on following child fqn " +  childFqn);
+						}
+						jbossCache.getInvocationContext().getOptionOverrides().setForceDataGravitation(true);
+						jbossCache.getNode(childFqn);
+					}
+				}
+				if (createdTx) {
+					txMgr.commit();
+					createdTx = false;
+				}
+				
 				if (txMgr != null && txMgr.getTransaction() == null) {
 					txMgr.begin();
 					createdTx = true;
