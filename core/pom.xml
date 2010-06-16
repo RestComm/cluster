@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.mobicents.cluster</groupId>
 		<artifactId>mobicents-cluster</artifactId>
-		<version>1.4-SNAPSHOT</version>
+		<version>1.4</version>
 	</parent>
 	
 	<artifactId>core</artifactId>
