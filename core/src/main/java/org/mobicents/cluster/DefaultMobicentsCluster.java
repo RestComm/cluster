@@ -36,6 +36,7 @@ import org.apache.log4j.Logger;
 import org.jboss.cache.Cache;
 import org.jboss.cache.Fqn;
 import org.jboss.cache.Node;
+import org.jboss.cache.config.Configuration;
 import org.jboss.cache.config.Configuration.CacheMode;
 import org.jboss.cache.notifications.annotation.BuddyGroupChanged;
 import org.jboss.cache.notifications.annotation.CacheListener;
@@ -232,7 +233,9 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 					txMgr.begin();
 					createdTx = true;
 				}
-				if(jbossCache.getConfiguration().getBuddyReplicationConfig().isEnabled()) {     
+				Configuration config = jbossCache.getConfiguration();
+				final boolean isBuddyReplicationEnabled = config.getBuddyReplicationConfig() != null && config.getBuddyReplicationConfig().isEnabled();
+				if(isBuddyReplicationEnabled) {     
 					// replace column to underscore in the couple ipaddress:port of the jgroups address
 					// to match the BUDDY GROUP Fqn pattern in the cache
 					String lostMemberFqnizied = lostMember.toString().replace(":", "_");
