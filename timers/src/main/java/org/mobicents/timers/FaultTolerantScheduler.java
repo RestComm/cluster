@@ -207,6 +207,7 @@ public class FaultTolerantScheduler {
 		
 		final TimerTaskData taskData = task.getData(); 
 		final Serializable taskID = taskData.getTaskID();
+		task.setScheduler(this);
 		
 		if (logger.isDebugEnabled()) {
 			logger.debug("Scheduling task with id "+taskID);

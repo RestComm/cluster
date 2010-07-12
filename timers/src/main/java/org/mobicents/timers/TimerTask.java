@@ -23,6 +23,8 @@ package org.mobicents.timers;
 
 import java.util.concurrent.ScheduledFuture;
 
+import org.apache.log4j.Logger;
+
 /**
  * The base class to implement a task to be scheduled and executed by an {@link FaultTolerantScheduler}.
  * 
@@ -30,7 +32,7 @@ import java.util.concurrent.ScheduledFuture;
  *
  */
 public abstract class TimerTask implements Runnable {
-	
+	private static final Logger logger = Logger.getLogger(TimerTask.class);
 	/**
 	 * the data associated with the task
 	 */
@@ -45,6 +47,11 @@ public abstract class TimerTask implements Runnable {
 	 * the tx action to set the timer when the tx commits, not used in a non tx environment 
 	 */
 	private SetTimerAfterTxCommitRunnable action;
+	
+	/**
+	 * the scheduler to remove the task locally and from the cluster once it has fired
+	 */
+	private FaultTolerantScheduler scheduler;
 	
 	/**
 	 * 
@@ -113,10 +120,32 @@ public abstract class TimerTask implements Runnable {
 		}
 	}
 	
+	public final void run() {		
+		// Fix for Issue 1612 : Mobicents Cluster does not remove non recurring tasks when they fired
+		if(data.getPeriod() < 0) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Task with id "
+						+ data.getTaskID() + " is not recurring, so removing it locally and in the cluster");
+			}
+			// once the task has been fired, remove it locally and in the cluster, only if it is a non recurring task
+			scheduler.remove(data.getTaskID(),true);
+		} else {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Task with id "
+						+ data.getTaskID() + " is recurring, not removing it locally nor in the cluster");
+			}
+		}
+		if (logger.isDebugEnabled()) {
+			logger.debug("Firing Timer with id "
+					+ data.getTaskID());
+		}
+		runTask();
+	}
+	
 	/**
 	 * The method executed by the scheduler
 	 */
-	public abstract void run();
+	public abstract void runTask();
 	
 	/**
 	 * Invoked before a task is recovered, after fail over, by default simply adjust start time.
@@ -126,6 +155,20 @@ public abstract class TimerTask implements Runnable {
 		if (data.getStartTime() < now) {
 			data.setStartTime(now);
 		}
+	}
+
+	/**
+	 * @param scheduler the scheduler to set
+	 */
+	public void setScheduler(FaultTolerantScheduler scheduler) {
+		this.scheduler = scheduler;
+	}
+
+	/**
+	 * @return the scheduler
+	 */
+	public FaultTolerantScheduler getScheduler() {
+		return scheduler;
 	}
 	
 }

@@ -62,9 +62,9 @@ public class FaultTolerantTimerTimerTask extends TimerTask {
 	
 	/*
 	 * (non-Javadoc)
-	 * @see org.mobicents.slee.core.timers.TimerTask#run()
+	 * @see org.mobicents.timers.TimerTask#runTask()
 	 */
-	public void run() {
+	public void runTask() {
 		if (isCanceled()) {
 			scheduler.cancel(this.getData().getTaskID());			
 		}
