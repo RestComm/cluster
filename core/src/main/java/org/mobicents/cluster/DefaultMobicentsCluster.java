@@ -241,19 +241,25 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 					String lostMemberFqnizied = lostMember.toString().replace(":", "_");
 					String fqn = BUDDY_BACKUP_FQN_ROOT + lostMemberFqnizied  + localListener.getBaseFqn();					
 					
-					Node buddyGroupRootNode = jbossCache.getNode(Fqn.fromString(fqn));					
-					Set<Node> children = buddyGroupRootNode.getChildren();
-					if(logger.isDebugEnabled()) {
-						logger.debug("Fqn : " + fqn + " : children " + children);						
-					}
-					//force data gravitation for each node under the base fqn we want to retrieve from the buddy that died
-					for(Node child : children) {
-						Fqn childFqn = Fqn.fromString(localListener.getBaseFqn().toString() + FQN_SEPARATOR + child.getFqn().getLastElementAsString());
+					Node buddyGroupRootNode = jbossCache.getNode(Fqn.fromString(fqn));
+					if(buddyGroupRootNode != null) {
+						Set<Node> children = buddyGroupRootNode.getChildren();
 						if(logger.isDebugEnabled()) {
-							logger.debug("forcing data gravitation on following child fqn " +  childFqn);
+							logger.debug("Fqn : " + fqn + " : children " + children);						
 						}
-						jbossCache.getInvocationContext().getOptionOverrides().setForceDataGravitation(true);
-						jbossCache.getNode(childFqn);
+						//force data gravitation for each node under the base fqn we want to retrieve from the buddy that died
+						for(Node child : children) {
+							Fqn childFqn = Fqn.fromString(localListener.getBaseFqn().toString() + FQN_SEPARATOR + child.getFqn().getLastElementAsString());
+							if(logger.isDebugEnabled()) {
+								logger.debug("forcing data gravitation on following child fqn " +  childFqn);
+							}
+							jbossCache.getInvocationContext().getOptionOverrides().setForceDataGravitation(true);
+							jbossCache.getNode(childFqn);
+						}
+					} else {
+						if(logger.isDebugEnabled()) {
+							logger.debug("Fqn : " + fqn + " : doesn't return any node, this node  " + localAddress + "might not be a buddy group of the failed node " + lostMember);						
+						}
 					}
 				}
 				if (createdTx) {
