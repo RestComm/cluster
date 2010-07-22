@@ -36,6 +36,7 @@ import org.apache.log4j.Logger;
 import org.jboss.cache.Cache;
 import org.jboss.cache.Fqn;
 import org.jboss.cache.Node;
+import org.jboss.cache.buddyreplication.BuddyGroup;
 import org.jboss.cache.config.Configuration;
 import org.jboss.cache.config.Configuration.CacheMode;
 import org.jboss.cache.notifications.annotation.BuddyGroupChanged;
@@ -70,11 +71,13 @@ import org.mobicents.cluster.election.ClusterElector;
 @CacheListener(sync = false)
 public class DefaultMobicentsCluster implements MobicentsCluster {
 
-	private static final String FQN_SEPARATOR = "/";
+	private static final String FQN_SEPARATOR = Fqn.SEPARATOR;
 
 	private static final String BUDDY_BACKUP_FQN_ROOT = "/_BUDDY_BACKUP_/";
 
 	private static final Logger logger = Logger.getLogger(DefaultMobicentsCluster.class);
+
+	private static final String BUDDIES_STORE = "MC_BUDDIES";
 
 	private final SortedSet<FailOverListener> failOverListeners;
 	@SuppressWarnings("unchecked")
@@ -98,7 +101,25 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 			currentView = new ArrayList<Address>(cache.getConfiguration().getRuntimeConfig().getChannel().getView().getMembers());
 			// start listening to events
 			cache.addCacheListener(this);		
+			
+			Configuration conf=cache.getConfiguration();
+			if(conf.getBuddyReplicationConfig()!=null && conf.getBuddyReplicationConfig().isEnabled())
+			{
+				//here we store our buddies in case we already have some
+				//it will happen if cache started before MC cluster registers listener.
+				if(conf.getRuntimeConfig().getBuddyGroup()!=null)
+				{
+					
+					Node root = cache.getRoot();
+					root.put(BUDDIES_STORE, conf.getRuntimeConfig().getBuddyGroup().getBuddies());
+				}
+			}
+			
 		}
+		//cache should be started HERE! But when JMX wrapper is used, its done by it... ech.
+		
+		
+		
 		this.txMgr = txMgr;
 		this.elector = elector;
 		this.clusteredCacheDataIndexingHandler = new DefaultClusteredCacheDataIndexingHandler();
@@ -170,59 +191,71 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 		if (logger.isDebugEnabled()) {
 			logger.debug("onViewChangeEvent : pre[" + event.isPre() + "] : event local address[" + event.getCache().getLocalAddress() + "]");
 		}
-				
+		
 		final List<Address> oldView = currentView;
 		currentView = new ArrayList<Address>(event.getNewView().getMembers());
 		final Address localAddress = getLocalAddress();
 		
-		// recover stuff from lost members
-		Runnable runnable = new Runnable() {
-			public void run() {
-				for (Address oldMember : oldView) {
-					if (!currentView.contains(oldMember)) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("onViewChangeEvent : processing lost member " + oldMember);
-						}				
-						for (FailOverListener localListener : failOverListeners) {
-							boolean electionDone = false;
-							boolean elected = false;
-							ClientLocalListenerElector localListenerElector = localListener.getElector();
-							if (localListenerElector != null) {
-								// going to use the local listener elector instead, which gives results based on data
-								performTakeOver(localListener,oldMember,localAddress,true);
+		//just a precaution, it can be null!
+		if (oldView != null) {
+			final Cache jbossCache = mobicentsCache.getJBossCache();
+			final Configuration config = jbossCache.getConfiguration();		
+
+			final boolean isBuddyReplicationEnabled = config.getBuddyReplicationConfig() != null && config.getBuddyReplicationConfig().isEnabled();
+			// recover stuff from lost members
+			Runnable runnable = new Runnable() {
+				public void run() {
+					for (Address oldMember : oldView) {
+						if (!currentView.contains(oldMember)) {
+							if (logger.isDebugEnabled()) {
+								logger.debug("onViewChangeEvent : processing lost member " + oldMember);
 							}
-							else {
-								if (!electionDone) {
-									electionDone = true;
-									elected = elector.elect(currentView).equals(localAddress);
+							for (FailOverListener localListener : failOverListeners) {
+								ClientLocalListenerElector localListenerElector = localListener.getElector();
+								if (localListenerElector != null && !isBuddyReplicationEnabled) {
+									// going to use the local listener elector instead, which gives results based on data
+									performTakeOver(localListener,oldMember,localAddress, true, isBuddyReplicationEnabled);
 								}
-								if (elected) {
-									// local member was elected to take over the work being done by the lost member
-									performTakeOver(localListener,oldMember,localAddress,false);
+								else {
+									
+									List<Address> electionView = getElectionView(oldMember);
+									if(electionView!=null && elector.elect(electionView).equals(localAddress))
+									{
+										performTakeOver(localListener, oldMember, localAddress, false, isBuddyReplicationEnabled);
+									}
+									
+									cleanAfterTakeOver(localListener, oldMember);
 								}
 							}
-						}																	
+						}
 					}
 				}
-			}
-		};
-		Thread t = new Thread(runnable);
-		t.start();
+			};
+			Thread t = new Thread(runnable);
+			t.start();
+		}
 		
 	}
-
+	
+	@BuddyGroupChanged
+	public void onBuddyGroupChangedEvent(BuddyGroupChangedEvent event) {
+		//here we only update stored information, it happens after view change, so take over should be taken care off.
+		Node root = event.getCache().getRoot();
+		root.put(BUDDIES_STORE, event.getBuddyGroup().getBuddies());
+		
+	}
 	/**
 	 * 
 	 */
 	@SuppressWarnings("unchecked")
-	private void performTakeOver(FailOverListener localListener, Address lostMember, Address localAddress, boolean useLocalListenerElector) {
-	
+	private void performTakeOver(FailOverListener localListener, Address lostMember, Address localAddress, boolean useLocalListenerElector, boolean isBuddyReplicationEnabled) {
+		//WARNING1: avoid using string representation, it may look ok, but hash is different if Fqn is not composed only from strings
+		//WARNING2: use Fqn.fromRelativeElemenets(); -- Fqn.fromElements(); adds Fqn.SEPARATOR at beggin of Fqn.
 		if (logger.isDebugEnabled()) {
-			logger.debug("onViewChangeEvent : failing over lost member " + lostMember);
+			logger.debug("onViewChangeEvent : " + localAddress + " failing over lost member " + lostMember + ", useLocalListenerElector=" + useLocalListenerElector + ", isBuddyReplicationEnabled=" + isBuddyReplicationEnabled);
 		}
-		
-		final Cache jbossCache = mobicentsCache.getJBossCache();
-					
+		//final boolean useLocalListenerElector = localListener.getElector()!=null;
+			final Cache jbossCache = mobicentsCache.getJBossCache();
 			final Fqn rootFqnOfChanges = localListener.getBaseFqn();
 			
 			boolean createdTx = false;
@@ -233,32 +266,36 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 					txMgr.begin();
 					createdTx = true;
 				}
-				Configuration config = jbossCache.getConfiguration();
-				final boolean isBuddyReplicationEnabled = config.getBuddyReplicationConfig() != null && config.getBuddyReplicationConfig().isEnabled();
+				
 				if(isBuddyReplicationEnabled) {     
 					// replace column to underscore in the couple ipaddress:port of the jgroups address
 					// to match the BUDDY GROUP Fqn pattern in the cache
-					String lostMemberFqnizied = lostMember.toString().replace(":", "_");
-					String fqn = BUDDY_BACKUP_FQN_ROOT + lostMemberFqnizied  + localListener.getBaseFqn();					
+					String fqn = getBuddyBackupFqn(lostMember)  + localListener.getBaseFqn();					
+					
 					
 					Node buddyGroupRootNode = jbossCache.getNode(Fqn.fromString(fqn));
-					if(buddyGroupRootNode != null) {
+					if (buddyGroupRootNode != null) {
 						Set<Node> children = buddyGroupRootNode.getChildren();
-						if(logger.isDebugEnabled()) {
-							logger.debug("Fqn : " + fqn + " : children " + children);						
+						if (logger.isDebugEnabled()) {
+							logger.debug("Fqn : " + fqn + " : children " + children);
 						}
-						//force data gravitation for each node under the base fqn we want to retrieve from the buddy that died
-						for(Node child : children) {
-							Fqn childFqn = Fqn.fromString(localListener.getBaseFqn().toString() + FQN_SEPARATOR + child.getFqn().getLastElementAsString());
-							if(logger.isDebugEnabled()) {
-								logger.debug("forcing data gravitation on following child fqn " +  childFqn);
+	
+						// force data gravitation for each node under the base fqn
+						// we want to retrieve from the buddy that died
+						for (Node child : children) {
+	
+							Fqn childFqn = Fqn.fromRelativeElements(localListener.getBaseFqn(), child.getFqn().getLastElement());
+							if (logger.isDebugEnabled()) {
+								logger.debug("forcing data gravitation on following child fqn " + childFqn);
 							}
 							jbossCache.getInvocationContext().getOptionOverrides().setForceDataGravitation(true);
-							jbossCache.getNode(childFqn);
+							Node n = jbossCache.getNode(childFqn);
+	
 						}
 					} else {
-						if(logger.isDebugEnabled()) {
-							logger.debug("Fqn : " + fqn + " : doesn't return any node, this node  " + localAddress + "might not be a buddy group of the failed node " + lostMember);						
+						if (logger.isDebugEnabled()) {
+							logger.debug("Fqn : " + fqn + " : doesn't return any node, this node  " + localAddress
+									+ "might not be a buddy group of the failed node " + lostMember);
 						}
 					}
 				}
@@ -273,8 +310,8 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 				}
 											
 				localListener.failOverClusterMember(lostMember);
-				
-				for (Object childName : jbossCache.getChildrenNames(rootFqnOfChanges)) {
+				Set<Object> children = jbossCache.getChildrenNames(rootFqnOfChanges);
+				for (Object childName : children) {
 					// Here in values we store data and... inet node., we must match
 					// passed one.
 					final ClusteredCacheData clusteredCacheData = new ClusteredCacheData(Fqn.fromRelativeElements(rootFqnOfChanges, childName),this);
@@ -282,7 +319,7 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 						Address address = clusteredCacheData.getClusterNodeAddress();
 						if (address != null && address.equals(lostMember)) {
 							// may need to do election using client local listener
-							if (useLocalListenerElector) {
+							if (!isBuddyReplicationEnabled && useLocalListenerElector) {
 								if(!localAddress.equals(localListener.getElector().elect(currentView, clusteredCacheData))) {
 									// not elected, move on
 									continue;
@@ -324,6 +361,7 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 
 	}
 
+	
 	@NodeRemoved
 	public void onNodeRemovedEvent(NodeRemovedEvent event) {
 		if(!event.isOriginLocal()) {			
@@ -333,7 +371,93 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 			}
 		}
 	}
+
+	private List<Address> getElectionView(Address deadMember) {
+		final Cache jbossCache = mobicentsCache.getJBossCache();
+		final Configuration config = jbossCache.getConfiguration();
+		final boolean isBuddyReplicationEnabled = config.getBuddyReplicationConfig() != null
+				&& config.getBuddyReplicationConfig().isEnabled();
+
+		if (isBuddyReplicationEnabled) {
+
+			boolean createdTx = false;
+			boolean doRollback = true;
+
+			try {
+				if (txMgr != null && txMgr.getTransaction() == null) {
+					txMgr.begin();
+					createdTx = true;
+				}
+				// than election view is a buddy view
+				String fqnBackupRoot = getBuddyBackupFqn(deadMember);
+				// check if we were a buddy
+				Node backupRoot = jbossCache.getNode(fqnBackupRoot);
+				if (backupRoot != null) {
+					// we were a buddy it seems
+					List<Address> buddies = (List<Address>) backupRoot.get(BUDDIES_STORE);
+					if (buddies == null) {
+						// which is weird
+						buddies = new ArrayList<Address>();
+						buddies.add(config.getRuntimeConfig().getChannel().getLocalAddress());
+
+					}
+					return buddies;
+				} else {
+					return null;
+				}
+
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+
+			} finally {
+				if (createdTx) {
+					try {
+						if (!doRollback) {
+							txMgr.commit();
+						} else {
+							txMgr.rollback();
+						}
+					} catch (Exception e) {
+						logger.error(e.getMessage(), e);
+					}
+				}
+			}
+			// in case of failure
+			return null;
+		} else {
+			// no buddies, its cluster wide election
+			return currentView;
+		}
+	}
+
 	
+	private String getBuddyBackupFqn(Address owner)
+	{
+		//FIXME: switch to BuddyFqnTransformer
+		String lostMemberFqnizied = owner.toString().replace(":", "_");
+		String fqn = BUDDY_BACKUP_FQN_ROOT + lostMemberFqnizied ;				
+		return fqn;
+	}
+	
+	private void cleanAfterTakeOver(FailOverListener localListener, Address deadMember)
+	{
+		final Cache jbossCache = mobicentsCache.getJBossCache();
+		final Configuration config = jbossCache.getConfiguration();
+		final boolean isBuddyReplicationEnabled = config.getBuddyReplicationConfig() != null && config.getBuddyReplicationConfig().isEnabled();
+		if(isBuddyReplicationEnabled)
+		{
+			//1. clean backup of the base fqn only
+			String fqn = getBuddyBackupFqn(deadMember) + localListener.getBaseFqn();
+			jbossCache.getInvocationContext().getOptionOverrides().setCacheModeLocal(true);
+			jbossCache.removeNode(Fqn.fromString(fqn));
+			//2. if that member is our single buddy, we need to clean MC_BUDDIES
+			BuddyGroup bg = config.getRuntimeConfig().getBuddyGroup();
+			if(bg!=null && bg.getBuddies().size() == 1 && bg.getBuddies().contains(deadMember))
+			{
+				jbossCache.getRoot().remove(BUDDIES_STORE);
+			}
+		}
+	}
 	// NOTE USED FOR NOW
 	
 	/*
