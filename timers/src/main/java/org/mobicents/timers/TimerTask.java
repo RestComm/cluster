@@ -54,6 +54,11 @@ public abstract class TimerTask implements Runnable {
 	private FaultTolerantScheduler scheduler;
 	
 	/**
+	 * if true the task is removed from the scheduler when it is executed the last time
+	 */
+	protected boolean autoRemoval = true;
+	
+	/**
 	 * 
 	 * @param data
 	 */
@@ -122,13 +127,13 @@ public abstract class TimerTask implements Runnable {
 	
 	public final void run() {		
 		// Fix for Issue 1612 : Mobicents Cluster does not remove non recurring tasks when they fired
-		if(data.getPeriod() < 0) {
+		if(data.getPeriod() < 0 && autoRemoval) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Task with id "
 						+ data.getTaskID() + " is not recurring, so removing it locally and in the cluster");
 			}
 			// once the task has been fired, remove it locally and in the cluster, only if it is a non recurring task
-			scheduler.remove(data.getTaskID(),true);
+			removeFromScheduler();
 		} else {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Task with id "
@@ -140,6 +145,13 @@ public abstract class TimerTask implements Runnable {
 					+ data.getTaskID());
 		}
 		runTask();
+	}
+	
+	/**
+	 * Self removal from the scheduler. Note that this method does not cancel the task execution.
+	 */
+	protected void removeFromScheduler() {
+		scheduler.remove(data.getTaskID(),true);
 	}
 	
 	/**
