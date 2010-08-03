@@ -85,7 +85,7 @@ public class MobicentsCache {
 		if (jBossCache.getConfiguration().getCacheMode() == CacheMode.LOCAL) {
 			localMode = true;
 		}
-		if (!managedCache && !(CacheStatus.STARTED == jBossCache.getCacheStatus())) {
+		if (!(CacheStatus.STARTED == jBossCache.getCacheStatus())) {
 			jBossCache.start();
 		}
 		if (logger.isInfoEnabled()) {
