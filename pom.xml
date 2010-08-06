@@ -9,14 +9,14 @@
 	
 	<groupId>org.mobicents.cluster</groupId>
 	<artifactId>mobicents-cluster</artifactId>
-	<version>1.6-SNAPSHOT</version>
+	<version>1.6</version>
 	
 	<packaging>pom</packaging>
 		
 	<scm>
-		<connection>scm:svn:https://mobicents.googlecode.com/svn/trunk/servers/cluster</connection>
-		<developerConnection>scm:svn:https://mobicents.googlecode.com/svn/trunk/servers/cluster</developerConnection>
-		<url>http://mobicents.googlecode.com/svn/trunk/servers/cluster</url>
+		<connection>scm:svn:https://mobicents.googlecode.com/svn/tags/servers/cluster/mobicents-cluster-1.6</connection>
+		<developerConnection>scm:svn:https://mobicents.googlecode.com/svn/tags/servers/cluster/mobicents-cluster-1.6</developerConnection>
+		<url>http://mobicents.googlecode.com/svn/tags/servers/cluster/mobicents-cluster-1.6</url>
 	</scm>
 
 	<modules>
@@ -97,10 +97,10 @@
           				 <javadocDirectory>${basedir}/javadoc</javadocDirectory>
           				 <docfilessubdirs>true</docfilessubdirs>
           				 <overview>${basedir}/javadoc/overview.html</overview>
-          				  <detectLinks/>
-          				  <detectOfflineLinks/>
-          				  <includeDependencySources/>
-          				  <includeTransitiveDependencySources/>          				  
+          				  <detectLinks />
+          				  <detectOfflineLinks />
+          				  <includeDependencySources />
+          				  <includeTransitiveDependencySources />          				  
 			        </configuration>
 			        <executions>
 			        <execution>
