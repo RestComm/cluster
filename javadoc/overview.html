@@ -4,9 +4,22 @@
     <TITLE>API Overview</TITLE>
   </HEAD>
 <body>
-<p><a ref="http://www.mobicents.org/products_sip_servlets.html"/>Mobicents SIP Servlets</a> delivers a consistent, open platform on which to develop and deploy portable and distributable SIP and Converged JEE services.  It is the first open source certified implementation of the SIP Servlet v1.1 (JSR 289 Spec) on top of Tomcat & JBoss containers and strive to feature best performances, security, foster innovation and develop interoperability standards between Sip Servlets and JSLEE so that applications may exploit the strengths of both.</p>
-
-<p>This API provides JSR 289 Extensions not defined in the specification that can prove useful and will be proposed for inclusion in a next release of the specification as well as Extensions for applications or external systems to interact with the Mobicents SIP Servlets container</p>
-
+<p>
+Clustering is a technique of linking multiple machines to work as single logical entity.
+It is a basic way of scaling execution environment.<br/>
+As clustered machines act as single logical entity, cluster allows to introduce:
+<ul>
+<li>High Availability(HA) : system design and procedures which ensure continual service at desired platform. In cluster environment node failure or addition does not change availability of cluster to user.</li>
+<li>Fault Tolerance(FT) : closely tied with HA. Fault tolerant design(or fail-safe) is design that enables system(cluster) to continue operation at reduced level, in favor of complete failure when part of system(cluster) fails. Operation may be understood as system operation or user specific operation.</li>
+</ul>
+</p>
+<p>
+Mobicents Cluster aims to provide HA/FT framework which can be reused in EEs as base for building HA/FT system. Mobicents FT/HA framework introduces following:
+<ul>
+<li>Core framework : base for whole solution. It defines procedures to ensure integrity of clustered data and cluster resources.
+Core ensures that operations performed on clustered data have means of achieving fault tolerance.</li>
+<li>FT/HA Timers : obicents Cluster framework comes with low cost HA/FT timers. Framework timer implementation ensures that timers scheduled on one cluster node can be recreated on any other node and run on it.</li>
+</ul>
+</p>
 </body>
 </html>
