@@ -58,7 +58,9 @@ public class SetTimerAfterTxCommitRunnable implements Runnable {
 		task.setSetTimerTransactionalAction(null);
 		
 		if (!canceled) {
-				
+			
+			scheduler.getLocalRunningTasksMap().put(task.getData().getTaskID(), task);
+			
 			final TimerTaskData taskData = task.getData();
 			// calculate delay
 			long delay = taskData.getStartTime() - System.currentTimeMillis();

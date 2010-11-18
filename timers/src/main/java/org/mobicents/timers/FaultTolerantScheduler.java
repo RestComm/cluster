@@ -212,12 +212,13 @@ public class FaultTolerantScheduler {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Scheduling task with id "+taskID);
 		}
-		localRunningTasks.put(taskID, task);
 		
 		// store the task and data
 		final TimerTaskCacheData timerTaskCacheData = new TimerTaskCacheData(taskID, baseFqn, cluster);
 		if (timerTaskCacheData.create()) {
 			timerTaskCacheData.setTaskData(taskData);
+		} else {
+            throw new IllegalStateException("timer task " + taskID + " already scheduled");
 		}
 				
 		// schedule task
@@ -240,15 +241,9 @@ public class FaultTolerantScheduler {
 							tc.getOrderedSynchronizationHandler()
 								.registerAtTail(new TransactionSynchronization(null,setTimerAction,null));
 						}
-					};
-					// action that cancels the schedule if the tx rollbacks
-					final Runnable rollbackAction = new Runnable() {
-						public void run() {
-							localRunningTasks.remove(taskID);
-						}
-					};
+					};					
 					tx.registerSynchronization(new TransactionSynchronization(
-							beforeCommitAction, null, rollbackAction));
+							beforeCommitAction, null, null));
 					task.setSetTimerTransactionalAction(setTimerAction);
 				}
 				else {
