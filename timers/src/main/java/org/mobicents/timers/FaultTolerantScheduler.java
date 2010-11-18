@@ -292,9 +292,14 @@ public class FaultTolerantScheduler {
 				Runnable cancelAction = new CancelTimerAfterTxCommitRunnable(task,this);
 				if (txManager != null) {
 					try {
-						Transaction tx = txManager.getTransaction();
-						if (tx != null) {
-							tx.registerSynchronization(new TransactionSynchronization(null,cancelAction,null));
+						// Fixes Issue 2131 http://code.google.com/p/mobicents/issues/detail?id=2131
+ 						// Calling cancel then schedule on a timer with the same Id in Transaction Context make them run reversed
+ 						// so registerItAtTail to have them ordered correctly
+						final TransactionContext tc = cluster.getMobicentsCache()
+							.getJBossCache().getInvocationContext().getTransactionContext();
+						if (tc != null) {
+							tc.getOrderedSynchronizationHandler()
+							.registerAtTail(new TransactionSynchronization(null,cancelAction,null));
 						}
 						else {
 							cancelAction.run();
