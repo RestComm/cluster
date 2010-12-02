@@ -198,12 +198,15 @@ public class FaultTolerantScheduler {
 	
 	// logic 
 	
+	public void schedule(TimerTask task) {
+		schedule(task, true);
+	}
 	/**
 	 * Schedules the specified task.
 	 * 
 	 * @param task
 	 */
-	public void schedule(TimerTask task) {
+	public void schedule(TimerTask task, boolean checkIfAlreadyPresent) {
 		
 		final TimerTaskData taskData = task.getData(); 
 		final Serializable taskID = taskData.getTaskID();
@@ -217,7 +220,7 @@ public class FaultTolerantScheduler {
 		final TimerTaskCacheData timerTaskCacheData = new TimerTaskCacheData(taskID, baseFqn, cluster);
 		if (timerTaskCacheData.create()) {
 			timerTaskCacheData.setTaskData(taskData);
-		} else {
+		} else if(checkIfAlreadyPresent) {
             throw new IllegalStateException("timer task " + taskID + " already scheduled");
 		}
 				
@@ -339,7 +342,9 @@ public class FaultTolerantScheduler {
 			logger.debug("Recovering task with id "+taskData.getTaskID());
 		}
 		task.beforeRecover();
-		schedule(task);
+		// on recovery the task will already be in the cache so we don't check for it
+		// or an IllegalStateException will be thrown
+		schedule(task, false);
 	}
 
 	public void shutdownNow() {
