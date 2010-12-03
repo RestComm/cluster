@@ -53,8 +53,8 @@ public class FaultTolerantTimerTimerTask extends TimerTask {
 	 * 
 	 * @param taskData
 	 */
-	public FaultTolerantTimerTimerTask(FaultTolerantTimerTimerTaskData taskData,FaultTolerantScheduler scheduler) {
-		super(taskData);
+	public FaultTolerantTimerTimerTask(String taskID, FaultTolerantTimerTimerTaskData taskData, FaultTolerantScheduler scheduler) {
+		super(taskID,taskData);
 		this.taskData = taskData;
 		this.scheduler = scheduler;
 		setPeriod(taskData.getJavaUtilTimerTask(),taskData.getPeriod());
@@ -66,13 +66,13 @@ public class FaultTolerantTimerTimerTask extends TimerTask {
 	 */
 	public void runTask() {
 		if (isCanceled()) {
-			scheduler.cancel(this.getData().getTaskID());			
+			scheduler.cancel(this.getTaskID());			
 		}
 		else {
 			try{
 				taskData.getJavaUtilTimerTask().run();
 				if(taskData.getPeriodicScheduleStrategy() == null) {
-					scheduler.cancel(this.getData().getTaskID());
+					scheduler.cancel(this.getTaskID());
 				}
 				else {
 					if (logger.isDebugEnabled()) {
@@ -158,7 +158,7 @@ public class FaultTolerantTimerTimerTask extends TimerTask {
 		try {
 			Field stateField=cc.getDeclaredField("period");
 			stateField.setAccessible(true);
-			stateField.set(javaUtilTimerTask,new Long(period));
+			stateField.set(javaUtilTimerTask, Long.valueOf(period));
 			stateField.setAccessible(false);
 			return;
 		} catch (Throwable e) {

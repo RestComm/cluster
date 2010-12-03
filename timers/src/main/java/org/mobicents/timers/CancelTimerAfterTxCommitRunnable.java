@@ -21,8 +21,6 @@
  */
 package org.mobicents.timers;
 
-import java.io.Serializable;
-
 import org.apache.log4j.Logger;
 
 
@@ -49,8 +47,7 @@ public class CancelTimerAfterTxCommitRunnable implements Runnable {
 	 */
 	public void run() {
 		
-		final TimerTaskData taskData = task.getData();
-		final Serializable taskID = taskData.getTaskID();
+		final String taskID = task.getTaskID();
 		
 		if (logger.isDebugEnabled()) {
 			logger.debug("Cancelling timer task for timer ID "+taskID);

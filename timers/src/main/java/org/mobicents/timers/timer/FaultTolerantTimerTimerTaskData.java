@@ -21,7 +21,6 @@
  */
 package org.mobicents.timers.timer;
 
-import java.io.Serializable;
 import java.util.TimerTask;
 
 import org.mobicents.timers.PeriodicScheduleStrategy;
@@ -42,13 +41,12 @@ public class FaultTolerantTimerTimerTaskData extends TimerTaskData {
 	/**
 	 * 
 	 * @param javaUtilTimerTask
-	 * @param id
 	 * @param startTime
 	 * @param period
 	 * @param periodicScheduleStrategy
 	 */
-	public FaultTolerantTimerTimerTaskData(TimerTask javaUtilTimerTask, Serializable id, long startTime, long period, PeriodicScheduleStrategy periodicScheduleStrategy) {
-		super(id,startTime,period, periodicScheduleStrategy);
+	public FaultTolerantTimerTimerTaskData(TimerTask javaUtilTimerTask, long startTime, long period, PeriodicScheduleStrategy periodicScheduleStrategy) {
+		super(startTime,period, periodicScheduleStrategy);
 		this.javaUtilTimerTask = javaUtilTimerTask;		
 	}
 

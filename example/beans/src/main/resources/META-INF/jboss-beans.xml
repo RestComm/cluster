@@ -24,7 +24,7 @@
 	</bean>
 	
 	<bean name="MCClusterTest" class="org.mobicents.cluster.test.MCClusterTest">
-		<annotation>@org.jboss.aop.microcontainer.aspects.jmx.JMX(name="jboss.mobicents:name=TimerTest",exposedInterface=org.mobicents.cluster.test.MCClusterTestMBean.class,registerDirectly=true)
+		<annotation>@org.jboss.aop.microcontainer.aspects.jmx.JMX(name="org.mobicents:name=FaultTolerantTimerServiceExample",exposedInterface=org.mobicents.cluster.test.MCClusterTestMBean.class,registerDirectly=true)
 		</annotation>
 
 		<property name="faultTolerantTimer">

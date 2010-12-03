@@ -16,7 +16,7 @@ public class MCClusterTest implements MCClusterTestMBean {
 	private FaultTolerantTimer faultTolerantTimer;
 
 	public void start() {
-		System.out.println("MCClusterTest Started");
+		System.out.println("Mobicents FT Timers Example Service started");
 	}
 	
 	public TransactionManager getJta() {

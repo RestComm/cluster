@@ -39,6 +39,11 @@ public abstract class TimerTask implements Runnable {
 	private final TimerTaskData data;
 	
 	/**
+	 * 
+	 */
+	private final String taskID;
+	
+	/**
 	 * the schedule future object that returns from the task scheduling
 	 */
 	private ScheduledFuture<?> scheduledFuture;
@@ -62,8 +67,9 @@ public abstract class TimerTask implements Runnable {
 	 * 
 	 * @param data
 	 */
-	public TimerTask(TimerTaskData data) {
+	public TimerTask(String taskID, TimerTaskData data) {
 		this.data = data;
+		this.taskID = taskID;
 	}
 	
 	/**
@@ -72,6 +78,14 @@ public abstract class TimerTask implements Runnable {
 	 */
 	public TimerTaskData getData() {
 		return data;
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public String getTaskID() {
+		return taskID;
 	}
 	
 	/**
@@ -130,19 +144,19 @@ public abstract class TimerTask implements Runnable {
 		if(data.getPeriod() < 0 && autoRemoval) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Task with id "
-						+ data.getTaskID() + " is not recurring, so removing it locally and in the cluster");
+						+ taskID + " is not recurring, so removing it locally and in the cluster");
 			}
 			// once the task has been fired, remove it locally and in the cluster, only if it is a non recurring task
 			removeFromScheduler();
 		} else {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Task with id "
-						+ data.getTaskID() + " is recurring, not removing it locally nor in the cluster");
+						+ taskID + " is recurring, not removing it locally nor in the cluster");
 			}
 		}
 		if (logger.isDebugEnabled()) {
 			logger.debug("Firing Timer with id "
-					+ data.getTaskID());
+					+ taskID);
 		}
 		runTask();
 	}
@@ -151,7 +165,7 @@ public abstract class TimerTask implements Runnable {
 	 * Self removal from the scheduler. Note that this method does not cancel the task execution.
 	 */
 	protected void removeFromScheduler() {
-		scheduler.remove(data.getTaskID(),true);
+		scheduler.remove(taskID,true);
 	}
 	
 	/**

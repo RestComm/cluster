@@ -21,8 +21,6 @@
  */
 package org.mobicents.timers;
 
-import java.io.Serializable;
-
 /**
  * 
  * The {@link TimerTask} data, which may be replicated in a cluster environment to support fail over.
@@ -30,12 +28,7 @@ import java.io.Serializable;
  * @author martins
  *
  */
-public class TimerTaskData implements Serializable {
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 8905073681622353718L;
+public class TimerTaskData {
 
 	/**
 	 * the starting time of the associated timer task execution
@@ -48,23 +41,16 @@ public class TimerTaskData implements Serializable {
 	private final long period;
 	
 	/**
-	 * the id of the associated timer task
-	 */
-	private final Serializable taskID;
-	
-	/**
 	 * the strategy used in a periodic timer task, can be null if it is not a periodic timer task
 	 */
 	private final PeriodicScheduleStrategy periodicScheduleStrategy;
 	
 	/**
 	 * 
-	 * @param id
 	 * @param startTime
 	 * @param period
 	 */
-	public TimerTaskData(Serializable id, long startTime, long period, PeriodicScheduleStrategy periodicScheduleStrategy) {
-		this.taskID = id;
+	public TimerTaskData(long startTime, long period, PeriodicScheduleStrategy periodicScheduleStrategy) {
 		this.startTime = startTime;
 		this.period = period;
 		this.periodicScheduleStrategy = periodicScheduleStrategy;
@@ -95,33 +81,11 @@ public class TimerTaskData implements Serializable {
 	}
 	
 	/**
-	 * Retrieves the id of the associated timer task.
-	 * @return
-	 */
-	public Serializable getTaskID() {
-		return taskID;
-	}
-	
-	/**
 	 * Retrieves the strategy used in a periodic timer task, can be null if it is not a periodic timer task.
 	 * @return
 	 */
 	public PeriodicScheduleStrategy getPeriodicScheduleStrategy() {
 		return periodicScheduleStrategy;
 	}
-	
-	@Override
-	public int hashCode() {		
-		return taskID.hashCode();
-	}
-	
-	@Override
-	public boolean equals(Object obj) {
-		if (obj != null && obj.getClass() == this.getClass()) {
-			return ((TimerTaskData)obj).taskID.equals(this.taskID);
-		}
-		else {
-			return false;
-		}
-	}
+
 }

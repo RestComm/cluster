@@ -37,13 +37,13 @@ public class FaultTolerantTimerTimerTaskFactory implements org.mobicents.timers.
 	
 	/*
 	 * (non-Javadoc)
-	 * @see org.mobicents.slee.core.timers.TimerTaskFactory#newTimerTask(org.mobicents.slee.core.timers.TimerTaskData)
+	 * @see org.mobicents.timers.TimerTaskFactory#newTimerTask(java.lang.String, org.mobicents.timers.TimerTaskData)
 	 */
-	public TimerTask newTimerTask(TimerTaskData data) {
+	public TimerTask newTimerTask(String taskID, TimerTaskData data) {
 		if (scheduler == null) {
 			throw new IllegalStateException("unable to create data, scheduler is not set");
 		}
-		return new FaultTolerantTimerTimerTask((org.mobicents.timers.timer.FaultTolerantTimerTimerTaskData) data,scheduler);
+		return new FaultTolerantTimerTimerTask(taskID,(org.mobicents.timers.timer.FaultTolerantTimerTimerTaskData) data,scheduler);
 	}
 
 	/**

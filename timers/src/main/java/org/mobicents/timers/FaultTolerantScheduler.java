@@ -21,7 +21,6 @@
  */
 package org.mobicents.timers;
 
-import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -75,7 +74,7 @@ public class FaultTolerantScheduler {
 	/**
 	 * the local running tasks. NOTE: never ever check for values, class instances may differ due cache replication, ALWAYS use keys.
 	 */
-	private final ConcurrentHashMap<Serializable, TimerTask> localRunningTasks = new ConcurrentHashMap<Serializable, TimerTask>();
+	private final ConcurrentHashMap<String, TimerTask> localRunningTasks = new ConcurrentHashMap<String, TimerTask>();
 	
 	/**
 	 * the timer task factory associated with this scheduler
@@ -99,6 +98,11 @@ public class FaultTolerantScheduler {
 	
 	/**
 	 * 
+	 */
+	private final TimerTaskDataMarshaller taskDataMarshaller;
+	
+	/**
+	 * 
 	 * @param name
 	 * @param corePoolSize
 	 * @param cluster
@@ -106,20 +110,21 @@ public class FaultTolerantScheduler {
 	 * @param txManager
 	 * @param timerTaskFactory
 	 */
-	public FaultTolerantScheduler(String name, int corePoolSize, Cluster<?> cluster, byte priority, TransactionManager txManager,TimerTaskFactory timerTaskFactory) {
+	public FaultTolerantScheduler(String name, int corePoolSize, Cluster<?> cluster, byte priority, TransactionManager txManager,TimerTaskFactory timerTaskFactory, TimerTaskDataMarshaller taskDataMarshaller) {
 		this.name = name;
 		this.executor = new ScheduledThreadPoolExecutor(corePoolSize);
 		this.clusterDataKey = new FaultTolerantSchedulerClusterDataKey(name);
 		this.cluster = cluster;
 		this.clusterData = cluster.getClusterDataSource().getClusterData(clusterDataKey);
 		this.timerTaskFactory = timerTaskFactory;
+		this.taskDataMarshaller = taskDataMarshaller;
 		this.txManager = txManager;		
 		clusterClientLocalListener = new ClientLocalListener(priority);
 		if (!cluster.getClusterDataSource().isLocalMode()) {
 			cluster.addFailOverListener(clusterClientLocalListener);
 			cluster.addDataRemovalListener(clusterClientLocalListener);
 			cluster.getClusterDataMarshalerManagement().register(FaultTolerantSchedulerClusterDataMarshaller.ID, new FaultTolerantSchedulerClusterDataMarshaller());
-			cluster.getClusterDataMarshalerManagement().register(TimerTaskClusterDataMarshaller.ID, new TimerTaskClusterDataMarshaller());
+			cluster.getClusterDataMarshalerManagement().register(TimerTaskClusterDataMarshaller.ID, new TimerTaskClusterDataMarshaller(taskDataMarshaller));
 		}
 	}
 
@@ -128,7 +133,7 @@ public class FaultTolerantScheduler {
 	 * @param taskID
 	 * @return null if there is no such timer task data
 	 */
-	public TimerTaskData getTimerTaskData(Serializable taskID) {
+	public TimerTaskData getTimerTaskData(String taskID) {
 		final TimerTaskClusterDataKey key = new TimerTaskClusterDataKey(name, taskID);
 		final ClusterData clusterData = cluster.getClusterDataSource().getClusterData(key);
 		return (TimerTaskData) clusterData.getDataObject();
@@ -146,7 +151,7 @@ public class FaultTolerantScheduler {
 	 * Retrieves local running tasks map.
 	 * @return
 	 */
-	ConcurrentHashMap<Serializable, TimerTask> getLocalRunningTasksMap() {
+	ConcurrentHashMap<String, TimerTask> getLocalRunningTasksMap() {
 		return localRunningTasks;
 	}
 	
@@ -192,6 +197,14 @@ public class FaultTolerantScheduler {
 		return timerTaskFactory;
 	}
 	
+	/**
+	 * Retrieves the task data marshaller.
+	 * @return
+	 */
+	public TimerTaskDataMarshaller getTaskDataMarshaller() {
+		return taskDataMarshaller;
+	}
+	
 	// logic 
 	
 	public void schedule(TimerTask task) {
@@ -205,7 +218,7 @@ public class FaultTolerantScheduler {
 	public void schedule(TimerTask task, boolean checkIfAlreadyPresent) {
 		
 		final TimerTaskData taskData = task.getData(); 
-		final Serializable taskID = taskData.getTaskID();
+		final String taskID = task.getTaskID();
 		task.setScheduler(this);
 		
 		if (logger.isDebugEnabled()) {
@@ -253,7 +266,7 @@ public class FaultTolerantScheduler {
 	 * @param taskID
 	 * @return the task canceled
 	 */
-	public TimerTask cancel(Serializable taskID) {
+	public TimerTask cancel(String taskID) {
 		
 		if (logger.isDebugEnabled()) {
 			logger.debug("Canceling task with timer id "+taskID);
@@ -303,7 +316,7 @@ public class FaultTolerantScheduler {
 		return task;
 	}
 	
-	void remove(Serializable taskID,boolean removeFromCache) {
+	void remove(String taskID,boolean removeFromCache) {
 		if(logger.isDebugEnabled())
 		{
 			logger.debug("remove() : "+taskID+" - "+removeFromCache);
@@ -315,7 +328,7 @@ public class FaultTolerantScheduler {
 		}
 	}
 	
-	private void removeTaskDataFromCluster(Serializable taskID) {
+	private void removeTaskDataFromCluster(String taskID) {
 		final TimerTaskClusterDataKey ttKey = new TimerTaskClusterDataKey(name, taskID);
 		clusterData.removeReference(ttKey);
 		cluster.getClusterDataSource().getClusterData(ttKey).remove(false);
@@ -326,10 +339,10 @@ public class FaultTolerantScheduler {
 	 * 
 	 * @param taskData
 	 */
-	private void recover(TimerTaskData taskData) {
-		TimerTask task = timerTaskFactory.newTimerTask(taskData);
+	private void recover(String taskID, TimerTaskData taskData) {
+		TimerTask task = timerTaskFactory.newTimerTask(taskID,taskData);
 		if (logger.isDebugEnabled()) {
-			logger.debug("Recovering task with id "+taskData.getTaskID());
+			logger.debug("Recovering task with id "+task.getTaskID());
 		}
 		task.beforeRecover();
 		// on recovery the task will already be in the cache so we don't check for it
@@ -433,7 +446,9 @@ public class FaultTolerantScheduler {
 			}
 
 			try {
-				recover((TimerTaskData) clusterData.getDataObject());
+				final TimerTaskClusterDataKey key = (TimerTaskClusterDataKey) clusterData.getKey(); 
+				final TimerTaskData taskData = (TimerTaskData) clusterData.getDataObject();
+				recover(key.getTaskID(),taskData);
 			}
 			catch (Throwable e) {
 				logger.error(e.getMessage(),e);
@@ -443,7 +458,7 @@ public class FaultTolerantScheduler {
 		
 		@Override
 		public void dataRemoved(ClusterDataKey removedReferencedKey) {
-			final Serializable taskId = ((TimerTaskClusterDataKey)removedReferencedKey).getTaskID();
+			final String taskId = ((TimerTaskClusterDataKey)removedReferencedKey).getTaskID();
 			final TimerTask task = localRunningTasks.remove(taskId);
 			if (task != null) {
 				task.cancel();

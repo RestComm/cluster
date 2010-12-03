@@ -30,10 +30,10 @@ package org.mobicents.timers;
 public interface TimerTaskFactory {
 	
 	/**
-	 * Creates a new instance of a concrete {@link TimerTask}, using the specified {@link TimerTaskData}.
+	 * Creates a new instance of a concrete {@link TimerTask}, using the specified {@link TimerTaskData} and ID.
 	 * 
 	 * @param data
 	 * @return
 	 */
-	public TimerTask newTimerTask(TimerTaskData data);
+	public TimerTask newTimerTask(String taskID, TimerTaskData data);
 }

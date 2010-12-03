@@ -1,7 +1,5 @@
 package org.mobicents.timers.cluster;
 
-import java.io.Serializable;
-
 import org.mobicents.cluster.ClusterDataKey;
 
 /**
@@ -11,10 +9,10 @@ import org.mobicents.cluster.ClusterDataKey;
  */
 public class TimerTaskClusterDataKey implements ClusterDataKey {
 
-	private final Serializable taskID;
+	private final String taskID;
 	private final String schedulerName;
 	
-	public TimerTaskClusterDataKey(String schedulerName, Serializable taskID) {
+	public TimerTaskClusterDataKey(String schedulerName, String taskID) {
 		this.taskID = taskID;
 		this.schedulerName = schedulerName;
 	}
@@ -23,7 +21,7 @@ public class TimerTaskClusterDataKey implements ClusterDataKey {
 		return schedulerName;
 	}
 	
-	public Serializable getTaskID() {
+	public String getTaskID() {
 		return taskID;
 	}
 	

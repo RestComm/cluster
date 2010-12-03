@@ -59,7 +59,7 @@ public class SetTimerAfterTxCommitRunnable implements Runnable {
 		
 		if (!canceled) {
 			
-			scheduler.getLocalRunningTasksMap().put(task.getData().getTaskID(), task);
+			scheduler.getLocalRunningTasksMap().put(task.getTaskID(), task);
 			
 			final TimerTaskData taskData = task.getData();
 			// calculate delay
@@ -73,13 +73,13 @@ public class SetTimerAfterTxCommitRunnable implements Runnable {
 				if (taskData.getPeriod() < 0) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Scheduling one-shot timer with id "
-								+ task.getData().getTaskID());
+								+ task.getTaskID());
 					}
 					task.setScheduledFuture(scheduler.getExecutor().schedule(task, delay, TimeUnit.MILLISECONDS));
 				} else {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Scheduling periodic timer with id "
-								+ task.getData().getTaskID());
+								+ task.getTaskID());
 					}
 					if (taskData.getPeriodicScheduleStrategy() == PeriodicScheduleStrategy.withFixedDelay) {
 						task.setScheduledFuture(scheduler.getExecutor().scheduleWithFixedDelay(task, delay, taskData.getPeriod(),TimeUnit.MILLISECONDS));
@@ -91,22 +91,22 @@ public class SetTimerAfterTxCommitRunnable implements Runnable {
 				}		
 			} catch (Throwable e) {
 				logger.error(e.getMessage(), e);
-				scheduler.remove(taskData.getTaskID(),true);
+				scheduler.remove(task.getTaskID(),true);
 			}
 		} else {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Canceled scheduling periodic timer with id "
-						+ task.getData().getTaskID());
+						+ task.getTaskID());
 			}
 		}
 	}
 
 	public void cancel() {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Canceling set timer action for task with timer id "+task.getData().getTaskID());
+			logger.debug("Canceling set timer action for task with timer id "+task.getTaskID());
 		}
 		canceled = true;
-		scheduler.remove(task.getData().getTaskID(),true);
+		scheduler.remove(task.getTaskID(),true);
 	}
 
 }

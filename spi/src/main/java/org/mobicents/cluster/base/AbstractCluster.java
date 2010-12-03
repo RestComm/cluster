@@ -1,5 +1,6 @@
 package org.mobicents.cluster.base;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -181,7 +182,12 @@ public abstract class AbstractCluster<T> implements Cluster<T> {
 	 * 
 	 */
 	private static class ClusterDataFailOverListenerComparator implements
-			Comparator<ClusterDataFailOverListener> {
+			Comparator<ClusterDataFailOverListener>, Serializable {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
 		/*
 		 * (non-Javadoc)
 		 * 

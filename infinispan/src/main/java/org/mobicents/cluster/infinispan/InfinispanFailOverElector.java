@@ -13,7 +13,7 @@ import org.mobicents.cluster.FailoverElector;
  */
 public class InfinispanFailOverElector implements FailoverElector {
 
-	private final int shift = 5; // lets set default to something other than
+	private static final int shift = 5; // lets set default to something other than
 									// zero
 
 	/*
@@ -26,7 +26,7 @@ public class InfinispanFailOverElector implements FailoverElector {
 		// Jgroups return addresses always in sorted order, infinispan does not
 		// change it.
 		int size = list.size();
-		int index = (this.shift % size) + size;
+		int index = (shift % size) + size;
 		index = index % size;
 		return list.get(index);
 	}

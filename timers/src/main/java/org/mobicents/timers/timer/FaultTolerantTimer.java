@@ -62,7 +62,7 @@ public class FaultTolerantTimer extends java.util.Timer {
 	 */
 	public FaultTolerantTimer(String name, Cluster<?> cluster, byte priority, TransactionManager txManager) {
 		timerTaskFactory = new FaultTolerantTimerTimerTaskFactory();
-		scheduler = new FaultTolerantScheduler(name,16, cluster, priority, txManager, timerTaskFactory);
+		scheduler = new FaultTolerantScheduler(name,16, cluster, priority, txManager, timerTaskFactory, new FaultTolerantTimerTimerTaskDataMarshaller());
 		timerTaskFactory.setScheduler(scheduler);
 	}
 	
@@ -85,7 +85,7 @@ public class FaultTolerantTimer extends java.util.Timer {
 		for (org.mobicents.timers.TimerTask timerTask : scheduler.getLocalRunningTasks()) {
 			FaultTolerantTimerTimerTask ftTimerTask = (FaultTolerantTimerTimerTask) timerTask;
 			if (ftTimerTask.isCanceled()) {
-				scheduler.cancel(ftTimerTask.getData().getTaskID());
+				scheduler.cancel(ftTimerTask.getTaskID());
 				count++;
 			}
 		}
@@ -94,37 +94,37 @@ public class FaultTolerantTimer extends java.util.Timer {
 	
 	@Override
 	public void schedule(TimerTask task, Date firstTime, long period) {
-		final org.mobicents.timers.TimerTask taskWrapper = timerTaskFactory.newTimerTask(new FaultTolerantTimerTimerTaskData(task, UUID.randomUUID(),firstTime.getTime() - System.currentTimeMillis(),period,PeriodicScheduleStrategy.withFixedDelay));
+		final org.mobicents.timers.TimerTask taskWrapper = timerTaskFactory.newTimerTask(UUID.randomUUID().toString(),new FaultTolerantTimerTimerTaskData(task, firstTime.getTime() - System.currentTimeMillis(),period,PeriodicScheduleStrategy.withFixedDelay));
 		scheduler.schedule(taskWrapper);
 	}
 	
 	@Override
 	public void schedule(TimerTask task, Date time) {
-		final org.mobicents.timers.TimerTask taskWrapper = timerTaskFactory.newTimerTask(new FaultTolerantTimerTimerTaskData(task, UUID.randomUUID(),time.getTime() - System.currentTimeMillis(),-1,null));
+		final org.mobicents.timers.TimerTask taskWrapper = timerTaskFactory.newTimerTask(UUID.randomUUID().toString(),new FaultTolerantTimerTimerTaskData(task, time.getTime() - System.currentTimeMillis(),-1,null));
 		scheduler.schedule(taskWrapper);		
 	}
 	
 	@Override
 	public void schedule(TimerTask task, long delay) {
-		final org.mobicents.timers.TimerTask taskWrapper = timerTaskFactory.newTimerTask(new FaultTolerantTimerTimerTaskData(task, UUID.randomUUID(),System.currentTimeMillis()+delay,-1,null));
+		final org.mobicents.timers.TimerTask taskWrapper = timerTaskFactory.newTimerTask(UUID.randomUUID().toString(),new FaultTolerantTimerTimerTaskData(task, System.currentTimeMillis()+delay,-1,null));
 		scheduler.schedule(taskWrapper);	
 	}
 	
 	@Override
 	public void schedule(TimerTask task, long delay, long period) {
-		final org.mobicents.timers.TimerTask taskWrapper = timerTaskFactory.newTimerTask(new FaultTolerantTimerTimerTaskData(task, UUID.randomUUID(),System.currentTimeMillis()+delay,period,PeriodicScheduleStrategy.withFixedDelay));
+		final org.mobicents.timers.TimerTask taskWrapper = timerTaskFactory.newTimerTask(UUID.randomUUID().toString(),new FaultTolerantTimerTimerTaskData(task, System.currentTimeMillis()+delay,period,PeriodicScheduleStrategy.withFixedDelay));
 		scheduler.schedule(taskWrapper);		
 	}
 	
 	@Override
 	public void scheduleAtFixedRate(TimerTask task, Date firstTime, long period) {
-		final org.mobicents.timers.TimerTask taskWrapper = timerTaskFactory.newTimerTask(new FaultTolerantTimerTimerTaskData(task, UUID.randomUUID(),firstTime.getTime() - System.currentTimeMillis(),period,PeriodicScheduleStrategy.atFixedRate));
+		final org.mobicents.timers.TimerTask taskWrapper = timerTaskFactory.newTimerTask(UUID.randomUUID().toString(),new FaultTolerantTimerTimerTaskData(task, firstTime.getTime() - System.currentTimeMillis(),period,PeriodicScheduleStrategy.atFixedRate));
 		scheduler.schedule(taskWrapper);
 	}
 	
 	@Override
 	public void scheduleAtFixedRate(TimerTask task, long delay, long period) {
-		final org.mobicents.timers.TimerTask taskWrapper = timerTaskFactory.newTimerTask(new FaultTolerantTimerTimerTaskData(task, UUID.randomUUID(),System.currentTimeMillis()+delay,period,PeriodicScheduleStrategy.atFixedRate));
+		final org.mobicents.timers.TimerTask taskWrapper = timerTaskFactory.newTimerTask(UUID.randomUUID().toString(),new FaultTolerantTimerTimerTaskData(task,System.currentTimeMillis()+delay,period,PeriodicScheduleStrategy.atFixedRate));
 		scheduler.schedule(taskWrapper);	
 	}
 }
