@@ -165,6 +165,15 @@ public class FaultTolerantScheduler {
 	}
 	
 	/**
+	 * Retrieves a local running task by its id
+	 * 
+	 * @return the local task if found, null otherwise
+	 */
+	public TimerTask getLocalRunningTask(Serializable taskId) {
+		return localRunningTasks.get(taskId);
+	}
+	
+	/**
 	 *  Retrieves the scheduler name.
 	 * @return the name
 	 */
