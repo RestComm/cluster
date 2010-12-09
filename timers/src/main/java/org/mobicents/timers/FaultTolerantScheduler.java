@@ -347,13 +347,26 @@ public class FaultTolerantScheduler {
 	 */
 	private void recover(TimerTaskData taskData) {
 		TimerTask task = timerTaskFactory.newTimerTask(taskData);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Recovering task with id "+taskData.getTaskID());
+		if(task != null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Recovering task with id "+taskData.getTaskID());
+			}
+			task.beforeRecover();
+			// on recovery the task will already be in the cache so we don't check for it
+			// or an IllegalStateException will be thrown
+			schedule(task, false);
+		} else {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Not Recovering task with id "+taskData.getTaskID() + " since the factory returned a null task");
+			}
+			task = localRunningTasks.get(taskData.getTaskID());
+			if(task == null) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Task with task id "+taskData.getTaskID() + " is not present locally neither, removing it from the cache");
+				}
+				remove(taskData.getTaskID(), true);
+			}
 		}
-		task.beforeRecover();
-		// on recovery the task will already be in the cache so we don't check for it
-		// or an IllegalStateException will be thrown
-		schedule(task, false);
 	}
 
 	public void shutdownNow() {
