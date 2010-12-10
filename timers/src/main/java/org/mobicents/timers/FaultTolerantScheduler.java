@@ -355,17 +355,6 @@ public class FaultTolerantScheduler {
 			// on recovery the task will already be in the cache so we don't check for it
 			// or an IllegalStateException will be thrown
 			schedule(task, false);
-		} else {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Not Recovering task with id "+taskData.getTaskID() + " since the factory returned a null task");
-			}
-			task = localRunningTasks.get(taskData.getTaskID());
-			if(task == null) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Task with task id "+taskData.getTaskID() + " is not present locally neither, removing it from the cache");
-				}
-				remove(taskData.getTaskID(), true);
-			}
 		}
 	}
 
@@ -474,8 +463,15 @@ public class FaultTolerantScheduler {
 		 */
 		@SuppressWarnings("unchecked")
 		public void dataRemoved(Fqn clusteredCacheDataFqn) {
-			final TimerTask task = localRunningTasks.remove(clusteredCacheDataFqn.getLastElement());
+			Object lastElement = clusteredCacheDataFqn.getLastElement();
+			if (logger.isDebugEnabled()) {
+				logger.debug("remote notification dataRemoved( clusterCacheDataFqn = "+clusteredCacheDataFqn+"), lastElement " + lastElement);
+			}
+			final TimerTask task = localRunningTasks.remove(lastElement);
 			if (task != null) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("remote notification dataRemoved( task = "+task.getData().getTaskID()+" removed locally cancelling it");
+				}
 				task.cancel();
 			}			
 		}
