@@ -4,19 +4,19 @@
 	<parent>
 		<groupId>org.mobicents</groupId>
 		<artifactId>mobicents-parent</artifactId>
-		<version>2.10</version>
+		<version>2.16</version>
 	</parent>
 	
 	<groupId>org.mobicents.cluster</groupId>
 	<artifactId>mobicents-cluster</artifactId>
-	<version>1.7-SNAPSHOT</version>
+	<version>1.7</version>
 	
 	<packaging>pom</packaging>
 		
 	<scm>
-		<connection>scm:svn:https://mobicents.googlecode.com/svn/trunk/servers/cluster</connection>
-		<developerConnection>scm:svn:https://mobicents.googlecode.com/svn/trunk/servers/cluster</developerConnection>
-		<url>http://mobicents.googlecode.com/svn/trunk/servers/cluster</url>
+		<connection>scm:svn:https://mobicents.googlecode.com/svn/tags/mobicents-cluster-1.7</connection>
+		<developerConnection>scm:svn:https://mobicents.googlecode.com/svn/tags/mobicents-cluster-1.7</developerConnection>
+		<url>http://mobicents.googlecode.com/svn/tags/mobicents-cluster-1.7</url>
 	</scm>
 
 	<modules>
