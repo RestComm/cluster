@@ -8,19 +8,23 @@ import javax.transaction.TransactionManager;
 
 import org.apache.log4j.Logger;
 import org.infinispan.Cache;
+import org.infinispan.notifications.Listenable;
 import org.infinispan.notifications.Listener;
 import org.infinispan.notifications.cachelistener.annotation.CacheEntryRemoved;
 import org.infinispan.notifications.cachelistener.event.CacheEntryRemovedEvent;
 import org.infinispan.notifications.cachemanagerlistener.annotation.ViewChanged;
 import org.infinispan.notifications.cachemanagerlistener.event.ViewChangedEvent;
 import org.infinispan.remoting.transport.Address;
-import org.mobicents.cluster.ClusterData;
-import org.mobicents.cluster.ClusterDataFailOverListener;
-import org.mobicents.cluster.ClusterDataKey;
-import org.mobicents.cluster.ClusterDataRemovalListener;
 import org.mobicents.cluster.ClusterNodeAddress;
-import org.mobicents.cluster.LocalFailoverElector;
 import org.mobicents.cluster.base.AbstractCluster;
+import org.mobicents.cluster.data.ClusterData;
+import org.mobicents.cluster.data.ClusterDataKey;
+import org.mobicents.cluster.elector.LocalFailoverElector;
+import org.mobicents.cluster.infinispan.data.InfinispanClusterData;
+import org.mobicents.cluster.infinispan.data.InfinispanClusterDataSource;
+import org.mobicents.cluster.infinispan.elector.InfinispanFailOverElector;
+import org.mobicents.cluster.listener.ClusterDataFailOverListener;
+import org.mobicents.cluster.listener.ClusterDataRemovalListener;
 
 /**
  * Infinispan impl for Mobicents Cluster.
@@ -74,6 +78,7 @@ public class InfinispanCluster extends AbstractCluster<Cache> {
 					.getTransport().getMembers());
 			// connect to infinispan as listener
 			clusterDataSource.getWrappedDataSource().addListener(this);
+			((Listenable) clusterDataSource.getWrappedDataSource().getCacheManager()).addListener(this);
 		} else {
 			// local mode
 			localAddress = null;
@@ -121,6 +126,11 @@ public class InfinispanCluster extends AbstractCluster<Cache> {
 	 */
 	@CacheEntryRemoved
 	public void onCacheEntryRemovedEvent(CacheEntryRemovedEvent event) {
+		
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("onCacheEntryRemovedEvent( event = "+event+")");
+		}
+
 		if (!event.isOriginLocal() && !event.isPre()) {
 			final ClusterDataKey dataKey = event.getKey() instanceof ClusterDataKey ? ((ClusterDataKey) event
 					.getKey()) : null;
@@ -194,8 +204,8 @@ public class InfinispanCluster extends AbstractCluster<Cache> {
 	private void performTakeOver(ClusterDataFailOverListener localListener,
 			ClusterNodeAddress lostNode, boolean useLocalListenerElector) {
 
-		if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug("Performing take over of lost node " + lostNode);
+		if (LOGGER.isInfoEnabled()) {
+			LOGGER.info("Performing take over of lost node " + lostNode+", for cluster data keys referenced by "+localListener.getListenerKey());
 		}
 
 		boolean createdTx = false;
@@ -230,6 +240,9 @@ public class InfinispanCluster extends AbstractCluster<Cache> {
 							// not elected, move on
 							continue;
 						}
+					}
+					if (LOGGER.isInfoEnabled()) {
+						LOGGER.info("Referenced key " + key+ " now owned by local node, after failover of node "+lostNode);
 					}
 					// call back the listener
 					localListener.wonOwnership(clusterData);

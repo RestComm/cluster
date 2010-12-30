@@ -9,12 +9,11 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.mobicents.cluster.Cluster;
-import org.mobicents.cluster.ClusterDataFailOverListener;
-import org.mobicents.cluster.ClusterDataKey;
-import org.mobicents.cluster.ClusterDataMarshallerManagement;
-import org.mobicents.cluster.ClusterDataRemovalListener;
-import org.mobicents.cluster.ClusterDataSource;
 import org.mobicents.cluster.ClusterNodeAddress;
+import org.mobicents.cluster.data.ClusterDataKey;
+import org.mobicents.cluster.data.ClusterDataSource;
+import org.mobicents.cluster.listener.ClusterDataFailOverListener;
+import org.mobicents.cluster.listener.ClusterDataRemovalListener;
 
 /**
  * Base impl for {@link Cluster}.
@@ -41,11 +40,6 @@ public abstract class AbstractCluster<T> implements Cluster<T> {
 	 * map of data reoval listeners
 	 */
 	protected final ConcurrentHashMap<ClusterDataKey, ClusterDataRemovalListener> dataRemovalListeners = new ConcurrentHashMap<ClusterDataKey, ClusterDataRemovalListener>();
-
-	/**
-	 * manager of marshallers
-	 */
-	protected final ClusterDataMarshallerManagement marshallerManagement = new DefaultClusterDataMarshallerManagement();
 
 	/**
 	 * 
@@ -163,16 +157,6 @@ public abstract class AbstractCluster<T> implements Cluster<T> {
 	@Override
 	public ClusterDataSource<T> getClusterDataSource() {
 		return clusterDataSource;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.mobicents.cluster.Cluster#getClusterDataMarshalerManagement()
-	 */
-	@Override
-	public ClusterDataMarshallerManagement getClusterDataMarshalerManagement() {
-		return marshallerManagement;
 	}
 
 	/**

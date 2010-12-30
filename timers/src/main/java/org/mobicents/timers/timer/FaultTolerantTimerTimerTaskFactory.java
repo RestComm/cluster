@@ -43,6 +43,9 @@ public class FaultTolerantTimerTimerTaskFactory implements org.mobicents.timers.
 		if (scheduler == null) {
 			throw new IllegalStateException("unable to create data, scheduler is not set");
 		}
+		if (!(data instanceof org.mobicents.timers.timer.FaultTolerantTimerTimerTaskData)) {
+			throw new IllegalArgumentException("invalid data type");
+		}
 		return new FaultTolerantTimerTimerTask(taskID,(org.mobicents.timers.timer.FaultTolerantTimerTimerTaskData) data,scheduler);
 	}
 

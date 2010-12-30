@@ -71,14 +71,6 @@ public class FaultTolerantTimerTimerTask extends TimerTask {
 		else {
 			try{
 				taskData.getJavaUtilTimerTask().run();
-				if(taskData.getPeriodicScheduleStrategy() == null) {
-					scheduler.cancel(this.getTaskID());
-				}
-				else {
-					if (logger.isDebugEnabled()) {
-						logger.debug("task data has a periodic schedule strategy, not cancelling the task");
-					}
-				}
 			} catch(Throwable e) {
 				logger.error(e.getMessage(),e);
 			}					

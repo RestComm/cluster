@@ -1,6 +1,6 @@
 package org.mobicents.timers.cluster;
 
-import org.mobicents.cluster.ClusterDataKey;
+import org.mobicents.cluster.data.ClusterDataKey;
 
 /**
  * 
@@ -65,6 +65,15 @@ public class TimerTaskClusterDataKey implements ClusterDataKey {
 			return false;
 		final TimerTaskClusterDataKey other = (TimerTaskClusterDataKey) obj;
 		return taskID.equals(other.taskID) && schedulerName.equals(other.schedulerName);
+	}
+	
+	@Override
+	public String toString() {
+		return new StringBuilder(TimerTaskClusterDataKey.class.getSimpleName())
+			.append("( ")
+			.append("taskId = ").append(taskID).append(", ") 
+			.append("schedulerName = ").append(schedulerName)
+			.append(" )").toString();
 	}
 	
 }

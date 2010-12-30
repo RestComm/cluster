@@ -1,4 +1,4 @@
-package org.mobicents.cluster;
+package org.mobicents.cluster.data.marshall;
 
 /**
  * Manages marshallers.

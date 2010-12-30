@@ -1,7 +1,4 @@
-package org.mobicents.cluster.infinispan;
-
-import org.infinispan.marshall.Marshallable;
-import org.mobicents.cluster.infinispan.marshal.InfinispanClusterDataObjectWrapperExternalizer;
+package org.mobicents.cluster.infinispan.data;
 
 /**
  * Wrapper for cluster data object, which has an Externalizer in Infinispan to
@@ -11,7 +8,6 @@ import org.mobicents.cluster.infinispan.marshal.InfinispanClusterDataObjectWrapp
  * @author martins
  * 
  */
-@Marshallable(id = InfinispanClusterDataObjectWrapperExternalizer.ID)
 public class InfinispanClusterDataObjectWrapper {
 
 	private final Object dataObject;

@@ -1,4 +1,4 @@
-package org.mobicents.cluster.infinispan;
+package org.mobicents.cluster.infinispan.data;
 
 /**
  * Enum representing type of real infinispan cluster data keys.
@@ -12,6 +12,6 @@ package org.mobicents.cluster.infinispan;
  */
 public enum InfinispanClusterDataKeyType {
 
-	DATA, REFERENCES, CLUSTER_NODE_ADDRESS
+	DATA, REFERENCES_ENTRY, REFERENCES_MAP, CLUSTER_NODE_ADDRESS
 
 }

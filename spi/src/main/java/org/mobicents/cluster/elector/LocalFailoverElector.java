@@ -19,17 +19,23 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.mobicents.cluster;
+package org.mobicents.cluster.elector;
 
 import java.util.List;
+
+import org.mobicents.cluster.ClusterNodeAddress;
+import org.mobicents.cluster.data.ClusterData;
 
 public interface LocalFailoverElector {
 
 	/**
+	 * Elects a cluster node to do failover, considering the cluster data
+	 * provided.
 	 * 
 	 * @param nodes
 	 * @param clusterData
 	 * @return
 	 */
-	public ClusterNodeAddress elect(List<ClusterNodeAddress> nodes, ClusterData clusterData);
+	public ClusterNodeAddress elect(List<ClusterNodeAddress> nodes,
+			ClusterData clusterData);
 }

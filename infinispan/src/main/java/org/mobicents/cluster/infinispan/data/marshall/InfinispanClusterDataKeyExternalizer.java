@@ -1,15 +1,16 @@
-package org.mobicents.cluster.infinispan.marshal;
+package org.mobicents.cluster.infinispan.data.marshall;
 
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 import org.infinispan.marshall.Externalizer;
-import org.mobicents.cluster.ClusterDataKey;
-import org.mobicents.cluster.ClusterDataMarshaller;
-import org.mobicents.cluster.ClusterDataMarshallerManagement;
-import org.mobicents.cluster.infinispan.InfinispanClusterDataKey;
-import org.mobicents.cluster.infinispan.InfinispanClusterDataKeyType;
+import org.infinispan.marshall.Marshalls;
+import org.mobicents.cluster.data.ClusterDataKey;
+import org.mobicents.cluster.data.marshall.ClusterDataMarshaller;
+import org.mobicents.cluster.data.marshall.ClusterDataMarshallerManagement;
+import org.mobicents.cluster.infinispan.data.InfinispanClusterDataKey;
+import org.mobicents.cluster.infinispan.data.InfinispanClusterDataKeyType;
 
 /**
  * Marshalls cluster data keys in Infinispan.
@@ -17,12 +18,9 @@ import org.mobicents.cluster.infinispan.InfinispanClusterDataKeyType;
  * @author martins
  * 
  */
-public class InfinispanClusterDataKeyExternalizer implements Externalizer {
-
-	/**
-	 * the infinispan marshall id
-	 */
-	public static final int ID = -100;
+@Marshalls(typeClasses = InfinispanClusterDataKey.class, id = ExternalizerIds.InfinispanClusterDataKeyExternalizer)
+public class InfinispanClusterDataKeyExternalizer implements
+		Externalizer<InfinispanClusterDataKey> {
 
 	private final ClusterDataMarshallerManagement marshallerManagement;
 
@@ -41,8 +39,8 @@ public class InfinispanClusterDataKeyExternalizer implements Externalizer {
 	 * @see org.infinispan.marshall.Externalizer#readObject(java.io.ObjectInput)
 	 */
 	@Override
-	public Object readObject(ObjectInput objectInput) throws IOException,
-			ClassNotFoundException {
+	public InfinispanClusterDataKey readObject(ObjectInput objectInput)
+			throws IOException, ClassNotFoundException {
 		// read marshaller id
 		int marshallerId = objectInput.readInt();
 		final ClusterDataMarshaller marshaller = marshallerManagement
@@ -69,9 +67,8 @@ public class InfinispanClusterDataKeyExternalizer implements Externalizer {
 	 * java.lang.Object)
 	 */
 	@Override
-	public void writeObject(ObjectOutput objectOutput, Object object)
-			throws IOException {
-		InfinispanClusterDataKey infinispanKey = (InfinispanClusterDataKey) object;
+	public void writeObject(ObjectOutput objectOutput,
+			InfinispanClusterDataKey infinispanKey) throws IOException {
 		final ClusterDataMarshaller marshaller = marshallerManagement
 				.get(infinispanKey.getKey().getMarshalerId());
 		if (marshaller == null) {

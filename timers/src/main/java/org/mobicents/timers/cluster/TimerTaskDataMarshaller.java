@@ -1,8 +1,11 @@
-package org.mobicents.timers;
+package org.mobicents.timers.cluster;
 
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+
+import org.mobicents.timers.PeriodicScheduleStrategy;
+import org.mobicents.timers.TimerTaskData;
 
 /**
  * 

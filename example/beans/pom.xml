@@ -9,11 +9,13 @@
 	</parent>
 
 	<artifactId>mobicents-cluster-example-beans</artifactId>
-		
+	
+	<!-- current only supports AS5 default mode	
 	<properties>
 		<node>all</node>
 	</properties>
-	
+	 -->
+	 
 	<dependencies>	
 		<dependency>
 			<groupId>${pom.groupId}</groupId>
@@ -48,9 +50,9 @@
     		<artifactId>river</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>jgroups</groupId>
-			<artifactId>jgroups</artifactId>
-		</dependency>
+         	<groupId>org.jgroups</groupId>
+         	<artifactId>jgroups</artifactId>         	
+      	</dependency>
 	</dependencies>
 
 	<build>

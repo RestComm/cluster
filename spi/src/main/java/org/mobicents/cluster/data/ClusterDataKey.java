@@ -1,4 +1,4 @@
-package org.mobicents.cluster;
+package org.mobicents.cluster.data;
 
 /**
  * The key that identifies specific cluster data, and provides further info

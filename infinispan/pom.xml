@@ -20,6 +20,10 @@
 			<artifactId>infinispan-core</artifactId>
 			<groupId>org.infinispan</groupId>
 		</dependency>
+		<dependency>
+			<artifactId>log4j</artifactId>
+			<groupId>log4j</groupId>
+		</dependency>
 	</dependencies>
 	
 </project>

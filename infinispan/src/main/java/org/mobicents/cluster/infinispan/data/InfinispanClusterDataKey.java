@@ -1,8 +1,6 @@
-package org.mobicents.cluster.infinispan;
+package org.mobicents.cluster.infinispan.data;
 
-import org.infinispan.marshall.Marshallable;
-import org.mobicents.cluster.ClusterDataKey;
-import org.mobicents.cluster.infinispan.marshal.InfinispanClusterDataKeyExternalizer;
+import org.mobicents.cluster.data.ClusterDataKey;
 
 /**
  * Key wrapper for Infinispan, adds a type for the wrapped key to target each
@@ -11,7 +9,6 @@ import org.mobicents.cluster.infinispan.marshal.InfinispanClusterDataKeyExternal
  * @author martins
  * 
  */
-@Marshallable(id = InfinispanClusterDataKeyExternalizer.ID)
 public class InfinispanClusterDataKey {
 
 	private final ClusterDataKey key;

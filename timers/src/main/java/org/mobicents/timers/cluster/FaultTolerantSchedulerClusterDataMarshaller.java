@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
-import org.mobicents.cluster.ClusterDataKey;
-import org.mobicents.cluster.ClusterDataMarshaller;
+import org.mobicents.cluster.data.ClusterDataKey;
+import org.mobicents.cluster.data.marshall.ClusterDataMarshaller;
 
 /**
  * 

@@ -1,8 +1,10 @@
-package org.mobicents.cluster;
+package org.mobicents.cluster.data.marshall;
 
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+
+import org.mobicents.cluster.data.ClusterDataKey;
 
 /**
  * Handles serialization of specific object(s).

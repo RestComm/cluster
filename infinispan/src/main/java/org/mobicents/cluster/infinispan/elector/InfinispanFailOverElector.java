@@ -1,9 +1,9 @@
-package org.mobicents.cluster.infinispan;
+package org.mobicents.cluster.infinispan.elector;
 
 import java.util.List;
 
 import org.mobicents.cluster.ClusterNodeAddress;
-import org.mobicents.cluster.FailoverElector;
+import org.mobicents.cluster.elector.FailoverElector;
 
 /**
  * Infinispan simple impl of {@link FailoverElector}.

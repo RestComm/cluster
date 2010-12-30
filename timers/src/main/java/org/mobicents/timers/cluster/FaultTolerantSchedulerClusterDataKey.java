@@ -1,6 +1,6 @@
 package org.mobicents.timers.cluster;
 
-import org.mobicents.cluster.ClusterDataKey;
+import org.mobicents.cluster.data.ClusterDataKey;
 
 /**
  * 
@@ -59,6 +59,15 @@ public class FaultTolerantSchedulerClusterDataKey implements ClusterDataKey {
 			return false;
 		final FaultTolerantSchedulerClusterDataKey other = (FaultTolerantSchedulerClusterDataKey) obj;
 		return schedulerName.equals(other.schedulerName);
+	}
+	
+	@Override
+	public String toString() {
+		return new StringBuilder(
+				FaultTolerantSchedulerClusterDataKey.class.getSimpleName())
+		.append("( ")
+		.append("schedulerName = ").append(schedulerName)
+		.append(" )").toString();
 	}
 		
 }

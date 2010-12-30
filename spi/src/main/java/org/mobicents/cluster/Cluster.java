@@ -2,6 +2,10 @@ package org.mobicents.cluster;
 
 import java.util.List;
 
+import org.mobicents.cluster.data.ClusterDataSource;
+import org.mobicents.cluster.listener.ClusterDataFailOverListener;
+import org.mobicents.cluster.listener.ClusterDataRemovalListener;
+
 /**
  * The base cluster interface, bound to a data source which wraps T.
  * @author martins
@@ -72,9 +76,4 @@ public interface Cluster<T> {
 	 */
 	public ClusterDataSource<T> getClusterDataSource();
 	
-	/**
-	 * 
-	 * @return manager of cluster data marshalers
-	 */
-	public ClusterDataMarshallerManagement getClusterDataMarshalerManagement();
 }

@@ -19,7 +19,12 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.mobicents.cluster;
+package org.mobicents.cluster.listener;
+
+import org.mobicents.cluster.ClusterNodeAddress;
+import org.mobicents.cluster.data.ClusterData;
+import org.mobicents.cluster.data.ClusterDataKey;
+import org.mobicents.cluster.elector.LocalFailoverElector;
 
 /**
  * 

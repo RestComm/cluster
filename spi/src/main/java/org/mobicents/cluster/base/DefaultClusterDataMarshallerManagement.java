@@ -2,8 +2,8 @@ package org.mobicents.cluster.base;
 
 import java.util.HashMap;
 
-import org.mobicents.cluster.ClusterDataMarshaller;
-import org.mobicents.cluster.ClusterDataMarshallerManagement;
+import org.mobicents.cluster.data.marshall.ClusterDataMarshaller;
+import org.mobicents.cluster.data.marshall.ClusterDataMarshallerManagement;
 
 /**
  * Default impl of {@link ClusterDataMarshallerManagement}. Uses a

@@ -1,13 +1,14 @@
-package org.mobicents.cluster.infinispan.marshal;
+package org.mobicents.cluster.infinispan.data.marshall;
 
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 import org.infinispan.marshall.Externalizer;
-import org.mobicents.cluster.ClusterDataMarshaller;
-import org.mobicents.cluster.ClusterDataMarshallerManagement;
-import org.mobicents.cluster.infinispan.InfinispanClusterDataObjectWrapper;
+import org.infinispan.marshall.Marshalls;
+import org.mobicents.cluster.data.marshall.ClusterDataMarshaller;
+import org.mobicents.cluster.data.marshall.ClusterDataMarshallerManagement;
+import org.mobicents.cluster.infinispan.data.InfinispanClusterDataObjectWrapper;
 
 /**
  * Marshalls data objects in Infinispan.
@@ -15,13 +16,9 @@ import org.mobicents.cluster.infinispan.InfinispanClusterDataObjectWrapper;
  * @author martins
  * 
  */
+@Marshalls(typeClasses = InfinispanClusterDataObjectWrapper.class, id = ExternalizerIds.InfinispanClusterDataObjectWrapperExternalizer)
 public class InfinispanClusterDataObjectWrapperExternalizer implements
-		Externalizer {
-
-	/**
-	 * the infinispan marshall id
-	 */
-	public static final int ID = -200;
+		Externalizer<InfinispanClusterDataObjectWrapper> {
 
 	private final ClusterDataMarshallerManagement marshallerManagement;
 
@@ -40,8 +37,8 @@ public class InfinispanClusterDataObjectWrapperExternalizer implements
 	 * @see org.infinispan.marshall.Externalizer#readObject(java.io.ObjectInput)
 	 */
 	@Override
-	public Object readObject(ObjectInput objectInput) throws IOException,
-			ClassNotFoundException {
+	public InfinispanClusterDataObjectWrapper readObject(ObjectInput objectInput)
+			throws IOException, ClassNotFoundException {
 		int marshallerId = objectInput.readInt();
 		final ClusterDataMarshaller marshaller = marshallerManagement
 				.get(marshallerId);
@@ -49,7 +46,8 @@ public class InfinispanClusterDataObjectWrapperExternalizer implements
 			throw new IOException("marshaller with id " + marshallerId
 					+ " not found.");
 		}
-		return marshaller.readDataObject(objectInput);
+		return new InfinispanClusterDataObjectWrapper(
+				marshaller.readDataObject(objectInput), marshallerId);
 	}
 
 	/*
@@ -60,9 +58,9 @@ public class InfinispanClusterDataObjectWrapperExternalizer implements
 	 * java.lang.Object)
 	 */
 	@Override
-	public void writeObject(ObjectOutput objectOutput, Object object)
+	public void writeObject(ObjectOutput objectOutput,
+			InfinispanClusterDataObjectWrapper dataObjectWrapper)
 			throws IOException {
-		InfinispanClusterDataObjectWrapper dataObjectWrapper = (InfinispanClusterDataObjectWrapper) object;
 		final ClusterDataMarshaller marshaller = marshallerManagement
 				.get(dataObjectWrapper.getMarshallerId());
 		if (marshaller == null) {

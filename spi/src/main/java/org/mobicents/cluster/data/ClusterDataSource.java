@@ -1,4 +1,6 @@
-package org.mobicents.cluster;
+package org.mobicents.cluster.data;
+
+import org.mobicents.cluster.data.marshall.ClusterDataMarshallerManagement;
 
 /**
  * The data source for cluster data, wraps T.
@@ -28,4 +30,9 @@ public interface ClusterDataSource<T> {
 	 */
 	public boolean isLocalMode();
 	
+	/**
+	 * 
+	 * @return manager of cluster data marshalers
+	 */
+	public ClusterDataMarshallerManagement getClusterDataMarshalerManagement();
 }

@@ -1,4 +1,6 @@
-package org.mobicents.cluster;
+package org.mobicents.cluster.data;
+
+import org.mobicents.cluster.ClusterNodeAddress;
 
 /**
  * Interface for clustered data.

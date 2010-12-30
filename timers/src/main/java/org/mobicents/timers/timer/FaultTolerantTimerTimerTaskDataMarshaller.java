@@ -5,7 +5,7 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.TimerTask;
 
-import org.mobicents.timers.TimerTaskDataMarshaller;
+import org.mobicents.timers.cluster.TimerTaskDataMarshaller;
 
 /**
  * 

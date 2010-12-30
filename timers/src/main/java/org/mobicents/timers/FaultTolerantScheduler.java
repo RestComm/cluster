@@ -31,16 +31,17 @@ import javax.transaction.TransactionManager;
 
 import org.apache.log4j.Logger;
 import org.mobicents.cluster.Cluster;
-import org.mobicents.cluster.ClusterData;
-import org.mobicents.cluster.ClusterDataFailOverListener;
-import org.mobicents.cluster.ClusterDataKey;
-import org.mobicents.cluster.ClusterDataRemovalListener;
 import org.mobicents.cluster.ClusterNodeAddress;
-import org.mobicents.cluster.LocalFailoverElector;
+import org.mobicents.cluster.data.ClusterData;
+import org.mobicents.cluster.data.ClusterDataKey;
+import org.mobicents.cluster.elector.LocalFailoverElector;
+import org.mobicents.cluster.listener.ClusterDataFailOverListener;
+import org.mobicents.cluster.listener.ClusterDataRemovalListener;
 import org.mobicents.timers.cluster.FaultTolerantSchedulerClusterDataKey;
 import org.mobicents.timers.cluster.FaultTolerantSchedulerClusterDataMarshaller;
 import org.mobicents.timers.cluster.TimerTaskClusterDataKey;
 import org.mobicents.timers.cluster.TimerTaskClusterDataMarshaller;
+import org.mobicents.timers.cluster.TimerTaskDataMarshaller;
 
 /**
  * 
@@ -64,7 +65,7 @@ public class FaultTolerantScheduler {
 	/**
 	 * the interface to scheduler's data in cluster
 	 */
-	private final ClusterData clusterData;
+	private final ClusterData schedulerClusterData;
 	
 	/**
 	 * the jta tx manager
@@ -115,7 +116,7 @@ public class FaultTolerantScheduler {
 		this.executor = new ScheduledThreadPoolExecutor(corePoolSize);
 		this.clusterDataKey = new FaultTolerantSchedulerClusterDataKey(name);
 		this.cluster = cluster;
-		this.clusterData = cluster.getClusterDataSource().getClusterData(clusterDataKey);
+		this.schedulerClusterData = cluster.getClusterDataSource().getClusterData(clusterDataKey);
 		this.timerTaskFactory = timerTaskFactory;
 		this.taskDataMarshaller = taskDataMarshaller;
 		this.txManager = txManager;		
@@ -123,8 +124,8 @@ public class FaultTolerantScheduler {
 		if (!cluster.getClusterDataSource().isLocalMode()) {
 			cluster.addFailOverListener(clusterClientLocalListener);
 			cluster.addDataRemovalListener(clusterClientLocalListener);
-			cluster.getClusterDataMarshalerManagement().register(FaultTolerantSchedulerClusterDataMarshaller.ID, new FaultTolerantSchedulerClusterDataMarshaller());
-			cluster.getClusterDataMarshalerManagement().register(TimerTaskClusterDataMarshaller.ID, new TimerTaskClusterDataMarshaller(taskDataMarshaller));
+			cluster.getClusterDataSource().getClusterDataMarshalerManagement().register(FaultTolerantSchedulerClusterDataMarshaller.ID, new FaultTolerantSchedulerClusterDataMarshaller());
+			cluster.getClusterDataSource().getClusterDataMarshalerManagement().register(TimerTaskClusterDataMarshaller.ID, new TimerTaskClusterDataMarshaller(taskDataMarshaller));
 		}
 	}
 
@@ -163,6 +164,15 @@ public class FaultTolerantScheduler {
 	 */
 	public Set<TimerTask> getLocalRunningTasks() {
 		return new HashSet<TimerTask>(localRunningTasks.values());
+	}
+	
+	/**
+	 * Retrieves a local running task by its id
+	 * 
+	 * @return the local task if found, null otherwise
+	 */
+	public TimerTask getLocalRunningTask(String taskId) {
+		return localRunningTasks.get(taskId);
 	}
 	
 	/**
@@ -231,6 +241,7 @@ public class FaultTolerantScheduler {
 			// create
 			timerTaskClusterData.setOwner();
 			timerTaskClusterData.setDataObject(taskData);
+			schedulerClusterData.addReference(timerTaskClusterData.getKey());			
 		} else if(checkIfAlreadyPresent) {
             throw new IllegalStateException("timer task " + taskID + " already scheduled");
 		}
@@ -330,7 +341,7 @@ public class FaultTolerantScheduler {
 	
 	private void removeTaskDataFromCluster(String taskID) {
 		final TimerTaskClusterDataKey ttKey = new TimerTaskClusterDataKey(name, taskID);
-		clusterData.removeReference(ttKey);
+		schedulerClusterData.removeReference(ttKey);
 		cluster.getClusterDataSource().getClusterData(ttKey).remove(false);
 	}
 	
@@ -341,13 +352,15 @@ public class FaultTolerantScheduler {
 	 */
 	private void recover(String taskID, TimerTaskData taskData) {
 		TimerTask task = timerTaskFactory.newTimerTask(taskID,taskData);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Recovering task with id "+task.getTaskID());
+		if(task != null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Recovering task with id "+task.getTaskID());
+			}
+			task.beforeRecover();
+			// on recovery the task will already be in the cache so we don't check for it
+			// or an IllegalStateException will be thrown
+			schedule(task, false);
 		}
-		task.beforeRecover();
-		// on recovery the task will already be in the cache so we don't check for it
-		// or an IllegalStateException will be thrown
-		schedule(task, false);
 	}
 
 	public void shutdownNow() {
@@ -357,8 +370,8 @@ public class FaultTolerantScheduler {
 		if (!cluster.getClusterDataSource().isLocalMode()) {
 			cluster.removeFailOverListener(clusterClientLocalListener);
 			cluster.removeDataRemovalListener(clusterClientLocalListener);
-			cluster.getClusterDataMarshalerManagement().unregister(FaultTolerantSchedulerClusterDataMarshaller.ID);
-			cluster.getClusterDataMarshalerManagement().unregister(TimerTaskClusterDataMarshaller.ID);
+			cluster.getClusterDataSource().getClusterDataMarshalerManagement().unregister(FaultTolerantSchedulerClusterDataMarshaller.ID);
+			cluster.getClusterDataSource().getClusterDataMarshalerManagement().unregister(TimerTaskClusterDataMarshaller.ID);
 		}		
 		executor.shutdownNow();
 		localRunningTasks.clear();
@@ -370,7 +383,7 @@ public class FaultTolerantScheduler {
 	}
 	
 	public String toDetailedString() {
-		return "FaultTolerantScheduler [ name = "+name+" , local tasks = "+localRunningTasks.size()+" , all tasks "+clusterData.getReferences().length+" ]";
+		return "FaultTolerantScheduler [ name = "+name+" , local tasks = "+localRunningTasks.size()+" , all tasks "+schedulerClusterData.getReferences().length+" ]";
 	}
 	
 	public void stop() {
