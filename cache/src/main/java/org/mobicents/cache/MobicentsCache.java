@@ -76,8 +76,13 @@ public class MobicentsCache {
 	
 	@SuppressWarnings("unchecked")
 	public MobicentsCache(Cache cache, String cacheName) {
+		this(cache, cacheName, true);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public MobicentsCache(Cache cache, String cacheName, boolean managed) {
 		this.jBossCache = cache;
-		this.managedCache = true;									
+		this.managedCache = managed;									
 		startCache();
 	}
 	
