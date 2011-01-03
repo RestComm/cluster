@@ -62,15 +62,26 @@ public class TimerTest extends TestCase{
 		assertEquals(count, timerCallback);
 	}
 	
+	private static class TestTimerTaskFactory implements
+	org.mobicents.timers.TimerTaskFactory {
+	               public org.mobicents.timers.TimerTask newTimerTask(TimerTaskData data) {
+	                       return new org.mobicents.timers.TimerTask(data) {
+	                               @Override
+	                               public void runTask() {
+	                                       timerCallback++;
+	                               }
+	                       };
+	               }
+	       }
+	
 	public void timerTestScheduler2nodes1timer() throws Exception {
 		DefaultMobicentsCluster c1 = startNode("1");
 		DefaultMobicentsCluster c2 = startNode("2");
-		FaultTolerantTimerTimerTaskFactory factory1 = new FaultTolerantTimerTimerTaskFactory();
-		FaultTolerantTimerTimerTaskFactory factory2 = new FaultTolerantTimerTimerTaskFactory();
+		TestTimerTaskFactory factory1 = new TestTimerTaskFactory();
+		TestTimerTaskFactory factory2 = new TestTimerTaskFactory();
 		FaultTolerantScheduler scheduler1 = new FaultTolerantScheduler("d", 11, c1, (byte) 1, null, factory1);
 		FaultTolerantScheduler scheduler2 = new FaultTolerantScheduler("d", 11, c2, (byte) 1, null, factory2);
-		factory1.setScheduler(scheduler1);
-		factory2.setScheduler(scheduler2);
+		
 		scheduler1.schedule(new org.mobicents.timers.TimerTask(new TimerTaskData(UUID.randomUUID().toString(),
 		 System.currentTimeMillis()+1000, 1000, PeriodicScheduleStrategy.withFixedDelay)) {
 			
@@ -131,6 +142,21 @@ public class TimerTest extends TestCase{
 		}, 1000, 1000);
 		
 		Thread.sleep(4000);
+		t.cancel();
+	}
+	
+	public void sysclockChangeObservation3() throws Exception {
+		Timer t = new Timer();
+		t.schedule(new TimerTask() {
+			
+			@Override
+			public void run() {
+				System.out.println(System.nanoTime() - timerCallback);
+				timerCallback = System.nanoTime();
+			}
+		}, 1000, 1000);
+		
+		Thread.sleep(400000);
 		t.cancel();
 	}
 	
