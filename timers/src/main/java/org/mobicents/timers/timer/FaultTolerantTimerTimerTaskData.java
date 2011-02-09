@@ -21,6 +21,9 @@
  */
 package org.mobicents.timers.timer;
 
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.TimerTask;
 
 import org.mobicents.timers.PeriodicScheduleStrategy;
@@ -36,7 +39,11 @@ public class FaultTolerantTimerTimerTaskData extends TimerTaskData {
 	/**
 	 * 
 	 */
-	private final TimerTask javaUtilTimerTask;
+	private TimerTask javaUtilTimerTask;
+	
+	public FaultTolerantTimerTimerTaskData() {
+		super();
+	}
 	
 	/**
 	 * 
@@ -58,9 +65,16 @@ public class FaultTolerantTimerTimerTaskData extends TimerTaskData {
 		return javaUtilTimerTask;
 	}
 	
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+	@Override
+	public void readExternal(ObjectInput in) throws IOException,
+			ClassNotFoundException {
+		super.readExternal(in);
+		javaUtilTimerTask = (TimerTask) in.readObject();
+	}
 
+	@Override
+	public void writeExternal(ObjectOutput out) throws IOException {
+		super.writeExternal(out);
+		out.writeObject(javaUtilTimerTask);
+	}
 }

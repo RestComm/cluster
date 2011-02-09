@@ -1,30 +1,37 @@
 package org.mobicents.timers.cluster;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+
 import org.mobicents.cluster.data.ClusterDataKey;
 
 /**
  * 
  * @author martins
- *
+ * 
  */
-public class TimerTaskClusterDataKey implements ClusterDataKey {
+public class TimerTaskClusterDataKey implements ClusterDataKey, Externalizable {
 
-	private final String taskID;
-	private final String schedulerName;
+	private String taskID;
+	private String schedulerName;
+
+	public TimerTaskClusterDataKey() {}
 	
 	public TimerTaskClusterDataKey(String schedulerName, String taskID) {
 		this.taskID = taskID;
 		this.schedulerName = schedulerName;
 	}
-	
+
 	public String getSchedulerName() {
 		return schedulerName;
 	}
-	
+
 	public String getTaskID() {
 		return taskID;
 	}
-	
+
 	@Override
 	public boolean storesData() {
 		return true;
@@ -41,18 +48,13 @@ public class TimerTaskClusterDataKey implements ClusterDataKey {
 	}
 
 	@Override
-	public int getMarshalerId() {
-		return TimerTaskClusterDataMarshaller.ID;
-	}
-
-	@Override
 	public ClusterDataKey getListenerKey() {
 		return new FaultTolerantSchedulerClusterDataKey(schedulerName);
 	}
 
 	@Override
 	public int hashCode() {
-		return taskID.hashCode()*31+schedulerName.hashCode();
+		return taskID.hashCode() * 31 + schedulerName.hashCode();
 	}
 
 	@Override
@@ -64,16 +66,33 @@ public class TimerTaskClusterDataKey implements ClusterDataKey {
 		if (getClass() != obj.getClass())
 			return false;
 		final TimerTaskClusterDataKey other = (TimerTaskClusterDataKey) obj;
-		return taskID.equals(other.taskID) && schedulerName.equals(other.schedulerName);
+		return taskID.equals(other.taskID)
+				&& schedulerName.equals(other.schedulerName);
 	}
-	
+
 	@Override
 	public String toString() {
 		return new StringBuilder(TimerTaskClusterDataKey.class.getSimpleName())
-			.append("( ")
-			.append("taskId = ").append(taskID).append(", ") 
-			.append("schedulerName = ").append(schedulerName)
-			.append(" )").toString();
+				.append("( ").append("taskId = ").append(taskID).append(", ")
+				.append("schedulerName = ").append(schedulerName).append(" )")
+				.toString();
+	}
+
+	@Override
+	public void readExternal(ObjectInput in) throws IOException,
+			ClassNotFoundException {
+		schedulerName = in.readUTF();
+		taskID = in.readUTF();
 	}
 	
+	@Override
+	public void writeExternal(ObjectOutput out) throws IOException {
+		out.writeUTF(schedulerName);
+		out.writeUTF(taskID);		
+	}
+	
+	@Override
+	public ClusterDataKey dependsOn() {
+		return null;
+	}
 }

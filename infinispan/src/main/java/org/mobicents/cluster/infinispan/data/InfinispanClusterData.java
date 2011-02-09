@@ -114,11 +114,7 @@ public class InfinispanClusterData implements ClusterData {
 		final InfinispanClusterDataKey dataObjectKey = new InfinispanClusterDataKey(
 				key, InfinispanClusterDataKeyType.DATA);
 		// get key's value in infinispan
-		final InfinispanClusterDataObjectWrapper dataObjectWrapper = (InfinispanClusterDataObjectWrapper) dataSource
-				.getWrappedDataSource().get(dataObjectKey);
-		// unwrap original object if result not null
-		return dataObjectWrapper == null ? null : dataObjectWrapper
-				.getDataObject();
+		return dataSource.getWrappedDataSource().get(dataObjectKey);
 	}
 
 	/*
@@ -138,11 +134,8 @@ public class InfinispanClusterData implements ClusterData {
 		final InfinispanClusterDataKey dataObjectKey = new InfinispanClusterDataKey(
 				key, InfinispanClusterDataKeyType.DATA);
 		if (value != null) {
-			// store it in a wrapper that has a marshall in infinispan
-			dataSource.getWrappedDataSource().put(
-					dataObjectKey,
-					new InfinispanClusterDataObjectWrapper(value, key
-							.getMarshalerId()));
+			// store it in data source
+			dataSource.getWrappedDataSource().put(dataObjectKey, value);
 		} else {
 			// remove it
 			dataSource.getWrappedDataSource().remove(dataObjectKey);
@@ -174,7 +167,7 @@ public class InfinispanClusterData implements ClusterData {
 			for (InfinispanClusterDataKey reference : references.keySet()) {
 				resultSet.add(reference.getKey());
 			}
-			ClusterDataKey[] resultArray = new ClusterDataKey[resultSet.size()]; 
+			ClusterDataKey[] resultArray = new ClusterDataKey[resultSet.size()];
 			return resultSet.toArray(resultArray);
 		}
 	}
@@ -205,7 +198,8 @@ public class InfinispanClusterData implements ClusterData {
 		cache.getAdvancedCache().getInvocationContextContainer()
 				.getInvocationContext().setFlags(Flag.SKIP_LOCKING);
 		// put reference
-		references.put(new InfinispanClusterDataKey(reference, InfinispanClusterDataKeyType.REFERENCES_ENTRY), Boolean.TRUE);
+		references.put(new InfinispanClusterDataKey(reference,
+				InfinispanClusterDataKeyType.REFERENCES_ENTRY), Boolean.TRUE);
 	}
 
 	/*
@@ -235,7 +229,8 @@ public class InfinispanClusterData implements ClusterData {
 		cache.getAdvancedCache().getInvocationContextContainer()
 				.getInvocationContext().setFlags(Flag.SKIP_LOCKING);
 		// remove reference
-		return references.remove(new InfinispanClusterDataKey(reference, InfinispanClusterDataKeyType.REFERENCES_ENTRY)) != null;
+		return references.remove(new InfinispanClusterDataKey(reference,
+				InfinispanClusterDataKeyType.REFERENCES_ENTRY)) != null;
 	}
 
 	/*
@@ -260,7 +255,8 @@ public class InfinispanClusterData implements ClusterData {
 		if (references == null) {
 			return false;
 		} else {
-			return references.containsKey(new InfinispanClusterDataKey(reference, InfinispanClusterDataKeyType.REFERENCES_ENTRY));
+			return references.containsKey(new InfinispanClusterDataKey(
+					reference, InfinispanClusterDataKeyType.REFERENCES_ENTRY));
 		}
 	}
 
@@ -291,8 +287,8 @@ public class InfinispanClusterData implements ClusterData {
 					.getAtomicMap(cache, referencesObjectKey, false);
 			if (references != null) {
 				ClusterDataKey reference = null;
-				for (Iterator<InfinispanClusterDataKey> it = references.keySet()
-						.iterator(); it.hasNext();) {
+				for (Iterator<InfinispanClusterDataKey> it = references
+						.keySet().iterator(); it.hasNext();) {
 					reference = it.next().getKey();
 					if (cascadeRemoval) {
 						// cascade removal, remove also the data selected by the

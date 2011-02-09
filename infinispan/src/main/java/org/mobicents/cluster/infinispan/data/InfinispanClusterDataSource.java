@@ -7,15 +7,13 @@ import org.infinispan.Cache;
 import org.infinispan.config.Configuration;
 import org.infinispan.config.Configuration.CacheMode;
 import org.infinispan.config.GlobalConfiguration;
-import org.infinispan.lifecycle.ComponentStatus;
-import org.infinispan.manager.CacheContainer;
 import org.infinispan.manager.DefaultCacheManager;
-import org.mobicents.cluster.base.AbstractClusterDataSource;
 import org.mobicents.cluster.data.ClusterData;
 import org.mobicents.cluster.data.ClusterDataKey;
+import org.mobicents.cluster.data.ClusterDataSource;
+import org.mobicents.cluster.data.marshall.ClusterDataMarshaller;
+import org.mobicents.cluster.infinispan.data.marshall.ClusterDataExternalizer;
 import org.mobicents.cluster.infinispan.data.marshall.InfinispanClusterDataKeyExternalizer;
-import org.mobicents.cluster.infinispan.data.marshall.InfinispanClusterDataObjectWrapperExternalizer;
-import org.mobicents.cluster.infinispan.distribution.DefaultConsistentHashExt;
 import org.mobicents.cluster.infinispan.util.MBeanServerLookupImpl;
 
 /**
@@ -25,70 +23,48 @@ import org.mobicents.cluster.infinispan.util.MBeanServerLookupImpl;
  * 
  */
 @SuppressWarnings("rawtypes")
-public class InfinispanClusterDataSource extends
-		AbstractClusterDataSource<Cache> {
+public class InfinispanClusterDataSource implements ClusterDataSource<Cache> {
 
 	private static final Logger LOGGER = Logger
 			.getLogger(InfinispanClusterDataSource.class);
 
 	private final Cache cache;
-	private boolean managedCache = false;
-	private boolean localMode;
-
-	/**
-	 * 
-	 * @param cacheContainer
-	 * @param cacheName
-	 */
-	public InfinispanClusterDataSource(CacheContainer cacheContainer,
-			String cacheName, MBeanServer mBeanServer) {
-		super();
-		cache = cacheContainer.getCache(cacheName);
-		setup(cache.getConfiguration(), cache.getConfiguration()
-				.getGlobalConfiguration(), mBeanServer);
-	}
+	
+	//private boolean managedCache = false;
+	private boolean localMode = false;
+	private boolean started = false;
 
 	public InfinispanClusterDataSource(GlobalConfiguration globalConfiguration,
 			Configuration configuration, MBeanServer mBeanServer) {
-		super();
-		setup(configuration, globalConfiguration, mBeanServer);
-		this.cache = new DefaultCacheManager(globalConfiguration,
-				configuration, false).getCache();
-	}
-
-	private void setup(Configuration configuration,
-			GlobalConfiguration globalConfiguration, MBeanServer mBeanServer) {
 		if (configuration.getCacheMode() == CacheMode.LOCAL) {
 			this.localMode = true;
 		} else {
-			// sets custom distributed mode consistent hashing
-			configuration.setConsistentHashClass(DefaultConsistentHashExt.class
-					.getName());
-			// add externalizers
+			// add key externalizer
 			globalConfiguration
-					.addExternalizer(new InfinispanClusterDataKeyExternalizer(
-							marshallerManagement));
-			globalConfiguration
-					.addExternalizer(new InfinispanClusterDataObjectWrapperExternalizer(
-							marshallerManagement));
-			globalConfiguration
-					.addExternalizer(new DefaultConsistentHashExt.Externalizer());
+					.addExternalizer(new InfinispanClusterDataKeyExternalizer());
 			// add mbean server
 			if (mBeanServer != null) {
 				globalConfiguration
-						.setMBeanServerLookup(new MBeanServerLookupImpl(
+						.setMBeanServerLookupInstance(new MBeanServerLookupImpl(
 								mBeanServer));
 			}
 		}
+		cache = new DefaultCacheManager(globalConfiguration,
+				configuration, false).getCache();		
 	}
 
-	/**
-	 * 
+	/*
+	 * (non-Javadoc)
+	 * @see org.mobicents.cluster.data.ClusterDataSource#startDatasource()
 	 */
-	public void start() {
-		if (ComponentStatus.RUNNING != cache.getStatus()) {
-			cache.start();
-			managedCache = true;
+	@Override
+	public void startDatasource() {		
+		if (!isStarted()) {
+			started = true;
+			cache.start();			
+		}
+		else  {
+			throw new IllegalStateException("Datasource already started");
 		}
 		if (LOGGER.isInfoEnabled()) {
 			LOGGER.info("Mobicents Infinispan DataSource started, status: "
@@ -97,13 +73,27 @@ public class InfinispanClusterDataSource extends
 		}
 	}
 
-	/**
-	 * 
+	/*
+	 * (non-Javadoc)
+	 * @see org.mobicents.cluster.data.ClusterDataSource#stopDatasource()
 	 */
-	public void stop() {
-		if (!managedCache) {
+	@Override
+	public void stopDatasource() {
+		if (!isStarted()) {
+			throw new IllegalStateException("Datasource not started");
+		}
+		else {
 			this.cache.stop();
 		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.mobicents.cluster.data.ClusterDataSource#isStarted()
+	 */
+	@Override
+	public boolean isStarted() {
+		return started;
 	}
 
 	/*
@@ -138,4 +128,25 @@ public class InfinispanClusterDataSource extends
 		return localMode;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.mobicents.cluster.data.ClusterDataSource#addMarshaller(org.mobicents.cluster.data.marshall.ClusterDataMarshaller)
+	 */
+	@Override
+	public <S> void addMarshaller(ClusterDataMarshaller<S> marshaller)
+			throws IllegalStateException {
+		if (!isLocalMode()) {
+			if (isStarted()) {
+				throw new IllegalStateException(
+						"Marshallers must be added with Infinispan Cache not yet started.");
+			} else {
+				LOGGER.info("Adding Marshaller for type "+marshaller.getDataType());
+				cache.getConfiguration()
+						.getGlobalConfiguration()
+						.addExternalizer(
+								new ClusterDataExternalizer<S>(marshaller));
+			}
+		}
+	}	
+	
 }

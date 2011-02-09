@@ -34,76 +34,74 @@ import org.mobicents.cluster.Cluster;
 import org.mobicents.cluster.ClusterNodeAddress;
 import org.mobicents.cluster.data.ClusterData;
 import org.mobicents.cluster.data.ClusterDataKey;
+import org.mobicents.cluster.data.marshall.ClusterDataMarshaller;
 import org.mobicents.cluster.elector.LocalFailoverElector;
 import org.mobicents.cluster.listener.ClusterDataFailOverListener;
 import org.mobicents.cluster.listener.ClusterDataRemovalListener;
 import org.mobicents.timers.cluster.FaultTolerantSchedulerClusterDataKey;
-import org.mobicents.timers.cluster.FaultTolerantSchedulerClusterDataMarshaller;
+import org.mobicents.timers.cluster.FaultTolerantSchedulerClusterDataKeyMarshaller;
 import org.mobicents.timers.cluster.TimerTaskClusterDataKey;
-import org.mobicents.timers.cluster.TimerTaskClusterDataMarshaller;
-import org.mobicents.timers.cluster.TimerTaskDataMarshaller;
+import org.mobicents.timers.cluster.TimerTaskClusterDataKeyMarshaller;
 
 /**
  * 
  * @author martins
- *
+ * 
  */
 public class FaultTolerantScheduler {
 
-	private static final Logger logger = Logger.getLogger(FaultTolerantScheduler.class);
-	
+	private static final Logger logger = Logger
+			.getLogger(FaultTolerantScheduler.class);
+
 	/**
 	 * the executor of timer tasks
 	 */
 	private final ScheduledThreadPoolExecutor executor;
-	
+
 	/**
 	 * the scheduler cluster data key
 	 */
 	private final FaultTolerantSchedulerClusterDataKey clusterDataKey;
-	
+
 	/**
 	 * the interface to scheduler's data in cluster
 	 */
 	private final ClusterData schedulerClusterData;
-	
+
 	/**
 	 * the jta tx manager
 	 */
 	private final TransactionManager txManager;
-	
+
 	/**
-	 * the local running tasks. NOTE: never ever check for values, class instances may differ due cache replication, ALWAYS use keys.
+	 * the local running tasks. NOTE: never ever check for values, class
+	 * instances may differ due cache replication, ALWAYS use keys.
 	 */
 	private final ConcurrentHashMap<String, TimerTask> localRunningTasks = new ConcurrentHashMap<String, TimerTask>();
-	
+
 	/**
 	 * the timer task factory associated with this scheduler
 	 */
 	private TimerTaskFactory timerTaskFactory;
-		
+
 	/**
 	 * the scheduler name
 	 */
 	private final String name;
-		
+
 	/**
-	 * the mobicents cluster 
+	 * the mobicents cluster
 	 */
 	private final Cluster<?> cluster;
-	
+
 	/**
 	 * listener for events in mobicents cluster
 	 */
 	private final ClientLocalListener clusterClientLocalListener;
-	
+
 	/**
 	 * 
-	 */
-	private final TimerTaskDataMarshaller taskDataMarshaller;
-	
-	/**
-	 * 
+	 * @param <T>
 	 * @param name
 	 * @param corePoolSize
 	 * @param cluster
@@ -111,51 +109,69 @@ public class FaultTolerantScheduler {
 	 * @param txManager
 	 * @param timerTaskFactory
 	 */
-	public FaultTolerantScheduler(String name, int corePoolSize, Cluster<?> cluster, byte priority, TransactionManager txManager,TimerTaskFactory timerTaskFactory, TimerTaskDataMarshaller taskDataMarshaller) {
+	public <T extends TimerTaskData> FaultTolerantScheduler(String name, int corePoolSize,
+			Cluster<?> cluster, byte priority, TransactionManager txManager,
+			TimerTaskFactory timerTaskFactory, ClusterDataMarshaller<T> taskDataMarshaller) {
 		this.name = name;
 		this.executor = new ScheduledThreadPoolExecutor(corePoolSize);
 		this.clusterDataKey = new FaultTolerantSchedulerClusterDataKey(name);
 		this.cluster = cluster;
-		this.schedulerClusterData = cluster.getClusterDataSource().getClusterData(clusterDataKey);
+		this.schedulerClusterData = cluster.getClusterDataSource()
+				.getClusterData(clusterDataKey);
 		this.timerTaskFactory = timerTaskFactory;
-		this.taskDataMarshaller = taskDataMarshaller;
-		this.txManager = txManager;		
+		this.txManager = txManager;
 		clusterClientLocalListener = new ClientLocalListener(priority);
 		if (!cluster.getClusterDataSource().isLocalMode()) {
 			cluster.addFailOverListener(clusterClientLocalListener);
 			cluster.addDataRemovalListener(clusterClientLocalListener);
-			cluster.getClusterDataSource().getClusterDataMarshalerManagement().register(FaultTolerantSchedulerClusterDataMarshaller.ID, new FaultTolerantSchedulerClusterDataMarshaller());
-			cluster.getClusterDataSource().getClusterDataMarshalerManagement().register(TimerTaskClusterDataMarshaller.ID, new TimerTaskClusterDataMarshaller(taskDataMarshaller));
+			if (!cluster.getClusterDataSource().isStarted()) {
+				cluster.getClusterDataSource().addMarshaller(
+						new FaultTolerantSchedulerClusterDataKeyMarshaller());
+				cluster.getClusterDataSource().addMarshaller(
+						new TimerTaskClusterDataKeyMarshaller());
+				cluster.getClusterDataSource().addMarshaller(taskDataMarshaller);
+			}
+			else {
+				logger.warn("Datasource already started.");			
+			}
+		}
+		else {
+			logger.warn("Datasource in local mode.");			
 		}
 	}
 
 	/**
-	 * Retrieves the {@link TimerTaskData} associated with the specified taskID. 
+	 * Retrieves the {@link TimerTaskData} associated with the specified taskID.
+	 * 
 	 * @param taskID
 	 * @return null if there is no such timer task data
 	 */
 	public TimerTaskData getTimerTaskData(String taskID) {
-		final TimerTaskClusterDataKey key = new TimerTaskClusterDataKey(name, taskID);
-		final ClusterData clusterData = cluster.getClusterDataSource().getClusterData(key);
+		final TimerTaskClusterDataKey key = new TimerTaskClusterDataKey(name,
+				taskID);
+		final ClusterData clusterData = cluster.getClusterDataSource()
+				.getClusterData(key);
 		return (TimerTaskData) clusterData.getDataObject();
 	}
-	
+
 	/**
 	 * Retrieves the executor of timer tasks.
+	 * 
 	 * @return
 	 */
 	ScheduledThreadPoolExecutor getExecutor() {
 		return executor;
 	}
-	
+
 	/**
 	 * Retrieves local running tasks map.
+	 * 
 	 * @return
 	 */
 	ConcurrentHashMap<String, TimerTask> getLocalRunningTasksMap() {
 		return localRunningTasks;
 	}
-	
+
 	/**
 	 * Retrieves a set containing all local running tasks. Removals on the set
 	 * will not be propagated to the internal state of the scheduler.
@@ -165,7 +181,7 @@ public class FaultTolerantScheduler {
 	public Set<TimerTask> getLocalRunningTasks() {
 		return new HashSet<TimerTask>(localRunningTasks.values());
 	}
-	
+
 	/**
 	 * Retrieves a local running task by its id
 	 * 
@@ -174,25 +190,29 @@ public class FaultTolerantScheduler {
 	public TimerTask getLocalRunningTask(String taskId) {
 		return localRunningTasks.get(taskId);
 	}
-	
+
 	/**
-	 *  Retrieves the scheduler name.
+	 * Retrieves the scheduler name.
+	 * 
 	 * @return the name
 	 */
 	public String getName() {
 		return name;
 	}
-	
+
 	/**
-	 *  Retrieves the priority of the scheduler as a client local listener of the mobicents cluster.
+	 * Retrieves the priority of the scheduler as a client local listener of the
+	 * mobicents cluster.
+	 * 
 	 * @return the priority
 	 */
 	public byte getPriority() {
 		return clusterClientLocalListener.getPriority();
 	}
-	
+
 	/**
 	 * Retrieves the jta tx manager.
+	 * 
 	 * @return
 	 */
 	public TransactionManager getTransactionManager() {
@@ -201,74 +221,71 @@ public class FaultTolerantScheduler {
 
 	/**
 	 * Retrieves the timer task factory associated with this scheduler.
+	 * 
 	 * @return
 	 */
 	public TimerTaskFactory getTimerTaskFactory() {
 		return timerTaskFactory;
 	}
-	
-	/**
-	 * Retrieves the task data marshaller.
-	 * @return
-	 */
-	public TimerTaskDataMarshaller getTaskDataMarshaller() {
-		return taskDataMarshaller;
-	}
-	
-	// logic 
-	
+
+	// logic
+
 	public void schedule(TimerTask task) {
 		schedule(task, true);
 	}
+
 	/**
 	 * Schedules the specified task.
 	 * 
 	 * @param task
 	 */
 	public void schedule(TimerTask task, boolean checkIfAlreadyPresent) {
-		
-		final TimerTaskData taskData = task.getData(); 
+
+		final TimerTaskData taskData = task.getData();
 		final String taskID = task.getTaskID();
 		task.setScheduler(this);
-		
+
 		if (logger.isDebugEnabled()) {
-			logger.debug("Scheduling task with id "+taskID);
+			logger.debug("Scheduling task with id " + taskID);
 		}
-		
+
 		// store the task and data
-		final ClusterData timerTaskClusterData = cluster.getClusterDataSource().getClusterData(new TimerTaskClusterDataKey(name,taskID));
+		final ClusterData timerTaskClusterData = cluster.getClusterDataSource()
+				.getClusterData(new TimerTaskClusterDataKey(name, taskID));
 		if (timerTaskClusterData.getDataObject() == null) {
 			// create
 			timerTaskClusterData.setOwner();
 			timerTaskClusterData.setDataObject(taskData);
-			schedulerClusterData.addReference(timerTaskClusterData.getKey());			
-		} else if(checkIfAlreadyPresent) {
-            throw new IllegalStateException("timer task " + taskID + " already scheduled");
+			schedulerClusterData.addReference(timerTaskClusterData.getKey());
+		} else if (checkIfAlreadyPresent) {
+			throw new IllegalStateException("timer task " + taskID
+					+ " already scheduled");
 		}
-				
+
 		// schedule task
-		final SetTimerAfterTxCommitRunnable setTimerAction = new SetTimerAfterTxCommitRunnable(task, this);
+		final SetTimerAfterTxCommitRunnable setTimerAction = new SetTimerAfterTxCommitRunnable(
+				task, this);
 		if (txManager != null) {
 			try {
 				final Transaction tx = txManager.getTransaction();
 				if (tx != null) {
 					// schedules timer on commit
-					// TODO confirm if action runs after infinispan, otherwise need to find a way to force such order
-					tx.registerSynchronization(new TransactionSynchronization(null,setTimerAction,null));					
+					// TODO confirm if action runs after infinispan, otherwise
+					// need to find a way to force such order
+					tx.registerSynchronization(new TransactionSynchronization(
+							null, setTimerAction, null));
 					task.setSetTimerTransactionalAction(setTimerAction);
-				}
-				else {
+				} else {
 					setTimerAction.run();
 				}
+			} catch (Throwable e) {
+				remove(taskID, true);
+				throw new RuntimeException(
+						"Unable to register tx synchronization object", e);
 			}
-			catch (Throwable e) {
-				remove(taskID,true);
-				throw new RuntimeException("Unable to register tx synchronization object",e);
-			}
-		}
-		else {
+		} else {
 			setTimerAction.run();
-		}		
+		}
 	}
 
 	/**
@@ -278,86 +295,91 @@ public class FaultTolerantScheduler {
 	 * @return the task canceled
 	 */
 	public TimerTask cancel(String taskID) {
-		
+
 		if (logger.isDebugEnabled()) {
-			logger.debug("Canceling task with timer id "+taskID);
+			logger.debug("Canceling task with timer id " + taskID);
 		}
-		
+
 		TimerTask task = localRunningTasks.get(taskID);
 		if (task != null) {
 			// remove task data
 			removeTaskDataFromCluster(taskID);
 
-			final SetTimerAfterTxCommitRunnable setAction = task.getSetTimerTransactionalAction();
+			final SetTimerAfterTxCommitRunnable setAction = task
+					.getSetTimerTransactionalAction();
 			if (setAction != null) {
-				// we have a tx action scheduled to run when tx commits, to set the timer, lets simply cancel it
+				// we have a tx action scheduled to run when tx commits, to set
+				// the timer, lets simply cancel it
 				setAction.cancel();
-			}
-			else {
+			} else {
 				// do cancellation
-				Runnable cancelAction = new CancelTimerAfterTxCommitRunnable(task,this);
+				Runnable cancelAction = new CancelTimerAfterTxCommitRunnable(
+						task, this);
 				if (txManager != null) {
 					try {
 						// TODO confirm order is corrected
-						// Fixes Issue 2131 http://code.google.com/p/mobicents/issues/detail?id=2131
- 						// Calling cancel then schedule on a timer with the same Id in Transaction Context make them run reversed
- 						// so registerItAtTail to have them ordered correctly
+						// Fixes Issue 2131
+						// http://code.google.com/p/mobicents/issues/detail?id=2131
+						// Calling cancel then schedule on a timer with the same
+						// Id in Transaction Context make them run reversed
+						// so registerItAtTail to have them ordered correctly
 						final Transaction tx = txManager.getTransaction();
 						if (tx != null) {
-							tx.registerSynchronization(new TransactionSynchronization(null,cancelAction,null));					
-						}
-						else {
+							tx.registerSynchronization(new TransactionSynchronization(
+									null, cancelAction, null));
+						} else {
 							cancelAction.run();
 						}
+					} catch (Throwable e) {
+						throw new RuntimeException(
+								"unable to register tx synchronization object",
+								e);
 					}
-					catch (Throwable e) {
-						throw new RuntimeException("unable to register tx synchronization object",e);
-					}
-				}
-				else {
+				} else {
 					cancelAction.run();
-				}			
-			}		
-		}
-		else {
-			// not found locally, we remove it from the cache still in case it is present
+				}
+			}
+		} else {
+			// not found locally, we remove it from the cache still in case it
+			// is present
 			remove(taskID, true);
 		}
-		
+
 		return task;
 	}
-	
-	void remove(String taskID,boolean removeFromCache) {
-		if(logger.isDebugEnabled())
-		{
-			logger.debug("remove() : "+taskID+" - "+removeFromCache);
+
+	void remove(String taskID, boolean removeFromCache) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("remove() : " + taskID + " - " + removeFromCache);
 		}
-		
+
 		localRunningTasks.remove(taskID);
-		if(removeFromCache) {
+		if (removeFromCache) {
 			removeTaskDataFromCluster(taskID);
 		}
 	}
-	
+
 	private void removeTaskDataFromCluster(String taskID) {
-		final TimerTaskClusterDataKey ttKey = new TimerTaskClusterDataKey(name, taskID);
+		final TimerTaskClusterDataKey ttKey = new TimerTaskClusterDataKey(name,
+				taskID);
 		schedulerClusterData.removeReference(ttKey);
 		cluster.getClusterDataSource().getClusterData(ttKey).remove(false);
 	}
-	
+
 	/**
 	 * Recovers a timer task that was running in another node.
 	 * 
 	 * @param taskData
 	 */
 	private void recover(String taskID, TimerTaskData taskData) {
-		TimerTask task = timerTaskFactory.newTimerTask(taskID,taskData);
-		if(task != null) {
+		TimerTask task = timerTaskFactory.newTimerTask(taskID, taskData);
+		if (task != null) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Recovering task with id "+task.getTaskID());
+				logger.debug("Recovering task with id " + task.getTaskID());
 			}
 			task.beforeRecover();
-			// on recovery the task will already be in the cache so we don't check for it
+			// on recovery the task will already be in the cache so we don't
+			// check for it
 			// or an IllegalStateException will be thrown
 			schedule(task, false);
 		}
@@ -370,33 +392,35 @@ public class FaultTolerantScheduler {
 		if (!cluster.getClusterDataSource().isLocalMode()) {
 			cluster.removeFailOverListener(clusterClientLocalListener);
 			cluster.removeDataRemovalListener(clusterClientLocalListener);
-			cluster.getClusterDataSource().getClusterDataMarshalerManagement().unregister(FaultTolerantSchedulerClusterDataMarshaller.ID);
-			cluster.getClusterDataSource().getClusterDataMarshalerManagement().unregister(TimerTaskClusterDataMarshaller.ID);
-		}		
+		}
 		executor.shutdownNow();
 		localRunningTasks.clear();
 	}
-	
+
 	@Override
 	public String toString() {
-		return "FaultTolerantScheduler [ name = "+name+" ]";
+		return "FaultTolerantScheduler [ name = " + name + " ]";
 	}
-	
+
 	public String toDetailedString() {
-		return "FaultTolerantScheduler [ name = "+name+" , local tasks = "+localRunningTasks.size()+" , all tasks "+schedulerClusterData.getReferences().length+" ]";
+		return "FaultTolerantScheduler [ name = " + name + " , local tasks = "
+				+ localRunningTasks.size() + " , all tasks "
+				+ schedulerClusterData.getReferences().length + " ]";
 	}
-	
+
 	public void stop() {
-		this.shutdownNow();		
+		this.shutdownNow();
 	}
-	
-	private class ClientLocalListener implements ClusterDataFailOverListener, ClusterDataRemovalListener {
+
+	private class ClientLocalListener implements ClusterDataFailOverListener,
+			ClusterDataRemovalListener {
 
 		/**
-		 * the priority of the scheduler as a client local listener of the mobicents cluster
+		 * the priority of the scheduler as a client local listener of the
+		 * mobicents cluster
 		 */
 		private final byte priority;
-				
+
 		/**
 		 * @param priority
 		 */
@@ -406,7 +430,9 @@ public class FaultTolerantScheduler {
 
 		/*
 		 * (non-Javadoc)
-		 * @see org.mobicents.cluster.ClusterDataFailOverListener#getListenerKey()
+		 * 
+		 * @see
+		 * org.mobicents.cluster.ClusterDataFailOverListener#getListenerKey()
 		 */
 		@Override
 		public ClusterDataKey getListenerKey() {
@@ -415,15 +441,18 @@ public class FaultTolerantScheduler {
 
 		/*
 		 * (non-Javadoc)
-		 * @see org.mobicents.cluster.ClusterDataFailOverListener#getLocalElector()
+		 * 
+		 * @see
+		 * org.mobicents.cluster.ClusterDataFailOverListener#getLocalElector()
 		 */
 		@Override
 		public LocalFailoverElector getLocalElector() {
 			return null;
 		}
-		
-		/* 
+
+		/*
 		 * (non-Javadoc)
+		 * 
 		 * @see org.mobicents.cluster.FailOverListener#getPriority()
 		 */
 		public byte getPriority() {
@@ -432,59 +461,72 @@ public class FaultTolerantScheduler {
 
 		/*
 		 * (non-Javadoc)
-		 * @see org.mobicents.cluster.ClusterDataFailOverListener#failOverClusterMember(org.mobicents.cluster.ClusterNodeAddress)
+		 * 
+		 * @see
+		 * org.mobicents.cluster.ClusterDataFailOverListener#failOverClusterMember
+		 * (org.mobicents.cluster.ClusterNodeAddress)
 		 */
 		@Override
 		public void failOverClusterMember(ClusterNodeAddress address) {
-			
-		}
-		
-		/*
-		 * (non-Javadoc)
-		 * @see org.mobicents.cluster.ClusterDataFailOverListener#lostOwnership(org.mobicents.cluster.ClusterData)
-		 */
-		@Override
-		public void lostOwnership(ClusterData clusterData) {
-			
+
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * @see org.mobicents.cluster.ClusterDataFailOverListener#wonOwnership(org.mobicents.cluster.ClusterData)
+		 * 
+		 * @see
+		 * org.mobicents.cluster.ClusterDataFailOverListener#lostOwnership(org
+		 * .mobicents.cluster.ClusterData)
+		 */
+		@Override
+		public void lostOwnership(ClusterData clusterData) {
+
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see
+		 * org.mobicents.cluster.ClusterDataFailOverListener#wonOwnership(org
+		 * .mobicents.cluster.ClusterData)
 		 */
 		@Override
 		public void wonOwnership(ClusterData clusterData) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("wonOwnership( clusterData = "+clusterData+")");
+				logger.debug("wonOwnership( clusterData = " + clusterData + ")");
 			}
 
 			try {
-				final TimerTaskClusterDataKey key = (TimerTaskClusterDataKey) clusterData.getKey(); 
-				final TimerTaskData taskData = (TimerTaskData) clusterData.getDataObject();
-				recover(key.getTaskID(),taskData);
+				final TimerTaskClusterDataKey key = (TimerTaskClusterDataKey) clusterData
+						.getKey();
+				final TimerTaskData taskData = (TimerTaskData) clusterData
+						.getDataObject();
+				recover(key.getTaskID(), taskData);
+			} catch (Throwable e) {
+				logger.error(e.getMessage(), e);
 			}
-			catch (Throwable e) {
-				logger.error(e.getMessage(),e);
-			}
-			
+
 		}
-		
+
 		@Override
 		public void dataRemoved(ClusterDataKey removedReferencedKey) {
-			final String taskId = ((TimerTaskClusterDataKey)removedReferencedKey).getTaskID();
+			final String taskId = ((TimerTaskClusterDataKey) removedReferencedKey)
+					.getTaskID();
 			final TimerTask task = localRunningTasks.remove(taskId);
 			if (task != null) {
 				task.cancel();
 			}
 		}
-		
-		/* (non-Javadoc)
+
+		/*
+		 * (non-Javadoc)
+		 * 
 		 * @see java.lang.Object#toString()
 		 */
 		@Override
 		public String toString() {
 			return FaultTolerantScheduler.this.toString();
 		}
-		
+
 	}
 }

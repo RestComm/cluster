@@ -1,5 +1,10 @@
 package org.mobicents.cluster.infinispan.data;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+
 import org.mobicents.cluster.data.ClusterDataKey;
 
 /**
@@ -9,10 +14,13 @@ import org.mobicents.cluster.data.ClusterDataKey;
  * @author martins
  * 
  */
-public class InfinispanClusterDataKey {
+public class InfinispanClusterDataKey implements Externalizable {
 
-	private final ClusterDataKey key;
-	private final InfinispanClusterDataKeyType type;
+	private ClusterDataKey key;
+	private InfinispanClusterDataKeyType type;
+
+	public InfinispanClusterDataKey() {
+	}
 
 	/**
 	 * 
@@ -50,7 +58,8 @@ public class InfinispanClusterDataKey {
 	 */
 	@Override
 	public int hashCode() {
-		return key.hashCode() * 31 + type.hashCode();
+		return key.dependsOn() != null ? key.dependsOn().hashCode() : key
+				.hashCode();
 	}
 
 	/*
@@ -72,6 +81,24 @@ public class InfinispanClusterDataKey {
 		if (type != other.type)
 			return false;
 		return true;
+	}
+
+	@Override
+	public void writeExternal(ObjectOutput objectOutput) throws IOException {
+		// write the type's ordinal
+		objectOutput.write(type.ordinal());
+		// write the wrapped key
+		objectOutput.writeObject(key);
+	}
+
+	@Override
+	public void readExternal(ObjectInput objectInput) throws IOException,
+			ClassNotFoundException {
+		// read type
+		final int typeOrdinal = objectInput.read();
+		type = InfinispanClusterDataKeyType.values()[typeOrdinal];
+		// read wrapped key
+		key = (ClusterDataKey) objectInput.readObject();
 	}
 
 }

@@ -32,13 +32,6 @@ public interface ClusterDataKey {
 	public boolean isFailedOver();
 
 	/**
-	 * Retrieves the id for the marshaler that handles serialization of the key.
-	 * 
-	 * @return
-	 */
-	public int getMarshalerId();
-
-	/**
 	 * Retrieves the related listener key. Listener keys are used to match a key
 	 * with a cluster listener, such as the ones handling fail over or remote
 	 * data removal.
@@ -47,10 +40,13 @@ public interface ClusterDataKey {
 	 */
 	public ClusterDataKey getListenerKey();
 
-	@Override
-	public int hashCode();
-
-	@Override
-	public boolean equals(Object arg0);
+	/**
+	 * Defines that the key depends on another key, this relation may be used by
+	 * the cluster to optimize distribution of data. If there is no such
+	 * relation this method should return null.
+	 * 
+	 * @return
+	 */
+	public ClusterDataKey dependsOn();
 
 }

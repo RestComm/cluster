@@ -21,6 +21,11 @@
  */
 package org.mobicents.timers;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+
 /**
  * 
  * The {@link TimerTask} data, which may be replicated in a cluster environment to support fail over.
@@ -28,7 +33,9 @@ package org.mobicents.timers;
  * @author martins
  *
  */
-public class TimerTaskData {
+public class TimerTaskData implements Externalizable {
+
+	private final static int NOT_PERIODIC_TIMER = 255;
 
 	/**
 	 * the starting time of the associated timer task execution
@@ -38,12 +45,14 @@ public class TimerTaskData {
 	/**
 	 * the period of the associated timer task execution, -1 means it is not a periodic task
 	 */
-	private final long period;
+	private long period;
 	
 	/**
 	 * the strategy used in a periodic timer task, can be null if it is not a periodic timer task
 	 */
-	private final PeriodicScheduleStrategy periodicScheduleStrategy;
+	private PeriodicScheduleStrategy periodicScheduleStrategy;
+	
+	public TimerTaskData() {}
 	
 	/**
 	 * 
@@ -86,6 +95,28 @@ public class TimerTaskData {
 	 */
 	public PeriodicScheduleStrategy getPeriodicScheduleStrategy() {
 		return periodicScheduleStrategy;
+	}
+
+	@Override
+	public void writeExternal(ObjectOutput out) throws IOException {
+		out.writeLong(period);
+		out.writeLong(startTime);
+		if (periodicScheduleStrategy != null)
+			out.write(periodicScheduleStrategy.ordinal());
+		else
+			out.write(NOT_PERIODIC_TIMER);
+	}
+
+	@Override
+	public void readExternal(ObjectInput in) throws IOException,
+			ClassNotFoundException {
+		period = in.readLong();
+		startTime = in.readLong();
+		final int ordinal = in.read();
+		if (ordinal != NOT_PERIODIC_TIMER) {
+			periodicScheduleStrategy = PeriodicScheduleStrategy
+				.values()[ordinal];
+		}
 	}
 
 }

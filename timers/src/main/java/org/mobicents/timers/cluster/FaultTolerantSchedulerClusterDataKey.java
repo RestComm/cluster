@@ -1,15 +1,22 @@
 package org.mobicents.timers.cluster;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+
 import org.mobicents.cluster.data.ClusterDataKey;
 
 /**
  * 
  * @author martins
- *
+ * 
  */
-public class FaultTolerantSchedulerClusterDataKey implements ClusterDataKey {
+public class FaultTolerantSchedulerClusterDataKey implements ClusterDataKey,Externalizable {
 
-	private final String schedulerName;
+	private String schedulerName;
+
+	public FaultTolerantSchedulerClusterDataKey() {}
 	
 	public FaultTolerantSchedulerClusterDataKey(String schedulerName) {
 		this.schedulerName = schedulerName;
@@ -18,7 +25,7 @@ public class FaultTolerantSchedulerClusterDataKey implements ClusterDataKey {
 	public String getSchedulerName() {
 		return schedulerName;
 	}
-	
+
 	@Override
 	public boolean storesData() {
 		return false;
@@ -32,11 +39,6 @@ public class FaultTolerantSchedulerClusterDataKey implements ClusterDataKey {
 	@Override
 	public boolean isFailedOver() {
 		return false;
-	}
-
-	@Override
-	public int getMarshalerId() {
-		return FaultTolerantSchedulerClusterDataMarshaller.ID;
 	}
 
 	@Override
@@ -60,14 +62,28 @@ public class FaultTolerantSchedulerClusterDataKey implements ClusterDataKey {
 		final FaultTolerantSchedulerClusterDataKey other = (FaultTolerantSchedulerClusterDataKey) obj;
 		return schedulerName.equals(other.schedulerName);
 	}
-	
+
 	@Override
 	public String toString() {
 		return new StringBuilder(
 				FaultTolerantSchedulerClusterDataKey.class.getSimpleName())
-		.append("( ")
-		.append("schedulerName = ").append(schedulerName)
-		.append(" )").toString();
+				.append("( ").append("schedulerName = ").append(schedulerName)
+				.append(" )").toString();
 	}
-		
+
+	@Override
+	public void writeExternal(ObjectOutput out) throws IOException {
+		out.writeUTF(schedulerName);
+	}
+
+	@Override
+	public void readExternal(ObjectInput in) throws IOException,
+			ClassNotFoundException {
+		schedulerName = in.readUTF();
+	}
+
+	@Override
+	public ClusterDataKey dependsOn() {
+		return null;
+	}
 }
