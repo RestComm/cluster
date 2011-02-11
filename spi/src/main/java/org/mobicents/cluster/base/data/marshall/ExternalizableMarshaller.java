@@ -43,7 +43,6 @@ public abstract class ExternalizableMarshaller<T extends Externalizable>
 	@Override
 	public T readData(ObjectInput input) throws IOException,
 			ClassNotFoundException {
-		//System.out.println("readData "+getDataType());
 		T t = getDataTypeInstance();
 		t.readExternal(input);
 		return t;
@@ -55,7 +54,6 @@ public abstract class ExternalizableMarshaller<T extends Externalizable>
 	 */
 	@Override
 	public void writeData(ObjectOutput output, T data) throws IOException {
-		//System.out.println("writeData "+getDataType());
 		data.writeExternal(output);
 	}
 	

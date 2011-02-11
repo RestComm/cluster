@@ -11,7 +11,6 @@ import org.infinispan.remoting.transport.Address;
 import org.mobicents.cluster.ClusterNodeAddress;
 import org.mobicents.cluster.data.ClusterData;
 import org.mobicents.cluster.data.ClusterDataKey;
-import org.mobicents.cluster.data.ClusterDataSource;
 import org.mobicents.cluster.infinispan.InfinispanClusterNodeAddress;
 
 /**
@@ -30,15 +29,15 @@ public class InfinispanClusterData implements ClusterData {
 
 	private final ClusterDataKey key;
 
-	private final ClusterDataSource<Cache> dataSource;
-
+	private final InfinispanClusterDataSource dataSource;
+	
 	/**
 	 * 
 	 * @param key
 	 * @param dataSource
 	 */
 	public InfinispanClusterData(ClusterDataKey key,
-			ClusterDataSource<Cache> dataSource) {
+			InfinispanClusterDataSource dataSource) {
 		this.key = key;
 		this.dataSource = dataSource;
 	}

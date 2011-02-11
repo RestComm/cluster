@@ -19,9 +19,12 @@ import org.mobicents.cluster.ClusterNodeAddress;
 import org.mobicents.cluster.base.AbstractCluster;
 import org.mobicents.cluster.data.ClusterData;
 import org.mobicents.cluster.data.ClusterDataKey;
+import org.mobicents.cluster.data.ClusterDataSource;
+import org.mobicents.cluster.data.marshall.ClusterDataMarshaller;
 import org.mobicents.cluster.elector.LocalFailoverElector;
 import org.mobicents.cluster.infinispan.data.InfinispanClusterData;
 import org.mobicents.cluster.infinispan.data.InfinispanClusterDataSource;
+import org.mobicents.cluster.infinispan.data.marshall.ClusterDataExternalizer;
 import org.mobicents.cluster.infinispan.elector.InfinispanFailOverElector;
 import org.mobicents.cluster.listener.ClusterDataFailOverListener;
 import org.mobicents.cluster.listener.ClusterDataRemovalListener;
@@ -47,7 +50,7 @@ public class InfinispanCluster extends AbstractCluster<Cache> {
 	/**
 	 * address of the local cluster node
 	 */
-	private final InfinispanClusterNodeAddress localAddress;
+	private InfinispanClusterNodeAddress localAddress;
 
 	/**
 	 * the JTA tx manager
@@ -60,33 +63,98 @@ public class InfinispanCluster extends AbstractCluster<Cache> {
 	private List<ClusterNodeAddress> clusterNodes;
 
 	/**
+	 * the datasource
+	 */
+	private final InfinispanClusterDataSource clusterDataSource;
+
+	/**
+	 * 
+	 */
+	private final boolean localMode;
+	
+	/**
 	 * 
 	 * @param dataSource
 	 * @param txMgr
 	 */
-	public InfinispanCluster(InfinispanClusterDataSource dataSource,
-			TransactionManager txMgr) {
-		super(dataSource);
-		if (!clusterDataSource.isLocalMode()) {
-			// cluster mode
-			localAddress = new InfinispanClusterNodeAddress(clusterDataSource
-					.getWrappedDataSource().getAdvancedCache().getRpcManager()
-					.getTransport().getAddress());
-			// create initial members list
-			clusterNodes = createClusterMembersList(clusterDataSource
-					.getWrappedDataSource().getAdvancedCache().getRpcManager()
-					.getTransport().getMembers());
-			// connect to infinispan as listener
-			clusterDataSource.getWrappedDataSource().addListener(this);
-			((Listenable) clusterDataSource.getWrappedDataSource().getCacheManager()).addListener(this);
-		} else {
-			// local mode
-			localAddress = null;
-			clusterNodes = Collections.emptyList();
+	public InfinispanCluster(InfinispanClusterDataSource clusterDataSource,
+			TransactionManager txManager) {
+		super();
+		this.clusterDataSource = clusterDataSource;
+		localMode = clusterDataSource.isLocalMode();
+		this.txManager = txManager;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.mobicents.cluster.Cluster#getClusterDataSource()
+	 */
+	@Override
+	public ClusterDataSource<Cache> getClusterDataSource() {
+		return clusterDataSource;
+	}
+
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.mobicents.cluster.Cluster#isLocalMode()
+	 */
+	@Override
+	public boolean isLocalMode() {
+		return localMode;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.mobicents.cluster.Cluster#startCluster()
+	 */
+	@Override
+	public void startCluster() {
+		synchronized (this) {
+			throwExceptionIfClusterStarted();
+			clusterDataSource.startCache();
+			if (!clusterDataSource.isLocalMode()) {
+				// cluster mode
+				localAddress = new InfinispanClusterNodeAddress(
+						clusterDataSource.getWrappedDataSource()
+								.getAdvancedCache().getRpcManager()
+								.getTransport().getAddress());
+				// create initial members list
+				clusterNodes = createClusterMembersList(clusterDataSource
+						.getWrappedDataSource().getAdvancedCache()
+						.getRpcManager().getTransport().getMembers());
+				// connect to infinispan as listener
+				clusterDataSource.getWrappedDataSource().addListener(this);
+				((Listenable) clusterDataSource.getWrappedDataSource()
+						.getCacheManager()).addListener(this);
+			} else {
+				// local mode
+				localAddress = null;
+				clusterNodes = Collections.emptyList();
+			}
+			started = true;
+			if (LOGGER.isInfoEnabled()) {
+				LOGGER.info("Mobicents Infinispan Cluster started.");
+			}
 		}
-		this.txManager = txMgr;
-		if (LOGGER.isInfoEnabled()) {
-			LOGGER.info("Mobicents Infinispan Cluster started.");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.mobicents.cluster.Cluster#stopCluster()
+	 */
+	@Override
+	public void stopCluster() throws IllegalStateException {
+		synchronized (this) {
+			throwExceptionIfClusterNotStarted();
+			clusterDataSource.stopCache();
+			started = false;
+			if (LOGGER.isInfoEnabled()) {
+				LOGGER.info("Mobicents Infinispan Cluster stopped.");
+			}
 		}
 	}
 
@@ -106,6 +174,7 @@ public class InfinispanCluster extends AbstractCluster<Cache> {
 	 */
 	@Override
 	public ClusterNodeAddress getLocalAddress() {
+		throwExceptionIfClusterNotStarted();
 		return localAddress;
 	}
 
@@ -116,6 +185,7 @@ public class InfinispanCluster extends AbstractCluster<Cache> {
 	 */
 	@Override
 	public List<ClusterNodeAddress> getClusterMembers() {
+		throwExceptionIfClusterNotStarted();
 		return clusterNodes;
 	}
 
@@ -126,9 +196,9 @@ public class InfinispanCluster extends AbstractCluster<Cache> {
 	 */
 	@CacheEntryRemoved
 	public void onCacheEntryRemovedEvent(CacheEntryRemovedEvent event) {
-		
+
 		if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug("onCacheEntryRemovedEvent( event = "+event+")");
+			LOGGER.debug("onCacheEntryRemovedEvent( event = " + event + ")");
 		}
 
 		if (!event.isOriginLocal() && !event.isPre()) {
@@ -205,7 +275,9 @@ public class InfinispanCluster extends AbstractCluster<Cache> {
 			ClusterNodeAddress lostNode, boolean useLocalListenerElector) {
 
 		if (LOGGER.isInfoEnabled()) {
-			LOGGER.info("Performing take over of lost node " + lostNode+", for cluster data keys referenced by "+localListener.getListenerKey());
+			LOGGER.info("Performing take over of lost node " + lostNode
+					+ ", for cluster data keys referenced by "
+					+ localListener.getListenerKey());
 		}
 
 		boolean createdTx = false;
@@ -242,7 +314,10 @@ public class InfinispanCluster extends AbstractCluster<Cache> {
 						}
 					}
 					if (LOGGER.isInfoEnabled()) {
-						LOGGER.info("Referenced key " + key+ " now owned by local node, after failover of node "+lostNode);
+						LOGGER.info("Referenced key "
+								+ key
+								+ " now owned by local node, after failover of node "
+								+ lostNode);
 					}
 					// call back the listener
 					localListener.wonOwnership(clusterData);
@@ -268,4 +343,25 @@ public class InfinispanCluster extends AbstractCluster<Cache> {
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.mobicents.cluster.Cluster#addMarshaller(org.mobicents.cluster.data
+	 * .marshall.ClusterDataMarshaller)
+	 */
+	@Override
+	public <S> void addMarshaller(ClusterDataMarshaller<S> marshaller)
+			throws IllegalStateException {
+		throwExceptionIfClusterStarted();
+		if (!isLocalMode()) {
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("Adding Marshaller for type "
+					+ marshaller.getDataType());
+			}
+			clusterDataSource
+					.getGlobalConfiguration()
+					.addExternalizer(new ClusterDataExternalizer<S>(marshaller));
+		}
+	}
 }

@@ -7,7 +7,7 @@ import javax.transaction.RollbackException;
 import javax.transaction.SystemException;
 import javax.transaction.TransactionManager;
 
-import org.mobicents.cluster.data.ClusterDataSource;
+import org.mobicents.cluster.Cluster;
 import org.mobicents.timers.timer.FaultTolerantTimer;
 
 
@@ -15,24 +15,24 @@ public class MCClusterTest implements MCClusterTestMBean {
 
 	private TransactionManager jta;
 	private FaultTolerantTimer faultTolerantTimer;
-	private ClusterDataSource<?> clusterDataSource;
+	private Cluster<?> cluster;
 	
 	public void start() {
-		clusterDataSource.startDatasource();
+		cluster.startCluster();
 		System.out.println("Mobicents FT Timers Example Service started");
 	}
 	
 	public void stop() {
-		clusterDataSource.stopDatasource();
+		cluster.stopCluster();
 		System.out.println("Mobicents FT Timers Example Service stopped");
 	}
 	
-	public ClusterDataSource<?> getClusterDataSource() {
-		return clusterDataSource;
+	public Cluster<?> getCluster() {
+		return cluster;
 	}
 	
-	public void setClusterDataSource(ClusterDataSource<?> clusterDataSource) {
-		this.clusterDataSource = clusterDataSource;
+	public void setCluster(Cluster<?> cluster) {
+		this.cluster = cluster;
 	}
 	
 	public TransactionManager getJta() {

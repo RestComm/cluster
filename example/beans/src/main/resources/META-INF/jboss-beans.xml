@@ -56,8 +56,8 @@
 		<property name="jta">
 			<inject bean="RealTransactionManager" />
 		</property>
-		<property name="clusterDataSource">
-			<inject bean="Mobicents.Cluster.DataSource" />
+		<property name="cluster">
+			<inject bean="Mobicents.Cluster" />
 		</property>		
 	</bean>
 

@@ -120,23 +120,20 @@ public class FaultTolerantScheduler {
 				.getClusterData(clusterDataKey);
 		this.timerTaskFactory = timerTaskFactory;
 		this.txManager = txManager;
-		clusterClientLocalListener = new ClientLocalListener(priority);
-		if (!cluster.getClusterDataSource().isLocalMode()) {
+		if (!cluster.isLocalMode()) {
+			clusterClientLocalListener = new ClientLocalListener(priority);
 			cluster.addFailOverListener(clusterClientLocalListener);
 			cluster.addDataRemovalListener(clusterClientLocalListener);
-			if (!cluster.getClusterDataSource().isStarted()) {
-				cluster.getClusterDataSource().addMarshaller(
+			if (!cluster.isStarted()) {
+				cluster.addMarshaller(
 						new FaultTolerantSchedulerClusterDataKeyMarshaller());
-				cluster.getClusterDataSource().addMarshaller(
+				cluster.addMarshaller(
 						new TimerTaskClusterDataKeyMarshaller());
-				cluster.getClusterDataSource().addMarshaller(taskDataMarshaller);
+				cluster.addMarshaller(taskDataMarshaller);
 			}
-			else {
-				logger.warn("Datasource already started.");			
-			}
-		}
+		}		
 		else {
-			logger.warn("Datasource in local mode.");			
+			clusterClientLocalListener = null;
 		}
 	}
 
@@ -389,9 +386,9 @@ public class FaultTolerantScheduler {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Shutdown now.");
 		}
-		if (!cluster.getClusterDataSource().isLocalMode()) {
+		if (clusterClientLocalListener != null) {
 			cluster.removeFailOverListener(clusterClientLocalListener);
-			cluster.removeDataRemovalListener(clusterClientLocalListener);
+			cluster.removeDataRemovalListener(clusterClientLocalListener);		
 		}
 		executor.shutdownNow();
 		localRunningTasks.clear();

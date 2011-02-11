@@ -11,7 +11,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.mobicents.cluster.Cluster;
 import org.mobicents.cluster.ClusterNodeAddress;
 import org.mobicents.cluster.data.ClusterDataKey;
-import org.mobicents.cluster.data.ClusterDataSource;
 import org.mobicents.cluster.listener.ClusterDataFailOverListener;
 import org.mobicents.cluster.listener.ClusterDataRemovalListener;
 
@@ -25,11 +24,6 @@ import org.mobicents.cluster.listener.ClusterDataRemovalListener;
 public abstract class AbstractCluster<T> implements Cluster<T> {
 
 	/**
-	 * the datasource
-	 */
-	protected final ClusterDataSource<T> clusterDataSource;
-
-	/**
 	 * sorted set of fail over listeners
 	 */
 	protected final SortedSet<ClusterDataFailOverListener> failOverListeners = Collections
@@ -40,14 +34,11 @@ public abstract class AbstractCluster<T> implements Cluster<T> {
 	 * map of data reoval listeners
 	 */
 	protected final ConcurrentHashMap<ClusterDataKey, ClusterDataRemovalListener> dataRemovalListeners = new ConcurrentHashMap<ClusterDataKey, ClusterDataRemovalListener>();
-
+	
 	/**
 	 * 
-	 * @param clusterDataSource
 	 */
-	public AbstractCluster(ClusterDataSource<T> clusterDataSource) {
-		this.clusterDataSource = clusterDataSource;
-	}
+	protected boolean started;
 
 	/*
 	 * (non-Javadoc)
@@ -65,34 +56,65 @@ public abstract class AbstractCluster<T> implements Cluster<T> {
 	@Override
 	public abstract List<ClusterNodeAddress> getClusterMembers();
 
+	/**
+	 * Throws exception if cluster not started.
+	 * @throws IllegalStateException
+	 */
+	protected void throwExceptionIfClusterNotStarted() throws IllegalStateException {
+		if(!isStarted()) {
+			throw new IllegalStateException("Cluster not started.");
+		}
+	}
+	
+	/**
+	 * Throws exception if cluster started.
+	 * @throws IllegalStateException
+	 */
+	protected void throwExceptionIfClusterStarted() throws IllegalStateException {
+		if(isStarted()) {
+			throw new IllegalStateException("Cluster already started.");
+		}
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see org.mobicents.cluster.Cluster#isHeadMember()
 	 */
 	@Override
-	public boolean isHeadMember() {
-		if (clusterDataSource.isLocalMode()) {
+	public boolean isHeadMember() throws IllegalStateException {
+		throwExceptionIfClusterNotStarted();
+		if (isLocalMode()) {
 			return true;
 		} else {
 			return getClusterMembers().get(0).equals(getLocalAddress());
 		}
 	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see org.mobicents.cluster.Cluster#isSingleMember()
 	 */
 	@Override
-	public boolean isSingleMember() {
-		if (clusterDataSource.isLocalMode()) {
+	public boolean isSingleMember() throws IllegalStateException {
+		throwExceptionIfClusterNotStarted();
+		if (isLocalMode()) {
 			return true;
 		} else {
 			return getClusterMembers().size() == 1;
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.mobicents.cluster.Cluster#isStarted()
+	 */
+	@Override
+	public boolean isStarted() {
+		return started;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -147,16 +169,6 @@ public abstract class AbstractCluster<T> implements Cluster<T> {
 	@Override
 	public boolean removeFailOverListener(ClusterDataFailOverListener listener) {
 		return failOverListeners.remove(listener);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.mobicents.cluster.Cluster#getClusterDataSource()
-	 */
-	@Override
-	public ClusterDataSource<T> getClusterDataSource() {
-		return clusterDataSource;
 	}
 
 	/**
