@@ -29,16 +29,20 @@ import org.apache.log4j.Logger;
  * @author martins
  *
  */
-public class CancelTimerAfterTxCommitRunnable implements Runnable {
+public class CancelTimerAfterTxCommitRunnable extends AfterTxCommitRunnable {
 
 	private static final Logger logger = Logger.getLogger(CancelTimerAfterTxCommitRunnable.class);
 	
-	private final FaultTolerantScheduler executor;	
-	private TimerTask task;
+	CancelTimerAfterTxCommitRunnable(TimerTask task,FaultTolerantScheduler scheduler) {
+		super(task,scheduler);
+	}
 
-	CancelTimerAfterTxCommitRunnable(TimerTask task,FaultTolerantScheduler executor) {
-		this.task = task;
-		this.executor = executor;
+	/*
+	 * (non-Javadoc)
+	 * @see org.mobicents.timers.AfterTxCommitRunnable#getType()
+	 */
+	public Type getType() {
+		return AfterTxCommitRunnable.Type.CANCEL;
 	}
 
 	/*
@@ -53,7 +57,7 @@ public class CancelTimerAfterTxCommitRunnable implements Runnable {
 			logger.debug("Cancelling timer task for timer ID "+taskID);
 		}
 		
-		executor.getLocalRunningTasksMap().remove(taskID);
+		scheduler.getLocalRunningTasksMap().remove(taskID);
 		
 		try {
 			task.cancel();					

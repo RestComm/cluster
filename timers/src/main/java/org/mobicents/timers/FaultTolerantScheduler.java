@@ -264,21 +264,23 @@ public class FaultTolerantScheduler {
 				task, this);
 		if (txManager != null) {
 			try {
-				final Transaction tx = txManager.getTransaction();
+				Transaction tx = txManager.getTransaction();
 				if (tx != null) {
-					// schedules timer on commit
-					// TODO confirm if action runs after infinispan, otherwise
-					// need to find a way to force such order
-					tx.registerSynchronization(new TransactionSynchronization(
-							null, setTimerAction, null));
+					TransactionContext txContext = TransactionContextThreadLocal.getTransactionContext();
+					if (txContext == null) {
+						txContext = new TransactionContext();
+						tx.registerSynchronization(new TransactionSynchronization(txContext));
+					}
+					txContext.put(taskID, setTimerAction);					
 					task.setSetTimerTransactionalAction(setTimerAction);
-				} else {
+				}
+				else {
 					setTimerAction.run();
 				}
-			} catch (Throwable e) {
-				remove(taskID, true);
-				throw new RuntimeException(
-						"Unable to register tx synchronization object", e);
+			}
+			catch (Throwable e) {
+				remove(taskID,true);
+				throw new RuntimeException("Unable to register tx synchronization object",e);
 			}
 		} else {
 			setTimerAction.run();
@@ -310,36 +312,52 @@ public class FaultTolerantScheduler {
 				setAction.cancel();
 			} else {
 				// do cancellation
-				Runnable cancelAction = new CancelTimerAfterTxCommitRunnable(
-						task, this);
+				AfterTxCommitRunnable runnable = new CancelTimerAfterTxCommitRunnable(task,this);
 				if (txManager != null) {
 					try {
-						// TODO confirm order is corrected
-						// Fixes Issue 2131
-						// http://code.google.com/p/mobicents/issues/detail?id=2131
-						// Calling cancel then schedule on a timer with the same
-						// Id in Transaction Context make them run reversed
-						// so registerItAtTail to have them ordered correctly
-						final Transaction tx = txManager.getTransaction();
+						Transaction tx = txManager.getTransaction();
 						if (tx != null) {
-							tx.registerSynchronization(new TransactionSynchronization(
-									null, cancelAction, null));
-						} else {
-							cancelAction.run();
+							TransactionContext txContext = TransactionContextThreadLocal.getTransactionContext();
+							if (txContext == null) {
+								txContext = new TransactionContext();
+								tx.registerSynchronization(new TransactionSynchronization(txContext));
+							}
+							txContext.put(taskID, runnable);					
 						}
-					} catch (Throwable e) {
-						throw new RuntimeException(
-								"unable to register tx synchronization object",
-								e);
+						else {
+							runnable.run();
+						}
 					}
-				} else {
-					cancelAction.run();
+					catch (Throwable e) {
+						throw new RuntimeException("Unable to register tx synchronization object",e);
+					}
 				}
+				else {
+					runnable.run();
+				}	
 			}
 		} else {
-			// not found locally, we remove it from the cache still in case it
-			// is present
-			remove(taskID, true);
+			// not found locally
+			// if there is a tx context there may be a set timer action there
+			if (txManager != null) {
+				try {
+					Transaction tx = txManager.getTransaction();
+					if (tx != null) {
+						TransactionContext txContext = TransactionContextThreadLocal.getTransactionContext();
+						if (txContext != null) {
+							final AfterTxCommitRunnable r = txContext.remove(taskID);
+							if (r != null) {
+								task = r.task;
+								// remove from cluster
+								removeTaskDataFromCluster(taskID);
+							}							
+						}											
+					}
+				}
+				catch (Throwable e) {
+					throw new RuntimeException("Failed to check tx context.",e);
+				}
+			}		
 		}
 
 		return task;

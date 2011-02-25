@@ -32,21 +32,26 @@ import org.apache.log4j.Logger;
  * @author martins
  *
  */
-public class SetTimerAfterTxCommitRunnable implements Runnable {
+public class SetTimerAfterTxCommitRunnable extends AfterTxCommitRunnable {
 
 	private static final Logger logger = Logger
 			.getLogger(SetTimerAfterTxCommitRunnable.class);
 
-	private final TimerTask task;
-
-	private final FaultTolerantScheduler scheduler;
 
 	private boolean canceled = false;
 
 	SetTimerAfterTxCommitRunnable(TimerTask task,
 			FaultTolerantScheduler scheduler) {
-		this.task = task;
-		this.scheduler = scheduler;
+		super(task,scheduler);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.mobicents.timers.AfterTxCommitRunnable#getType()
+	 */
+	@Override
+	public Type getType() {
+		return AfterTxCommitRunnable.Type.SET;
 	}
 
 	/*

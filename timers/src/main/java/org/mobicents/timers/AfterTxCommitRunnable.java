@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source
- * Copyright 2008, Red Hat Middleware LLC, and individual contributors
+ * Copyright 2011, Red Hat Middleware LLC, and individual contributors
  * by the @authors tag. See the copyright.txt in the distribution for a
  * full listing of individual contributors.
  *
@@ -21,44 +21,24 @@
  */
 package org.mobicents.timers;
 
-import javax.transaction.Status;
-import javax.transaction.Synchronization;
-
 /**
+ * Base class for {@link Runnable}'s to be run after tx commit.
  * @author martins
  *
  */
-public class TransactionSynchronization implements Synchronization {
+public abstract class AfterTxCommitRunnable implements Runnable {
+
+	public enum Type { SET, CANCEL }
 	
-	private final TransactionContext txContext;
-	
-	/**
-	 * 
-	 * @param txContext
-	 */
-	TransactionSynchronization(TransactionContext txContext) {
-		this.txContext = txContext;
-		TransactionContextThreadLocal.setTransactionContext(txContext);
+	protected final TimerTask task;
+	protected final FaultTolerantScheduler scheduler;
+
+	public AfterTxCommitRunnable(TimerTask task,
+			FaultTolerantScheduler scheduler) {
+		this.task = task;
+		this.scheduler = scheduler;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see javax.transaction.Synchronization#afterCompletion(int)
-	 */
-	public void afterCompletion(int status) {
-		switch (status) {
-			case Status.STATUS_COMMITTED:
-				txContext.run();
-				break;
-			default:				
-		}
-		TransactionContextThreadLocal.setTransactionContext(null);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see javax.transaction.Synchronization#beforeCompletion()
-	 */
-	public void beforeCompletion() {}
+	public abstract Type getType();
 	
 }
