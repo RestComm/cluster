@@ -33,7 +33,6 @@ import javax.transaction.TransactionManager;
 
 import org.apache.log4j.Logger;
 import org.jboss.cache.Fqn;
-import org.jboss.cache.transaction.TransactionContext;
 import org.jgroups.Address;
 import org.mobicents.cluster.DataRemovalListener;
 import org.mobicents.cluster.FailOverListener;
@@ -56,11 +55,6 @@ public class FaultTolerantScheduler {
 	 * the executor of timer tasks
 	 */
 	private final ScheduledThreadPoolExecutor executor;
-	
-	/**
-	 * the scheduler cache data
-	 */
-	private final FaultTolerantSchedulerCacheData cacheData;
 	
 	/**
 	 * the jta tx manager
@@ -111,11 +105,7 @@ public class FaultTolerantScheduler {
 		this.name = name;
 		this.executor = new ScheduledThreadPoolExecutor(corePoolSize);
 		this.baseFqn = Fqn.fromElements(name);
-		this.cluster = cluster;
-		this.cacheData = new FaultTolerantSchedulerCacheData(baseFqn,cluster);
-		if (!cacheData.exists()) {
-			cacheData.create();
-		}
+		this.cluster = cluster;		
 		this.timerTaskFactory = timerTaskFactory;
 		this.txManager = txManager;		
 		clusterClientLocalListener = new ClientLocalListener(priority);
@@ -239,23 +229,12 @@ public class FaultTolerantScheduler {
 			try {
 				Transaction tx = txManager.getTransaction();
 				if (tx != null) {
-					// action that before commit, adds a the synchronization
-					// that schedules the timer on commit, to the jboss cache
-					// handler
-					// so it is executed after all data, which the timer may
-					// depend, is already processed by jboss cache
-					final TransactionContext tc = cluster.getMobicentsCache()
-							.getJBossCache().getInvocationContext().getTransactionContext();
-					final Runnable beforeCommitAction = new Runnable() {
-						public void run() {
-							// add the set timer action to jboss cache
-							// synchronization handler
-							tc.getOrderedSynchronizationHandler()
-								.registerAtTail(new TransactionSynchronization(null,setTimerAction,null));
-						}
-					};					
-					tx.registerSynchronization(new TransactionSynchronization(
-							beforeCommitAction, null, null));
+					TransactionContext txContext = TransactionContextThreadLocal.getTransactionContext();
+					if (txContext == null) {
+						txContext = new TransactionContext();
+						tx.registerSynchronization(new TransactionSynchronization(txContext));
+					}
+					txContext.put(taskID, setTimerAction);					
 					task.setSetTimerTransactionalAction(setTimerAction);
 				}
 				else {
@@ -296,34 +275,53 @@ public class FaultTolerantScheduler {
 			}
 			else {
 				// do cancellation
-				Runnable cancelAction = new CancelTimerAfterTxCommitRunnable(task,this);
+				AfterTxCommitRunnable runnable = new CancelTimerAfterTxCommitRunnable(task,this);
 				if (txManager != null) {
 					try {
-						// Fixes Issue 2131 http://code.google.com/p/mobicents/issues/detail?id=2131
- 						// Calling cancel then schedule on a timer with the same Id in Transaction Context make them run reversed
- 						// so registerItAtTail to have them ordered correctly
-						final TransactionContext tc = cluster.getMobicentsCache()
-							.getJBossCache().getInvocationContext().getTransactionContext();
-						if (tc != null) {
-							tc.getOrderedSynchronizationHandler()
-							.registerAtTail(new TransactionSynchronization(null,cancelAction,null));
+						Transaction tx = txManager.getTransaction();
+						if (tx != null) {
+							TransactionContext txContext = TransactionContextThreadLocal.getTransactionContext();
+							if (txContext == null) {
+								txContext = new TransactionContext();
+								tx.registerSynchronization(new TransactionSynchronization(txContext));
+							}
+							txContext.put(taskID, runnable);					
 						}
 						else {
-							cancelAction.run();
+							runnable.run();
 						}
 					}
 					catch (Throwable e) {
-						throw new RuntimeException("unable to register tx synchronization object",e);
+						throw new RuntimeException("Unable to register tx synchronization object",e);
 					}
 				}
 				else {
-					cancelAction.run();
+					runnable.run();
 				}			
 			}		
 		}
 		else {
-			// not found locally, we remove it from the cache still in case it is present
-			remove(taskID, true);
+			// not found locally
+			// if there is a tx context there may be a set timer action there
+			if (txManager != null) {
+				try {
+					Transaction tx = txManager.getTransaction();
+					if (tx != null) {
+						TransactionContext txContext = TransactionContextThreadLocal.getTransactionContext();
+						if (txContext != null) {
+							final AfterTxCommitRunnable r = txContext.remove(taskID);
+							if (r != null) {
+								task = r.task;
+								// remove from cluster
+								new TimerTaskCacheData(taskID, baseFqn, cluster).remove();
+							}							
+						}											
+					}
+				}
+				catch (Throwable e) {
+					throw new RuntimeException("Failed to check tx context.",e);
+				}
+			}			
 		}
 		
 		return task;
@@ -375,6 +373,10 @@ public class FaultTolerantScheduler {
 	}
 	
 	public String toDetailedString() {
+		FaultTolerantSchedulerCacheData cacheData = new FaultTolerantSchedulerCacheData(baseFqn,cluster);
+		if (!cacheData.exists()) {
+			cacheData.create();
+		}
 		return "FaultTolerantScheduler [ name = "+name+" , local tasks = "+localRunningTasks.size()+" , all tasks "+cacheData.getTaskIDs().size()+" ]";
 	}
 	

@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source
- * Copyright 2008, Red Hat Middleware LLC, and individual contributors
+ * Copyright 2011, Red Hat Middleware LLC, and individual contributors
  * by the @authors tag. See the copyright.txt in the distribution for a
  * full listing of individual contributors.
  *
@@ -21,44 +21,34 @@
  */
 package org.mobicents.timers;
 
-import javax.transaction.Status;
-import javax.transaction.Synchronization;
-
 /**
+ * 
+ * A thread local used to store the a tx context.
+ * 
  * @author martins
- *
+ * 
  */
-public class TransactionSynchronization implements Synchronization {
-	
-	private final TransactionContext txContext;
-	
+public class TransactionContextThreadLocal {
+
+	/**
+	 * 
+	 */
+	private static final ThreadLocal<TransactionContext> transactionContext = new ThreadLocal<TransactionContext>();
+
 	/**
 	 * 
 	 * @param txContext
 	 */
-	TransactionSynchronization(TransactionContext txContext) {
-		this.txContext = txContext;
-		TransactionContextThreadLocal.setTransactionContext(txContext);
+	public static void setTransactionContext(TransactionContext txContext) {
+		transactionContext.set(txContext);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see javax.transaction.Synchronization#afterCompletion(int)
+	/**
+	 * 
+	 * @return
 	 */
-	public void afterCompletion(int status) {
-		switch (status) {
-			case Status.STATUS_COMMITTED:
-				txContext.run();
-				break;
-			default:				
-		}
-		TransactionContextThreadLocal.setTransactionContext(null);
+	public static TransactionContext getTransactionContext() {
+		return transactionContext.get();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see javax.transaction.Synchronization#beforeCompletion()
-	 */
-	public void beforeCompletion() {}
-	
 }

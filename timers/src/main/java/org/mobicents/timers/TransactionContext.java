@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source
- * Copyright 2008, Red Hat Middleware LLC, and individual contributors
+ * Copyright 2011, Red Hat Middleware LLC, and individual contributors
  * by the @authors tag. See the copyright.txt in the distribution for a
  * full listing of individual contributors.
  *
@@ -21,44 +21,33 @@
  */
 package org.mobicents.timers;
 
-import javax.transaction.Status;
-import javax.transaction.Synchronization;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
-/**
- * @author martins
- *
- */
-public class TransactionSynchronization implements Synchronization {
-	
-	private final TransactionContext txContext;
-	
-	/**
-	 * 
-	 * @param txContext
-	 */
-	TransactionSynchronization(TransactionContext txContext) {
-		this.txContext = txContext;
-		TransactionContextThreadLocal.setTransactionContext(txContext);
-	}
+import org.mobicents.timers.AfterTxCommitRunnable.Type;
 
-	/*
-	 * (non-Javadoc)
-	 * @see javax.transaction.Synchronization#afterCompletion(int)
-	 */
-	public void afterCompletion(int status) {
-		switch (status) {
-			case Status.STATUS_COMMITTED:
-				txContext.run();
-				break;
-			default:				
+public class TransactionContext implements Runnable {
+	
+	private Map<Serializable,AfterTxCommitRunnable> map = new HashMap<Serializable, AfterTxCommitRunnable>(); 
+	
+	public void put(Serializable taskId, AfterTxCommitRunnable r) {
+		final AfterTxCommitRunnable q = map.put(taskId,r);
+		if (q != null && q.getType() == Type.SET) {
+			// if there was a set timer runnable then we don't need to keep the cancel one
+			map.remove(taskId);
 		}
-		TransactionContextThreadLocal.setTransactionContext(null);
 	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see javax.transaction.Synchronization#beforeCompletion()
-	 */
-	public void beforeCompletion() {}
 	
+	public AfterTxCommitRunnable remove(Serializable taskId) {
+		return map.remove(taskId);
+	}
+	
+	@Override
+	public void run() {
+		for(AfterTxCommitRunnable r : map.values()) {
+			r.run();		
+		}
+		map = null;
+	}
 }
