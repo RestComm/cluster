@@ -95,31 +95,6 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 		this.failOverListeners = Collections.synchronizedSortedSet(new TreeSet<FailOverListener>(new FailOverListenerPriorityComparator()));
 		this.dataRemovalListeners = new ConcurrentHashMap<Fqn, DataRemovalListener>();
 		this.mobicentsCache = watchedCache;
-		final Cache<?,?> cache = watchedCache.getJBossCache();
-		if (!cache.getConfiguration().getCacheMode().equals(CacheMode.LOCAL)) {
-			// get current cluster members
-			currentView = new ArrayList<Address>(cache.getConfiguration().getRuntimeConfig().getChannel().getView().getMembers());
-			// start listening to events
-			cache.addCacheListener(this);		
-			
-			Configuration conf=cache.getConfiguration();
-			if(conf.getBuddyReplicationConfig()!=null && conf.getBuddyReplicationConfig().isEnabled())
-			{
-				//here we store our buddies in case we already have some
-				//it will happen if cache started before MC cluster registers listener.
-				if(conf.getRuntimeConfig().getBuddyGroup()!=null)
-				{
-					
-					Node root = cache.getRoot();
-					root.put(BUDDIES_STORE, conf.getRuntimeConfig().getBuddyGroup().getBuddies());
-				}
-			}
-			
-		}
-		//cache should be started HERE! But when JMX wrapper is used, its done by it... ech.
-		
-		
-		
 		this.txMgr = txMgr;
 		this.elector = elector;
 		this.clusteredCacheDataIndexingHandler = new DefaultClusteredCacheDataIndexingHandler();
@@ -607,4 +582,36 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 	public ClusteredCacheDataIndexingHandler getClusteredCacheDataIndexingHandler() {
 		return clusteredCacheDataIndexingHandler;
 	}
+	
+	@Override
+	public void startCluster() {
+		mobicentsCache.startCache();
+		final Cache<?,?> cache = mobicentsCache.getJBossCache();
+		if (!cache.getConfiguration().getCacheMode().equals(CacheMode.LOCAL)) {
+			// get current cluster members
+			currentView = new ArrayList<Address>(cache.getConfiguration().getRuntimeConfig().getChannel().getView().getMembers());
+			// start listening to events
+			cache.addCacheListener(this);		
+			
+			Configuration conf=cache.getConfiguration();
+			if(conf.getBuddyReplicationConfig()!=null && conf.getBuddyReplicationConfig().isEnabled())
+			{
+				//here we store our buddies in case we already have some
+				//it will happen if cache started before MC cluster registers listener.
+				if(conf.getRuntimeConfig().getBuddyGroup()!=null)
+				{
+					
+					Node root = cache.getRoot();
+					root.put(BUDDIES_STORE, conf.getRuntimeConfig().getBuddyGroup().getBuddies());
+				}
+			}
+			
+		}		
+	}
+	
+	@Override
+	public void stopCluster() {
+		mobicentsCache.stopCache();		
+	}
+	
 }

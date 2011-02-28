@@ -102,4 +102,17 @@ public interface MobicentsCluster {
 	 * @return
 	 */
 	public ClusteredCacheDataIndexingHandler getClusteredCacheDataIndexingHandler();
+
+	/**
+	 * Starts the cluster. This should only be invoked when all listeners are
+	 * added, and when all classes needed to deserialize data in a running
+	 * cluster are visible (somehow).
+	 */
+	public void startCluster();
+	
+	/**
+	 * Stops the cluster.
+	 */
+	public void stopCluster();
+	
 }

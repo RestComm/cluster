@@ -50,47 +50,33 @@ public class MobicentsCache {
 	public MobicentsCache(Configuration cacheConfiguration) {
 		this.jBossCache = new DefaultCacheFactory().createCache(cacheConfiguration,false);
 		this.managedCache = false;
-		startCache();	
+		setLocalMode();
 	}
 
 	@SuppressWarnings("unchecked")
 	public MobicentsCache(String cacheConfigurationLocation) {
 		this.jBossCache = new DefaultCacheFactory().createCache(cacheConfigurationLocation,false);
 		this.managedCache = false;
+		setLocalMode();
 		startCache();	
-	}
-	@Deprecated
-	public MobicentsCache(CacheManager haCacheManager, String cacheName) throws Exception {
-		this.jBossCache = haCacheManager.getCache(cacheName, true);
-		this.jBossCache.create();
-		this.managedCache = true;
-		startCache();
 	}
 	
 	public MobicentsCache(CacheManager haCacheManager, String cacheName, boolean managedCache) throws Exception {
 		this.jBossCache = haCacheManager.getCache(cacheName, true);
 		this.jBossCache.create();
 		this.managedCache = managedCache;
-		startCache();
+		setLocalMode();
 	}
 	
-	@SuppressWarnings("unchecked")
-	public MobicentsCache(Cache cache, String cacheName) {
-		this(cache, cacheName, true);
-	}
-	
-	@SuppressWarnings("unchecked")
-	public MobicentsCache(Cache cache, String cacheName, boolean managed) {
-		this.jBossCache = cache;
-		this.managedCache = managed;									
-		startCache();
-	}
-	
-	protected void startCache() {
+	private void setLocalMode() {
 		if (jBossCache.getConfiguration().getCacheMode() == CacheMode.LOCAL) {
 			localMode = true;
 		}
+	}
+	
+	public void startCache() {
 		if (!(CacheStatus.STARTED == jBossCache.getCacheStatus())) {
+			logger.info("Starting JBoss Cache...");
 			jBossCache.start();
 		}
 		if (logger.isInfoEnabled()) {
@@ -103,11 +89,17 @@ public class MobicentsCache {
 		return jBossCache;
 	}
 	
-	public void stop() {
+	public void stopCache() {
 		if (!managedCache) {
+			if (logger.isInfoEnabled()) {
+				logger.info("Mobicents Cache stopping...");
+			}			
 			this.jBossCache.stop();
 			this.jBossCache.destroy();
 		}
+		if (logger.isInfoEnabled()) {
+			logger.info("Mobicents Cache stopped.");
+		}		
 	}
 
 	/**
