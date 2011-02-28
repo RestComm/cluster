@@ -53,6 +53,9 @@
       <constructor>
           <parameter><value-factory bean="Mobicents.Cache" method="getJBossCache"/></parameter>
       </constructor>
+      <start method="start" ignored="true"/>
+      <stop method="stop" ignored="true"/>
+      <destroy method="destroy" ignored="true"/>
       <demand>Mobicents.Cache</demand>	      
    </bean>
 
@@ -67,7 +70,9 @@
 			<parameter><inject bean="Mobicents.Cache"/></parameter>
 			<parameter><inject bean="RealTransactionManager"/></parameter>
 			<parameter><inject bean="Mobicents.Cluster.DefaultElector"/></parameter>
-		</constructor>				
+		</constructor>
+		<start method="startCluster"/>
+      	<stop method="stopCluster"/>				
 		<demand>Mobicents.Cache</demand>
 		<demand>RealTransactionManager</demand>
 		<demand>Mobicents.Cluster.DefaultElector</demand>
