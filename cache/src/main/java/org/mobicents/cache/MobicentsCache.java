@@ -58,7 +58,6 @@ public class MobicentsCache {
 		this.jBossCache = new DefaultCacheFactory().createCache(cacheConfigurationLocation,false);
 		this.managedCache = false;
 		setLocalMode();
-		startCache();	
 	}
 	
 	public MobicentsCache(CacheManager haCacheManager, String cacheName, boolean managedCache) throws Exception {
