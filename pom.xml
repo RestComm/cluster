@@ -9,14 +9,14 @@
 	
 	<groupId>org.mobicents.cluster</groupId>
 	<artifactId>mobicents-cluster</artifactId>
-	<version>1.8</version>
+	<version>1.9-SNAPSHOT</version>
 	
 	<packaging>pom</packaging>
 		
 	<scm>
-		<connection>scm:svn:https://mobicents.googlecode.com/svn/tags/servers/cluster/1.8</connection>
-		<developerConnection>scm:svn:https://mobicents.googlecode.com/svn/tags/servers/cluster/1.8</developerConnection>
-		<url>http://mobicents.googlecode.com/svn/tags/servers/cluster/1.8</url>
+		<connection>scm:svn:https://mobicents.googlecode.com/svn/trunk/servers/cluster</connection>
+		<developerConnection>scm:svn:https://mobicents.googlecode.com/svn/trunk/servers/cluster</developerConnection>
+		<url>http://mobicents.googlecode.com/svn/trunk/servers/cluster</url>
 	</scm>
 
 	<modules>
