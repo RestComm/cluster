@@ -90,6 +90,8 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 	
 	private List<Address> currentView;
 	
+	private boolean started;
+	
 	@SuppressWarnings("unchecked")
 	public DefaultMobicentsCluster(MobicentsCache watchedCache, TransactionManager txMgr, ClusterElector elector) {
 		this.failOverListeners = Collections.synchronizedSortedSet(new TreeSet<FailOverListener>(new FailOverListenerPriorityComparator()));
@@ -585,33 +587,51 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 	
 	@Override
 	public void startCluster() {
-		mobicentsCache.startCache();
-		final Cache<?,?> cache = mobicentsCache.getJBossCache();
-		if (!cache.getConfiguration().getCacheMode().equals(CacheMode.LOCAL)) {
-			// get current cluster members
-			currentView = new ArrayList<Address>(cache.getConfiguration().getRuntimeConfig().getChannel().getView().getMembers());
-			// start listening to events
-			cache.addCacheListener(this);		
-			
-			Configuration conf=cache.getConfiguration();
-			if(conf.getBuddyReplicationConfig()!=null && conf.getBuddyReplicationConfig().isEnabled())
-			{
-				//here we store our buddies in case we already have some
-				//it will happen if cache started before MC cluster registers listener.
-				if(conf.getRuntimeConfig().getBuddyGroup()!=null)
-				{
-					
-					Node root = cache.getRoot();
-					root.put(BUDDIES_STORE, conf.getRuntimeConfig().getBuddyGroup().getBuddies());
-				}
+		synchronized (this) {
+			if (started) {
+				throw new IllegalStateException("cluster already started");
 			}
-			
-		}		
+			mobicentsCache.startCache();
+			final Cache<?,?> cache = mobicentsCache.getJBossCache();
+			if (!cache.getConfiguration().getCacheMode().equals(CacheMode.LOCAL)) {
+				// get current cluster members
+				currentView = new ArrayList<Address>(cache.getConfiguration().getRuntimeConfig().getChannel().getView().getMembers());
+				// start listening to events
+				cache.addCacheListener(this);		
+				
+				Configuration conf=cache.getConfiguration();
+				if(conf.getBuddyReplicationConfig()!=null && conf.getBuddyReplicationConfig().isEnabled())
+				{
+					//here we store our buddies in case we already have some
+					//it will happen if cache started before MC cluster registers listener.
+					if(conf.getRuntimeConfig().getBuddyGroup()!=null)
+					{
+						
+						Node root = cache.getRoot();
+						root.put(BUDDIES_STORE, conf.getRuntimeConfig().getBuddyGroup().getBuddies());
+					}
+				}			
+			}
+			started = true;
+		}				
+	}
+	
+	@Override
+	public boolean isStarted() {
+		synchronized (this) {
+			return started;
+		}
 	}
 	
 	@Override
 	public void stopCluster() {
-		mobicentsCache.stopCache();		
+		synchronized (this) {
+			if (!started) {
+				throw new IllegalStateException("cluster already started");
+			}
+			mobicentsCache.stopCache();
+			started = false;
+		}				
 	}
 	
 }

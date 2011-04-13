@@ -111,6 +111,12 @@ public interface MobicentsCluster {
 	public void startCluster();
 	
 	/**
+	 * Indicates if the cluster is running or not.
+	 * @return
+	 */
+	public boolean isStarted();
+	
+	/**
 	 * Stops the cluster.
 	 */
 	public void stopCluster();

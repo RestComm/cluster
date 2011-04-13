@@ -77,6 +77,8 @@ public class FaultTolerantScheduler {
 	@SuppressWarnings("unchecked")
 	private final Fqn baseFqn;
 	
+	private FaultTolerantSchedulerCacheData cacheData;
+	
 	/**
 	 * the scheduler name
 	 */
@@ -108,6 +110,10 @@ public class FaultTolerantScheduler {
 		this.cluster = cluster;		
 		this.timerTaskFactory = timerTaskFactory;
 		this.txManager = txManager;		
+		cacheData = new FaultTolerantSchedulerCacheData(baseFqn,cluster);
+		if (cluster.isStarted()) {
+			cacheData.create();
+		}
 		clusterClientLocalListener = new ClientLocalListener(priority);
 		cluster.addFailOverListener(clusterClientLocalListener);
 		cluster.addDataRemovalListener(clusterClientLocalListener);
@@ -372,11 +378,7 @@ public class FaultTolerantScheduler {
 		return "FaultTolerantScheduler [ name = "+name+" ]";
 	}
 	
-	public String toDetailedString() {
-		FaultTolerantSchedulerCacheData cacheData = new FaultTolerantSchedulerCacheData(baseFqn,cluster);
-		if (!cacheData.exists()) {
-			cacheData.create();
-		}
+	public String toDetailedString() {		
 		return "FaultTolerantScheduler [ name = "+name+" , local tasks = "+localRunningTasks.size()+" , all tasks "+cacheData.getTaskIDs().size()+" ]";
 	}
 	
