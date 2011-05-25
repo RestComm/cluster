@@ -42,19 +42,19 @@ public class MobicentsCache {
 
 	private static Logger logger = Logger.getLogger(MobicentsCache.class);
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	private final Cache jBossCache;
 	private boolean localMode;
 	private final boolean managedCache;
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public MobicentsCache(Configuration cacheConfiguration) {
 		this.jBossCache = new DefaultCacheFactory().createCache(cacheConfiguration,false);
 		this.managedCache = false;
 		setLocalMode();
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public MobicentsCache(String cacheConfigurationLocation) {
 		this.jBossCache = new DefaultCacheFactory().createCache(cacheConfigurationLocation,false);
 		this.managedCache = false;
@@ -68,12 +68,11 @@ public class MobicentsCache {
 		setLocalMode();
 	}
 	
-	@SuppressWarnings("unchecked")
-	// used by MSS, don't remove !!!
-	public MobicentsCache(Cache cache, String cacheName) {
+	@SuppressWarnings("rawtypes")
+	public MobicentsCache(Cache cache) {
 		this.jBossCache = cache;
 		this.managedCache = true;									
-		startCache();
+		setLocalMode();
 	}
 	
 	private void setLocalMode() {
@@ -92,7 +91,7 @@ public class MobicentsCache {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public Cache getJBossCache() {
 		return jBossCache;
 	}
@@ -127,7 +126,7 @@ public class MobicentsCache {
 	 * @param regionFqn
 	 * @param classLoader
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public void setReplicationClassLoader(Fqn regionFqn, ClassLoader classLoader) {
 		if (!isLocalMode()) {
 			final Region region = jBossCache.getRegion(regionFqn, true);
@@ -153,7 +152,7 @@ public class MobicentsCache {
 	 * @param regionFqn
 	 * @param classLoader
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public void unsetReplicationClassLoader(Fqn regionFqn, ClassLoader classLoader) {
 		if (!isLocalMode()) {
 			final Region region = jBossCache.getRegion(regionFqn, true);
