@@ -68,6 +68,14 @@ public class MobicentsCache {
 		setLocalMode();
 	}
 	
+	@SuppressWarnings("unchecked")
+	// used by MSS, don't remove !!!
+	public MobicentsCache(Cache cache, String cacheName) {
+		this.jBossCache = cache;
+		this.managedCache = true;									
+		startCache();
+	}
+	
 	private void setLocalMode() {
 		if (jBossCache.getConfiguration().getCacheMode() == CacheMode.LOCAL) {
 			localMode = true;
