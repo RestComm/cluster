@@ -31,6 +31,7 @@ import org.jboss.cache.Fqn;
 import org.jboss.cache.Region;
 import org.jboss.cache.config.Configuration;
 import org.jboss.cache.config.Configuration.CacheMode;
+import org.jboss.cache.util.CachePrinter;
 
 /**
  * The container's HA and FT data source.
@@ -131,7 +132,9 @@ public class MobicentsCache {
 		if (!isLocalMode()) {
 			final Region region = jBossCache.getRegion(regionFqn, true);
 			region.registerContextClassLoader(classLoader);
-			region.activate();
+			if (!region.isActive() && jBossCache.getCacheStatus() == CacheStatus.STARTED) {
+				region.activate();
+			}			
 		}
 	}
 	
@@ -156,9 +159,13 @@ public class MobicentsCache {
 	public void unsetReplicationClassLoader(Fqn regionFqn, ClassLoader classLoader) {
 		if (!isLocalMode()) {
 			final Region region = jBossCache.getRegion(regionFqn, true);
-			region.unregisterContextClassLoader();
-			region.deactivate();
-			
+			if (region != null) {
+				if (region.isActive()) {
+					region.deactivate();
+				}				
+				region.unregisterContextClassLoader();
+				jBossCache.removeRegion(regionFqn);
+			}	
 		}
 	}
 	
@@ -169,5 +176,14 @@ public class MobicentsCache {
 	 */
 	public void unsetReplicationClassLoader(ClassLoader classLoader) {
 		unsetReplicationClassLoader(Fqn.ROOT,classLoader);
+	}
+	
+	/**
+	 * Retrieves the cache content as a string.
+	 * @return
+	 */
+	public String getCacheContent() {
+		return "Mobicents Cache: " 
+		+ "\n+-- Content:\n" + CachePrinter.printCacheDetails(jBossCache);
 	}
 }
