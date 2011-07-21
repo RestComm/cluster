@@ -350,6 +350,7 @@ public class InfinispanCluster extends AbstractCluster<Cache> {
 	 * org.mobicents.cluster.Cluster#addMarshaller(org.mobicents.cluster.data
 	 * .marshall.ClusterDataMarshaller)
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public <S> void addMarshaller(ClusterDataMarshaller<S> marshaller)
 			throws IllegalStateException {
@@ -360,8 +361,7 @@ public class InfinispanCluster extends AbstractCluster<Cache> {
 					+ marshaller.getDataType());
 			}
 			clusterDataSource
-					.getGlobalConfiguration()
-					.addExternalizer(new ClusterDataExternalizer<S>(marshaller));
+					.getGlobalConfiguration().fluent().serialization().addAdvancedExternalizer(new ClusterDataExternalizer<S>(marshaller));
 		}
 	}
 }

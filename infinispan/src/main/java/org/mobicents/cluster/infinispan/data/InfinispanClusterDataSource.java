@@ -74,6 +74,7 @@ public class InfinispanClusterDataSource implements ClusterDataSource<Cache> {
 	/**
 	 * 
 	 */
+	@SuppressWarnings("unchecked")
 	public void startCache() {		
 		synchronized (this) {
 			if(started) {
@@ -83,11 +84,10 @@ public class InfinispanClusterDataSource implements ClusterDataSource<Cache> {
 				started = true;
 			}
 			// add key externalizer
-			globalConfiguration.addExternalizer(new InfinispanClusterDataKeyExternalizer());
+			globalConfiguration.fluent().serialization().addAdvancedExternalizer(new InfinispanClusterDataKeyExternalizer());
 			// add mbean server
 			if (mBeanServer != null) {
-				globalConfiguration
-						.setMBeanServerLookupInstance(new MBeanServerLookupImpl(
+				globalConfiguration.fluent().globalJmxStatistics().mBeanServerLookup(new MBeanServerLookupImpl(
 								mBeanServer));			
 			}
 			cache = new DefaultCacheManager(globalConfiguration,configuration,false).getCache();

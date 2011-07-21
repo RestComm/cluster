@@ -6,10 +6,15 @@ import java.io.ObjectOutput;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.infinispan.marshall.Externalizer;
+import org.infinispan.marshall.AdvancedExternalizer;
 import org.mobicents.cluster.data.marshall.ClusterDataMarshaller;
 
-public class ClusterDataExternalizer<T> implements Externalizer<T> {
+public class ClusterDataExternalizer<T> implements AdvancedExternalizer<T> {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	private final ClusterDataMarshaller<T> marshaller;
 	

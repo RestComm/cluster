@@ -6,7 +6,7 @@ import java.io.ObjectOutput;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.infinispan.marshall.Externalizer;
+import org.infinispan.marshall.AdvancedExternalizer;
 import org.mobicents.cluster.infinispan.data.InfinispanClusterDataKey;
 
 /**
@@ -17,7 +17,12 @@ import org.mobicents.cluster.infinispan.data.InfinispanClusterDataKey;
  * 
  */
 public class InfinispanClusterDataKeyExternalizer implements
-		Externalizer<InfinispanClusterDataKey> {
+		AdvancedExternalizer<InfinispanClusterDataKey> {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	private static final Integer ID = 5432;
 
