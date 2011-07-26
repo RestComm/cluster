@@ -11,6 +11,7 @@ import org.infinispan.remoting.transport.Address;
 import org.mobicents.cluster.ClusterNodeAddress;
 import org.mobicents.cluster.data.ClusterData;
 import org.mobicents.cluster.data.ClusterDataKey;
+import org.mobicents.cluster.data.ClusterDataSource;
 import org.mobicents.cluster.infinispan.InfinispanClusterNodeAddress;
 
 /**
@@ -42,6 +43,11 @@ public class InfinispanClusterData implements ClusterData {
 		this.dataSource = dataSource;
 	}
 
+	@Override
+	public ClusterDataSource<?> getClusterDataSource() {
+		return dataSource;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -159,7 +165,7 @@ public class InfinispanClusterData implements ClusterData {
 		AtomicMap<InfinispanClusterDataKey, Boolean> references = AtomicMapLookup
 				.getAtomicMap(dataSource.getWrappedDataSource(),
 						referencesObjectKey, false);
-		if (references == null) {
+		if (references == null || references.isEmpty()) {
 			return EMPTY_REFERENCES_RESULT;
 		} else {
 			HashSet<ClusterDataKey> resultSet = new HashSet<ClusterDataKey>();
@@ -179,7 +185,7 @@ public class InfinispanClusterData implements ClusterData {
 	 * ClusterDataKey)
 	 */
 	@Override
-	public void addReference(ClusterDataKey reference)
+	public boolean addReference(ClusterDataKey reference)
 			throws UnsupportedOperationException {
 		// validate request
 		if (!key.usesReferences()) {
@@ -197,8 +203,8 @@ public class InfinispanClusterData implements ClusterData {
 		cache.getAdvancedCache().getInvocationContextContainer()
 				.getInvocationContext().setFlags(Flag.SKIP_LOCKING);
 		// put reference
-		references.put(new InfinispanClusterDataKey(reference,
-				InfinispanClusterDataKeyType.REFERENCES_ENTRY), Boolean.TRUE);
+		return references.put(new InfinispanClusterDataKey(reference,
+				InfinispanClusterDataKeyType.REFERENCES_ENTRY), Boolean.TRUE) == null;
 	}
 
 	/*

@@ -18,6 +18,13 @@ public interface ClusterData {
 	public ClusterDataKey getKey();
 
 	/**
+	 * Retrieves the cluster data source related with this data.
+	 * 
+	 * @return
+	 */
+	public ClusterDataSource<?> getClusterDataSource();
+
+	/**
 	 * Retrieves the related data object stored
 	 * 
 	 * @return
@@ -64,11 +71,12 @@ public interface ClusterData {
 	 * Adds a reference to the specified key.
 	 * 
 	 * @param reference
+	 * @return false if the reference already existed
 	 * @throws UnsupportedOperationException
 	 *             if the related key does not indicates that references may be
 	 *             used.
 	 */
-	public void addReference(ClusterDataKey reference)
+	public boolean addReference(ClusterDataKey reference)
 			throws UnsupportedOperationException;
 
 	/**
