@@ -161,12 +161,20 @@ public abstract class TimerTask implements Runnable {
 	public abstract void runTask();
 	
 	/**
-	 * Invoked before a task is recovered, after fail over, by default simply adjust start time.
+	 * Invoked before a task is recovered, after fail over, by default simply adjust start time if it is a periodic timer.
 	 */
 	public void beforeRecover() {
-		final long now = System.currentTimeMillis();
-		if (data.getStartTime() < now) {
-			data.setStartTime(now);
+		if (data.getPeriod() > 0) {			
+			final long now = System.currentTimeMillis();
+			long startTime = data.getStartTime();
+			while(startTime <= now) {
+				startTime += data.getPeriod();
+				data.setStartTime(startTime);				
+			}			
+			if (logger.isDebugEnabled()) {
+				logger.debug("Task with id "
+						+ data.getTaskID() + " start time reset to " + data.getStartTime());
+			}
 		}
 	}
 

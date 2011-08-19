@@ -31,7 +31,6 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 
-
 import org.apache.log4j.Logger;
 import org.jboss.cache.Fqn;
 import org.jgroups.Address;
@@ -219,7 +218,7 @@ public class FaultTolerantScheduler {
 		task.setScheduler(this);
 		
 		if (logger.isDebugEnabled()) {
-			logger.debug("Scheduling task with id "+taskID);
+			logger.debug("Scheduling task with id " + taskID);
 		}
 		
 		// store the task and data

@@ -84,13 +84,13 @@ public class SetTimerAfterTxCommitRunnable extends AfterTxCommitRunnable {
 				if (taskData.getPeriod() < 0) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Scheduling one-shot timer with id "
-								+ task.getData().getTaskID());
+								+ task.getData().getTaskID() + ", delay " + delay);
 					}
 					task.setScheduledFuture(scheduler.getExecutor().schedule(task, delay, TimeUnit.MILLISECONDS));
 				} else {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Scheduling periodic timer with id "
-								+ task.getData().getTaskID());
+								+ task.getData().getTaskID() + ", scheduling strategy " + taskData.getPeriodicScheduleStrategy() + ", delay " + delay + ", period " + taskData.getPeriod());
 					}
 					if (taskData.getPeriodicScheduleStrategy() == PeriodicScheduleStrategy.withFixedDelay) {
 						task.setScheduledFuture(scheduler.getExecutor().scheduleWithFixedDelay(task, delay, taskData.getPeriod(),TimeUnit.MILLISECONDS));
