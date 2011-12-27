@@ -1,5 +1,10 @@
 package org.mobicents.cluster.infinispan;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+
 import org.infinispan.remoting.transport.Address;
 import org.mobicents.cluster.ClusterNodeAddress;
 
@@ -10,20 +15,15 @@ import org.mobicents.cluster.ClusterNodeAddress;
  * @author martins
  * 
  */
-public class InfinispanClusterNodeAddress implements ClusterNodeAddress {
+public class InfinispanClusterNodeAddress implements ClusterNodeAddress, Externalizable {
 
-	private final Address address;
+	private Address address;
 
-	/**
-	 * @param address
-	 */
-	public InfinispanClusterNodeAddress(Address address) {
-		if (address == null) {
-			throw new NullPointerException("null address");
-		}
+	public InfinispanClusterNodeAddress setAddress(Address address) {
 		this.address = address;
+		return this;
 	}
-
+	
 	/**
 	 * Retrieves the wrapped address.
 	 * @return
@@ -32,21 +32,13 @@ public class InfinispanClusterNodeAddress implements ClusterNodeAddress {
 		return address;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#hashCode()
-	 */
+	
+
 	@Override
 	public int hashCode() {
-		return address.hashCode();
+		return (address == null) ? 0 : address.hashCode();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -55,8 +47,13 @@ public class InfinispanClusterNodeAddress implements ClusterNodeAddress {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		final InfinispanClusterNodeAddress other = (InfinispanClusterNodeAddress) obj;
-		return address.equals(other.address);
+		InfinispanClusterNodeAddress other = (InfinispanClusterNodeAddress) obj;
+		if (address == null) {
+			if (other.address != null)
+				return false;
+		} else if (!address.equals(other.address))
+			return false;
+		return true;
 	}
 
 	/*
@@ -67,6 +64,20 @@ public class InfinispanClusterNodeAddress implements ClusterNodeAddress {
 	@Override
 	public String toString() {
 		return address.toString();
+	}
+
+	@Override
+	public void writeExternal(ObjectOutput out) throws IOException {
+		if (address == null) {
+			throw new IOException("null address");
+		}
+		out.writeObject(address);
+	}
+
+	@Override
+	public void readExternal(ObjectInput in) throws IOException,
+			ClassNotFoundException {
+		address = (Address) in.readObject();
 	}
 
 }

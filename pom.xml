@@ -49,6 +49,7 @@
 	<modules>
 		<module>spi</module>
 		<module>infinispan</module>
+		<module>hazelcast</module>
 		<module>timers</module>
 	</modules>
 			

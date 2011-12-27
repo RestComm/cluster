@@ -1,4 +1,4 @@
-package org.mobicents.cluster.infinispan.data;
+package org.mobicents.cluster.hazelcast.data;
 
 import java.io.Externalizable;
 import java.io.IOException;
@@ -14,12 +14,12 @@ import org.mobicents.cluster.data.ClusterDataKey;
  * @author martins
  * 
  */
-public class InfinispanClusterDataKey implements Externalizable {
+public class HazelcastClusterDataKey implements Externalizable {
 
 	private ClusterDataKey key;
-	private InfinispanClusterDataKeyType type;
+	private HazelcastClusterDataKeyType type;
 
-	public InfinispanClusterDataKey() {
+	public HazelcastClusterDataKey() {
 	}
 
 	/**
@@ -27,8 +27,8 @@ public class InfinispanClusterDataKey implements Externalizable {
 	 * @param key
 	 * @param type
 	 */
-	public InfinispanClusterDataKey(ClusterDataKey key,
-			InfinispanClusterDataKeyType type) {
+	public HazelcastClusterDataKey(ClusterDataKey key,
+			HazelcastClusterDataKeyType type) {
 		this.key = key;
 		this.type = type;
 	}
@@ -47,7 +47,7 @@ public class InfinispanClusterDataKey implements Externalizable {
 	 * 
 	 * @return
 	 */
-	public InfinispanClusterDataKeyType getType() {
+	public HazelcastClusterDataKeyType getType() {
 		return type;
 	}
 
@@ -75,7 +75,7 @@ public class InfinispanClusterDataKey implements Externalizable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		InfinispanClusterDataKey other = (InfinispanClusterDataKey) obj;
+		HazelcastClusterDataKey other = (HazelcastClusterDataKey) obj;
 		if (!key.equals(other.key))
 			return false;
 		if (type != other.type)
@@ -96,7 +96,7 @@ public class InfinispanClusterDataKey implements Externalizable {
 			ClassNotFoundException {
 		// read type
 		final int typeOrdinal = objectInput.read();
-		type = InfinispanClusterDataKeyType.values()[typeOrdinal];
+		type = HazelcastClusterDataKeyType.values()[typeOrdinal];
 		// read wrapped key
 		key = (ClusterDataKey) objectInput.readObject();
 	}

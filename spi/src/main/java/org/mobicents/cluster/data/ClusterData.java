@@ -96,6 +96,18 @@ public interface ClusterData {
 	public boolean containsReference(ClusterDataKey reference);
 
 	/**
+	 * Initiates the management of references. This operation should be invoked
+	 * when it is expected that first references may be added concurrently, to
+	 * allow the implementation to be prepared for such case, if there is such
+	 * need.
+	 * 
+	 * Note that the invocation of this operation is not mandatory before adding
+	 * the first reference, the implementation must support doing it when such
+	 * reference is added.
+	 */
+	public void initReferences();
+
+	/**
 	 * Removes the cluster data
 	 * 
 	 * @param cascadeRemoval

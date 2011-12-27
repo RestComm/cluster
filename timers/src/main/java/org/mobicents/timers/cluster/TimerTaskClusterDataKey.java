@@ -6,6 +6,7 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 import org.mobicents.cluster.data.ClusterDataKey;
+import org.mobicents.timers.FaultTolerantScheduler;
 
 /**
  * 
@@ -48,10 +49,10 @@ public class TimerTaskClusterDataKey implements ClusterDataKey, Externalizable {
 	}
 
 	@Override
-	public ClusterDataKey getListenerKey() {
-		return new FaultTolerantSchedulerClusterDataKey(schedulerName);
+	public Object getDataRemovalListenerID() {
+		return FaultTolerantScheduler.DATA_REMOVAL_LISTENER_ID;
 	}
-
+	
 	@Override
 	public int hashCode() {
 		return taskID.hashCode() * 31 + schedulerName.hashCode();

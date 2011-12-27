@@ -1,38 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <deployment xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="urn:jboss:bean-deployer:2.0">
-
-	<bean name="Mobicents.Cluster.DataSource.Marshallers" class="org.infinispan.config.GlobalConfiguration">  
-        <property name="clusterName">mobicents-cluster</property>
-        <property name="transportClass">org.infinispan.remoting.transport.jgroups.JGroupsTransport</property>
-        <property name="exposeGlobalJmxStatistics">true</property>
-   </bean>
-   
-	<bean name="Mobicents.Cluster.DataSource.GlobalConfig" class="org.infinispan.config.GlobalConfiguration">  
-        <property name="clusterName">mobicents-cluster</property>
-        <property name="transportClass">org.infinispan.remoting.transport.jgroups.JGroupsTransport</property>
-        <property name="exposeGlobalJmxStatistics">true</property>
-   </bean>
-   
-	<bean name="Mobicents.Cluster.DataSource.Config" class="org.infinispan.config.Configuration">  
-        <property name="transactionManagerLookupClass">org.infinispan.transaction.lookup.JBossTransactionManagerLookup</property>
-        <property name="isolationLevel">REPEATABLE_READ</property>
-        <property name="cacheMode">DIST_SYNC</property>
-        <property name="exposeJmxStatistics">true</property>
-	    <demand>RealTransactionManager</demand>
-   </bean>
-   
-	<bean name="Mobicents.Cluster.DataSource" class="org.mobicents.cluster.infinispan.data.InfinispanClusterDataSource">
-		<constructor>
-			<parameter class="org.infinispan.config.GlobalConfiguration"><inject bean="Mobicents.Cluster.DataSource.GlobalConfig"/></parameter>
-			<parameter><inject bean="Mobicents.Cluster.DataSource.Config"/></parameter>
-			<parameter><inject bean="JMXKernel" property="mbeanServer"/></parameter>						
-		</constructor>
-	</bean>
 	
-	<bean name="Mobicents.Cluster" class="org.mobicents.cluster.infinispan.InfinispanCluster">
+	<bean name="Mobicents.Cluster" class="org.mobicents.cluster.hazelcast.HazelcastCluster">
 		<constructor>
-			<parameter><inject bean="Mobicents.Cluster.DataSource"/></parameter>
 			<parameter><inject bean="RealTransactionManager"/></parameter>
 		</constructor>				
 	</bean>

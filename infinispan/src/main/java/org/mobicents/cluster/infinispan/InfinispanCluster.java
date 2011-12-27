@@ -20,11 +20,9 @@ import org.mobicents.cluster.base.AbstractCluster;
 import org.mobicents.cluster.data.ClusterData;
 import org.mobicents.cluster.data.ClusterDataKey;
 import org.mobicents.cluster.data.ClusterDataSource;
-import org.mobicents.cluster.data.marshall.ClusterDataMarshaller;
 import org.mobicents.cluster.elector.LocalFailoverElector;
 import org.mobicents.cluster.infinispan.data.InfinispanClusterData;
 import org.mobicents.cluster.infinispan.data.InfinispanClusterDataSource;
-import org.mobicents.cluster.infinispan.data.marshall.ClusterDataExternalizer;
 import org.mobicents.cluster.infinispan.elector.InfinispanFailOverElector;
 import org.mobicents.cluster.listener.ClusterDataFailOverListener;
 import org.mobicents.cluster.listener.ClusterDataRemovalListener;
@@ -114,10 +112,10 @@ public class InfinispanCluster extends AbstractCluster<Cache> {
 	public void startCluster() {
 		synchronized (this) {
 			throwExceptionIfClusterStarted();
-			clusterDataSource.startCache();
+			clusterDataSource.init();
 			if (!clusterDataSource.isLocalMode()) {
 				// cluster mode
-				localAddress = new InfinispanClusterNodeAddress(
+				localAddress = new InfinispanClusterNodeAddress().setAddress(
 						clusterDataSource.getWrappedDataSource()
 								.getAdvancedCache().getRpcManager()
 								.getTransport().getAddress());
@@ -150,7 +148,7 @@ public class InfinispanCluster extends AbstractCluster<Cache> {
 	public void stopCluster() throws IllegalStateException {
 		synchronized (this) {
 			throwExceptionIfClusterNotStarted();
-			clusterDataSource.stopCache();
+			clusterDataSource.shutdown();
 			started = false;
 			if (LOGGER.isInfoEnabled()) {
 				LOGGER.info("Mobicents Infinispan Cluster stopped.");
@@ -162,7 +160,7 @@ public class InfinispanCluster extends AbstractCluster<Cache> {
 			List<Address> addressList) {
 		final List<ClusterNodeAddress> result = new ArrayList<ClusterNodeAddress>();
 		for (Address address : addressList) {
-			result.add(new InfinispanClusterNodeAddress(address));
+			result.add(new InfinispanClusterNodeAddress().setAddress(address));
 		}
 		return Collections.unmodifiableList(result);
 	}
@@ -207,12 +205,12 @@ public class InfinispanCluster extends AbstractCluster<Cache> {
 			if (dataKey == null) {
 				return;
 			}
-			final ClusterDataKey listenerKey = dataKey.getListenerKey();
-			if (listenerKey == null) {
+			final Object listenerID = dataKey.getDataRemovalListenerID();
+			if (listenerID == null) {
 				return;
 			}
 			final ClusterDataRemovalListener dataRemovalListener = dataRemovalListeners
-					.get(listenerKey);
+					.get(listenerID);
 			if (dataRemovalListener != null) {
 				dataRemovalListener.dataRemoved(dataKey);
 			}
@@ -277,7 +275,7 @@ public class InfinispanCluster extends AbstractCluster<Cache> {
 		if (LOGGER.isInfoEnabled()) {
 			LOGGER.info("Performing take over of lost node " + lostNode
 					+ ", for cluster data keys referenced by "
-					+ localListener.getListenerKey());
+					+ localListener.getDataFailoverListenerKey());
 		}
 
 		boolean createdTx = false;
@@ -293,7 +291,7 @@ public class InfinispanCluster extends AbstractCluster<Cache> {
 			// get base cluster data from listener, we will get all it's
 			// references
 			ClusterData baseClusterData = clusterDataSource
-					.getClusterData(localListener.getListenerKey());
+					.getClusterData(localListener.getDataFailoverListenerKey());
 			ClusterData clusterData = null;
 			ClusterNodeAddress clusterDataOwner = null;
 			for (ClusterDataKey key : baseClusterData.getReferences()) {
@@ -320,7 +318,7 @@ public class InfinispanCluster extends AbstractCluster<Cache> {
 								+ lostNode);
 					}
 					// call back the listener
-					localListener.wonOwnership(clusterData);
+					localListener.failover(clusterData);
 					// change ownership
 					clusterData.setOwner();
 				}
@@ -343,25 +341,4 @@ public class InfinispanCluster extends AbstractCluster<Cache> {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.mobicents.cluster.Cluster#addMarshaller(org.mobicents.cluster.data
-	 * .marshall.ClusterDataMarshaller)
-	 */
-	@SuppressWarnings("unchecked")
-	@Override
-	public <S> void addMarshaller(ClusterDataMarshaller<S> marshaller)
-			throws IllegalStateException {
-		throwExceptionIfClusterStarted();
-		if (!isLocalMode()) {
-			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug("Adding Marshaller for type "
-					+ marshaller.getDataType());
-			}
-			clusterDataSource
-					.getGlobalConfiguration().fluent().serialization().addAdvancedExternalizer(new ClusterDataExternalizer<S>(marshaller));
-		}
-	}
 }

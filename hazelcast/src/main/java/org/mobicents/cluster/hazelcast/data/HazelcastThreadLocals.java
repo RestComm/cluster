@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source
- * Copyright 2008, Red Hat Middleware LLC, and individual contributors
+ * Copyright 2011, Red Hat, Inc. and individual contributors
  * by the @authors tag. See the copyright.txt in the distribution for a
  * full listing of individual contributors.
  *
@@ -19,30 +19,30 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.mobicents.cluster.listener;
 
-import org.mobicents.cluster.data.ClusterDataKey;
+package org.mobicents.cluster.hazelcast.data;
+
+import java.util.Map;
+
+import javax.resource.cci.Connection;
+import javax.transaction.Transaction;
 
 /**
+ * Storage of data in event router {@link ExecutorService}'s threads
  * 
  * @author martins
- * 
+ *
  */
-public interface ClusterDataRemovalListener {
+public class HazelcastThreadLocals {
 
-	/**
-	 * Retrieves the listener ID. The listener will be invoked to handle remote
-	 * removal of any cluster data, which {@link ClusterDataKey#getDataRemovalListenerID()}
-	 * returns same ID.
-	 * 
-	 * @return
-	 */
-	public Object getDataRemovalListenerID();
+	private static ThreadLocal<Map<Transaction, Connection>> txConnections = new ThreadLocal<Map<Transaction, Connection>>();
+	
+	public static void setTxConnections(Map<Transaction, Connection> map) {
+		txConnections.set(map);
+	}
 
-	/**
-	 * Indicates that the data with the specified key was removed.
-	 * 
-	 * @param removedReferencedKey
-	 */
-	public void dataRemoved(ClusterDataKey removedReferencedKey);
+	public static Map<Transaction, Connection> getTxConnections() {
+		return txConnections.get();
+	}
+	
 }

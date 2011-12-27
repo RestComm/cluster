@@ -75,7 +75,7 @@ public class InfinispanClusterDataSource implements ClusterDataSource<Cache> {
 	 * 
 	 */
 	@SuppressWarnings("unchecked")
-	public void startCache() {		
+	public void init() {		
 		synchronized (this) {
 			if(started) {
 				throw new IllegalStateException("datasource already started");
@@ -107,7 +107,7 @@ public class InfinispanClusterDataSource implements ClusterDataSource<Cache> {
 	/**
 	 * 
 	 */
-	public void stopCache() {
+	public void shutdown() {
 		synchronized (this) {
 			if(!started) {
 				throw new IllegalStateException("datasource not started");

@@ -29,8 +29,7 @@ import org.mobicents.cluster.elector.LocalFailoverElector;
 /**
  * 
  * This interface defines callback methods which will be called when the local
- * cluster node looses or wins ownership on a certain cluster data
- * .
+ * cluster node looses or wins ownership on a certain cluster data .
  * 
  * @author <a href="mailto:baranowb@gmail.com">Bartosz Baranowski </a>
  * @author martins
@@ -40,13 +39,12 @@ public interface ClusterDataFailOverListener {
 
 	/**
 	 * Retrieves the cluster data key, which the listener is bound. The listener
-	 * will be invoked to handle failover of any cluster data, which is
-	 * bound to the same listener key.
+	 * will be invoked to handle failover of any cluster data referenced by this key.
 	 * 
 	 * @return
 	 */
-	public ClusterDataKey getListenerKey();
-	
+	public ClusterDataKey getDataFailoverListenerKey();
+
 	/**
 	 * Retrieves the listener's local elector, used to elect the node which does
 	 * failover of specific data.
@@ -54,28 +52,29 @@ public interface ClusterDataFailOverListener {
 	 * @return
 	 */
 	public LocalFailoverElector getLocalElector();
-	
+
 	/**
 	 * Retrieves the priority of the listener.
+	 * 
 	 * @return
 	 */
 	public byte getPriority();
 
 	/**
-	 * Indicates that it will do fail over the cluster node with the specified {@link ClusterNodeAddress}.
+	 * Indicates that it will do fail over the cluster node with the specified
+	 * {@link ClusterNodeAddress}.
+	 * 
 	 * @param address
 	 */
 	public void failOverClusterMember(ClusterNodeAddress address);
-	
-	/**
-	 * Notifies the local client that it now owns the specified {@link ClusterData}. 
-	 * @param clusterData
-	 */
-	public void wonOwnership(ClusterData clusterData);
 
 	/**
-	 * Notifies the local client that it lost ownership of the specified {@link ClusterData}.
+	 * Asks the listener to process failover for the specified data. The
+	 * listener logic must invoke {@link ClusterData#setOwner()} if the data is
+	 * to be kept.
+	 * 
 	 * @param clusterData
 	 */
-	public void lostOwnership(ClusterData clusterData);
+	public void failover(ClusterData clusterData);
+
 }

@@ -24,13 +24,18 @@
 		</dependency>
 		<dependency>
 			<groupId>${pom.groupId}</groupId>
-			<artifactId>mobicents-cluster-infinispan</artifactId>
+			<artifactId>mobicents-cluster-hazelcast</artifactId>
 			<version>${pom.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>${pom.groupId}</groupId>
 			<artifactId>mobicents-cluster-example-as5-jar</artifactId>
 			<version>${pom.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.hazelcast</groupId>
+			<artifactId>hazelcast</artifactId>
+			<version>1.9.3</version>
 		</dependency>
 		<!-- FIXME need versions on these <dependency> <artifactId>infinispan-core</artifactId> 
 			<groupId>org.infinispan</groupId> </dependency> <dependency> <groupId>org.jboss.marshalling</groupId> 

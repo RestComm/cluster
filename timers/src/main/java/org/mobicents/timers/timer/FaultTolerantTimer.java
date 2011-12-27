@@ -62,7 +62,7 @@ public class FaultTolerantTimer extends java.util.Timer {
 	 */
 	public FaultTolerantTimer(String name, Cluster<?> cluster, byte priority, TransactionManager txManager) {
 		timerTaskFactory = new FaultTolerantTimerTimerTaskFactory();
-		scheduler = new FaultTolerantScheduler(name,16, cluster, priority, txManager, timerTaskFactory, new FaultTolerantTimerTimerTaskDataMarshaller());
+		scheduler = new FaultTolerantScheduler(name,16, cluster, priority, txManager, timerTaskFactory);
 		timerTaskFactory.setScheduler(scheduler);
 	}
 	

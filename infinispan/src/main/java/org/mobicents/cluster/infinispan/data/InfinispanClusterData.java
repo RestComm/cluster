@@ -74,7 +74,7 @@ public class InfinispanClusterData implements ClusterData {
 				.get(new InfinispanClusterDataKey(key,
 						InfinispanClusterDataKeyType.CLUSTER_NODE_ADDRESS));
 		// if not null wrap it
-		return address != null ? new InfinispanClusterNodeAddress(address)
+		return address != null ? new InfinispanClusterNodeAddress().setAddress(address)
 				: null;
 	}
 
@@ -177,6 +177,22 @@ public class InfinispanClusterData implements ClusterData {
 		}
 	}
 
+	@Override
+	public void initReferences() throws UnsupportedOperationException {
+		// validate request
+		if (!key.usesReferences()) {
+			throw new UnsupportedOperationException(
+					"cluster data key does not uses references");
+		}
+		// create specific key
+		final InfinispanClusterDataKey referencesObjectKey = new InfinispanClusterDataKey(
+				key, InfinispanClusterDataKeyType.REFERENCES_MAP);
+		// get reference's atomic map, ensuring it is created if does not exists
+		final Cache cache = dataSource.getWrappedDataSource();
+		AtomicMapLookup.getAtomicMap(cache,
+				referencesObjectKey, true);
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -200,8 +216,8 @@ public class InfinispanClusterData implements ClusterData {
 		final AtomicMap references = AtomicMapLookup.getAtomicMap(cache,
 				referencesObjectKey, true);
 		// turn off locking
-		cache.getAdvancedCache().getInvocationContextContainer()
-				.getInvocationContext().setFlags(Flag.SKIP_LOCKING);
+		//cache.getAdvancedCache().getInvocationContextContainer()
+		//		.getInvocationContext().setFlags(Flag.SKIP_LOCKING);
 		// put reference
 		return references.put(new InfinispanClusterDataKey(reference,
 				InfinispanClusterDataKeyType.REFERENCES_ENTRY), Boolean.TRUE) == null;
@@ -231,8 +247,8 @@ public class InfinispanClusterData implements ClusterData {
 			return false;
 		}
 		// references exist, turn off locking
-		cache.getAdvancedCache().getInvocationContextContainer()
-				.getInvocationContext().setFlags(Flag.SKIP_LOCKING);
+		//cache.getAdvancedCache().getInvocationContextContainer()
+		//		.getInvocationContext().setFlags(Flag.SKIP_LOCKING);
 		// remove reference
 		return references.remove(new InfinispanClusterDataKey(reference,
 				InfinispanClusterDataKeyType.REFERENCES_ENTRY)) != null;
@@ -288,22 +304,21 @@ public class InfinispanClusterData implements ClusterData {
 		if (key.usesReferences()) {
 			final InfinispanClusterDataKey referencesObjectKey = new InfinispanClusterDataKey(
 					key, InfinispanClusterDataKeyType.REFERENCES_MAP);
-			AtomicMap<InfinispanClusterDataKey, Boolean> references = AtomicMapLookup
-					.getAtomicMap(cache, referencesObjectKey, false);
-			if (references != null) {
-				ClusterDataKey reference = null;
-				for (Iterator<InfinispanClusterDataKey> it = references
-						.keySet().iterator(); it.hasNext();) {
-					reference = it.next().getKey();
-					if (cascadeRemoval) {
-						// cascade removal, remove also the data selected by the
-						// reference key
+			if (cascadeRemoval) {
+				// cascade removal, remove also the data selected by the
+				// reference keys
+				AtomicMap<InfinispanClusterDataKey, Boolean> references = AtomicMapLookup
+				.getAtomicMap(cache, referencesObjectKey, false);
+				if (references != null) {
+					ClusterDataKey reference = null;
+					for (Iterator<InfinispanClusterDataKey> it = references
+							.keySet().iterator(); it.hasNext();) {
+						reference = it.next().getKey();					
 						dataSource.getClusterData(reference).remove(true);
-					}
-					it.remove();
-				}
-				cache.remove(referencesObjectKey);
+					}					
+				}			
 			}
+			AtomicMapLookup.removeAtomicMap(cache, referencesObjectKey);
 		}
 	}
 

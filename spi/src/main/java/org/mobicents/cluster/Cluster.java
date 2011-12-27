@@ -3,7 +3,6 @@ package org.mobicents.cluster;
 import java.util.List;
 
 import org.mobicents.cluster.data.ClusterDataSource;
-import org.mobicents.cluster.data.marshall.ClusterDataMarshaller;
 import org.mobicents.cluster.listener.ClusterDataFailOverListener;
 import org.mobicents.cluster.listener.ClusterDataRemovalListener;
 
@@ -110,16 +109,4 @@ public interface Cluster<T> {
 	 */
 	public boolean isStarted();
 
-	/**
-	 * Adds a cluster data marshaller to the cluster. Marshallers are used to
-	 * enhance the performance of converting data to bytes and vice-versa, when
-	 * transferring state among cluster nodes.
-	 * 
-	 * @param <S>
-	 * @param marshaller
-	 * @throws IllegalStateException
-	 *             if the cluster is started
-	 */
-	public <S> void addMarshaller(ClusterDataMarshaller<S> marshaller)
-			throws IllegalStateException;
 }

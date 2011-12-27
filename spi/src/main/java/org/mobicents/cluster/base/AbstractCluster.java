@@ -10,7 +10,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.mobicents.cluster.Cluster;
 import org.mobicents.cluster.ClusterNodeAddress;
-import org.mobicents.cluster.data.ClusterDataKey;
 import org.mobicents.cluster.listener.ClusterDataFailOverListener;
 import org.mobicents.cluster.listener.ClusterDataRemovalListener;
 
@@ -33,7 +32,7 @@ public abstract class AbstractCluster<T> implements Cluster<T> {
 	/**
 	 * map of data reoval listeners
 	 */
-	protected final ConcurrentHashMap<ClusterDataKey, ClusterDataRemovalListener> dataRemovalListeners = new ConcurrentHashMap<ClusterDataKey, ClusterDataRemovalListener>();
+	protected final ConcurrentHashMap<Object, ClusterDataRemovalListener> dataRemovalListeners = new ConcurrentHashMap<Object, ClusterDataRemovalListener>();
 	
 	/**
 	 * 
@@ -124,7 +123,7 @@ public abstract class AbstractCluster<T> implements Cluster<T> {
 	 */
 	@Override
 	public boolean addDataRemovalListener(ClusterDataRemovalListener listener) {
-		return dataRemovalListeners.putIfAbsent(listener.getListenerKey(),
+		return dataRemovalListeners.putIfAbsent(listener.getDataRemovalListenerID(),
 				listener) == null;
 	}
 
@@ -138,8 +137,8 @@ public abstract class AbstractCluster<T> implements Cluster<T> {
 	@Override
 	public boolean addFailOverListener(ClusterDataFailOverListener listener) {
 		for (ClusterDataFailOverListener failOverListener : failOverListeners) {
-			if (failOverListener.getListenerKey().equals(
-					listener.getListenerKey())) {
+			if (failOverListener.getDataFailoverListenerKey().equals(
+					listener.getDataFailoverListenerKey())) {
 				return false;
 			}
 		}
@@ -155,7 +154,7 @@ public abstract class AbstractCluster<T> implements Cluster<T> {
 	 */
 	@Override
 	public boolean removeDataRemovalListener(ClusterDataRemovalListener listener) {
-		return dataRemovalListeners.remove(listener.getListenerKey()) != null;
+		return dataRemovalListeners.remove(listener.getDataRemovalListenerID()) != null;
 
 	}
 

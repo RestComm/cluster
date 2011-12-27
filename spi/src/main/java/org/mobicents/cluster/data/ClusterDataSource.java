@@ -1,5 +1,7 @@
 package org.mobicents.cluster.data;
 
+import org.mobicents.cluster.Cluster;
+
 /**
  * The data source for cluster data, wraps T.
  * 
@@ -23,5 +25,17 @@ public interface ClusterDataSource<T> {
 	 * @return
 	 */
 	public ClusterData getClusterData(ClusterDataKey key);
+
+	/**
+	 * Initiates the data source. This should only be invoked when using the
+	 * data source without a {@link Cluster}.
+	 */
+	public void init();
+
+	/**
+	 * Shuts down the data source. This should only be invoked when using the
+	 * data source without a {@link Cluster}.
+	 */
+	public void shutdown();
 
 }

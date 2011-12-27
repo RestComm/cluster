@@ -32,13 +32,13 @@ public interface ClusterDataKey {
 	public boolean isFailedOver();
 
 	/**
-	 * Retrieves the related listener key. Listener keys are used to match a key
+	 * Retrieves the related listener ID. Listener IDs are used to match a key
 	 * with a cluster listener, such as the ones handling fail over or remote
 	 * data removal.
 	 * 
-	 * @return null if there is no defined listener key.
+	 * @return null if there is no defined listener ID.
 	 */
-	public ClusterDataKey getListenerKey();
+	public Object getDataRemovalListenerID();
 
 	/**
 	 * Defines that the key depends on another key, this relation may be used by

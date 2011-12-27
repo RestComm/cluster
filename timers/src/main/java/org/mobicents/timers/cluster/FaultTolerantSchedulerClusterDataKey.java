@@ -42,7 +42,7 @@ public class FaultTolerantSchedulerClusterDataKey implements ClusterDataKey,Exte
 	}
 
 	@Override
-	public ClusterDataKey getListenerKey() {
+	public Object getDataRemovalListenerID() {
 		return null;
 	}
 

@@ -34,14 +34,11 @@ import org.mobicents.cluster.Cluster;
 import org.mobicents.cluster.ClusterNodeAddress;
 import org.mobicents.cluster.data.ClusterData;
 import org.mobicents.cluster.data.ClusterDataKey;
-import org.mobicents.cluster.data.marshall.ClusterDataMarshaller;
 import org.mobicents.cluster.elector.LocalFailoverElector;
 import org.mobicents.cluster.listener.ClusterDataFailOverListener;
 import org.mobicents.cluster.listener.ClusterDataRemovalListener;
 import org.mobicents.timers.cluster.FaultTolerantSchedulerClusterDataKey;
-import org.mobicents.timers.cluster.FaultTolerantSchedulerClusterDataKeyMarshaller;
 import org.mobicents.timers.cluster.TimerTaskClusterDataKey;
-import org.mobicents.timers.cluster.TimerTaskClusterDataKeyMarshaller;
 
 /**
  * 
@@ -52,6 +49,8 @@ public class FaultTolerantScheduler {
 
 	private static final Logger logger = Logger
 			.getLogger(FaultTolerantScheduler.class);
+
+	public static final Object DATA_REMOVAL_LISTENER_ID = new Object();
 
 	/**
 	 * the executor of timer tasks
@@ -111,7 +110,7 @@ public class FaultTolerantScheduler {
 	 */
 	public <T extends TimerTaskData> FaultTolerantScheduler(String name, int corePoolSize,
 			Cluster<?> cluster, byte priority, TransactionManager txManager,
-			TimerTaskFactory timerTaskFactory, ClusterDataMarshaller<T> taskDataMarshaller) {
+			TimerTaskFactory timerTaskFactory) {
 		this.name = name;
 		this.executor = new ScheduledThreadPoolExecutor(corePoolSize);
 		this.clusterDataKey = new FaultTolerantSchedulerClusterDataKey(name);
@@ -124,12 +123,8 @@ public class FaultTolerantScheduler {
 			clusterClientLocalListener = new ClientLocalListener(priority);
 			cluster.addFailOverListener(clusterClientLocalListener);
 			cluster.addDataRemovalListener(clusterClientLocalListener);
-			if (!cluster.isStarted()) {
-				cluster.addMarshaller(
-						new FaultTolerantSchedulerClusterDataKeyMarshaller());
-				cluster.addMarshaller(
-						new TimerTaskClusterDataKeyMarshaller());
-				cluster.addMarshaller(taskDataMarshaller);
+			if (cluster.isStarted()) {
+				schedulerClusterData.initReferences();
 			}
 		}		
 		else {
@@ -429,7 +424,7 @@ public class FaultTolerantScheduler {
 
 	private class ClientLocalListener implements ClusterDataFailOverListener,
 			ClusterDataRemovalListener {
-
+		
 		/**
 		 * the priority of the scheduler as a client local listener of the
 		 * mobicents cluster
@@ -439,79 +434,44 @@ public class FaultTolerantScheduler {
 		/**
 		 * @param priority
 		 */
-		public ClientLocalListener(byte priority) {
+		ClientLocalListener(byte priority) {
 			this.priority = priority;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * org.mobicents.cluster.ClusterDataFailOverListener#getListenerKey()
-		 */
 		@Override
-		public ClusterDataKey getListenerKey() {
+		public Object getDataRemovalListenerID() {
+			return DATA_REMOVAL_LISTENER_ID;
+		}
+		
+		@Override
+		public ClusterDataKey getDataFailoverListenerKey() {
 			return clusterDataKey;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * org.mobicents.cluster.ClusterDataFailOverListener#getLocalElector()
-		 */
 		@Override
 		public LocalFailoverElector getLocalElector() {
 			return null;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.mobicents.cluster.FailOverListener#getPriority()
-		 */
 		public byte getPriority() {
 			return priority;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * org.mobicents.cluster.ClusterDataFailOverListener#failOverClusterMember
-		 * (org.mobicents.cluster.ClusterNodeAddress)
-		 */
 		@Override
 		public void failOverClusterMember(ClusterNodeAddress address) {
 
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * org.mobicents.cluster.ClusterDataFailOverListener#lostOwnership(org
-		 * .mobicents.cluster.ClusterData)
-		 */
 		@Override
-		public void lostOwnership(ClusterData clusterData) {
-
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * org.mobicents.cluster.ClusterDataFailOverListener#wonOwnership(org
-		 * .mobicents.cluster.ClusterData)
-		 */
-		@Override
-		public void wonOwnership(ClusterData clusterData) {
+		public void failover(ClusterData clusterData) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("wonOwnership( clusterData = " + clusterData + ")");
+				logger.debug("failover( clusterData = " + clusterData + ")");
 			}
 
 			try {
+				// this node now owns the timer task
+				clusterData.setOwner();
+				// recover the timer task 
 				final TimerTaskClusterDataKey key = (TimerTaskClusterDataKey) clusterData
 						.getKey();
 				final TimerTaskData taskData = (TimerTaskData) clusterData
