@@ -61,8 +61,20 @@ public class FaultTolerantTimer extends java.util.Timer {
 	 * @param txManager
 	 */
 	public FaultTolerantTimer(String name, Cluster<?> cluster, byte priority, TransactionManager txManager) {
+		this(name, cluster, priority, txManager, 0);
+	}
+	
+	/**
+	 * 
+	 * @param name
+	 * @param cluster
+	 * @param priority
+	 * @param txManager
+	 * @param purgePeriod
+	 */
+	public FaultTolerantTimer(String name, Cluster<?> cluster, byte priority, TransactionManager txManager, int purgePeriod) {
 		timerTaskFactory = new FaultTolerantTimerTimerTaskFactory();
-		scheduler = new FaultTolerantScheduler(name,16, cluster, priority, txManager, timerTaskFactory);
+		scheduler = new FaultTolerantScheduler(name,16, cluster, priority, txManager, timerTaskFactory, purgePeriod);
 		timerTaskFactory.setScheduler(scheduler);
 	}
 	
