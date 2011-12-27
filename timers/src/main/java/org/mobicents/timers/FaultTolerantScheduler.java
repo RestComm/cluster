@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
@@ -104,8 +105,36 @@ public class FaultTolerantScheduler {
 	 * @param timerTaskFactory
 	 */
 	public FaultTolerantScheduler(String name, int corePoolSize, MobicentsCluster cluster, byte priority, TransactionManager txManager,TimerTaskFactory timerTaskFactory) {
+		this(name, corePoolSize, cluster, priority, txManager, timerTaskFactory, 0);
+	}
+	
+	/**
+	 * 
+	 * @param name
+	 * @param corePoolSize
+	 * @param cluster
+	 * @param priority
+	 * @param txManager
+	 * @param timerTaskFactory
+	 * @param purgePeriod
+	 */
+	public FaultTolerantScheduler(String name, int corePoolSize, MobicentsCluster cluster, byte priority, TransactionManager txManager,TimerTaskFactory timerTaskFactory, int purgePeriod) {
 		this.name = name;
 		this.executor = new ScheduledThreadPoolExecutor(corePoolSize);
+		if(purgePeriod > 0) {
+			Runnable r = new Runnable() {			
+				@Override
+				public void run() {
+					try {
+						executor.purge();				
+					}
+					catch (Exception e) {
+						logger.error("failed to execute purge",e);
+					}
+				}
+			};
+			this.executor.scheduleWithFixedDelay(r, purgePeriod, purgePeriod, TimeUnit.MINUTES);
+		}
 		this.baseFqn = Fqn.fromElements(name);
 		this.cluster = cluster;		
 		this.timerTaskFactory = timerTaskFactory;
