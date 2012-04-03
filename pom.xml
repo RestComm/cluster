@@ -9,7 +9,7 @@
 	
 	<groupId>org.mobicents.cluster</groupId>
 	<artifactId>mobicents-cluster</artifactId>
-	<version>1.14-SNAPSHOT</version>
+	<version>1.13.1.FINAL</version>
 	
 	<packaging>pom</packaging>
 	
