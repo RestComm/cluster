@@ -5,7 +5,7 @@
    	<parent>
 		<groupId>org.mobicents.cluster</groupId>
 		<artifactId>mobicents-cluster</artifactId>
-		<version>1.13.1.FINAL</version>
+		<version>1.14.0-SNAPSHOT</version>
 	</parent>
 	
 	<artifactId>timers</artifactId>
