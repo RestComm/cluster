@@ -10,30 +10,34 @@
 	
 	<artifactId>example-beans</artifactId>
 		
+	<name>Mobicents Cluster Framework Example Beans</name>
+	<description>Mobicents Cluster Framework Example Beans</description>
+	<url>http://code.google.com/p/commscale.cluster</url>	
+
 	<properties>
 		<node>all</node>
 	</properties>
 	
 	<dependencies>	
 		<dependency>
-			<groupId>${pom.groupId}</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>cache</artifactId>
-			<version>${pom.version}</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>${pom.groupId}</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>timers</artifactId>
-			<version>${pom.version}</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>${pom.groupId}</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>core</artifactId>
-			<version>${pom.version}</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>${pom.groupId}</groupId>
+			<groupId>${project.groupId}</groupId>
            		<artifactId>example-jar</artifactId>
-           	<version>${pom.version}</version>           	
+           	<version>${project.version}</version>           	
 		</dependency>
 	</dependencies>
 

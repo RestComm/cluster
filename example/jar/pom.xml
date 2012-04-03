@@ -10,11 +10,15 @@
 	
 	<artifactId>example-jar</artifactId>
 
+	<name>Mobicents Cluster Framework Example Jar</name>
+	<description>Mobicents Cluster Framework Example Jar</description>
+	<url>http://code.google.com/p/commscale.cluster</url>
+
 	<dependencies>		
 		<dependency>
-			<groupId>${pom.groupId}</groupId>
+			<groupId>${project.groupId}</groupId>
            	<artifactId>timers</artifactId>
-           	<version>${pom.version}</version>           	
+           	<version>${project.version}</version>           	
 		</dependency>
 	</dependencies>
 

@@ -9,11 +9,15 @@
 	
 	<artifactId>core</artifactId>
 	
+	<name>Mobicents Cluster Framework Core</name>
+	<description>Mobicents Cluster Framework Core</description>
+	<url>http://code.google.com/p/commscale.cluster</url>
+
 	<dependencies>
 		<dependency>
-			<groupId>${pom.groupId}</groupId>
+			<groupId>${project.groupId}</groupId>
            	<artifactId>cache</artifactId>
-           	<version>${pom.version}</version>           	
+           	<version>${project.version}</version>           	
 		</dependency>	
 	</dependencies>
 

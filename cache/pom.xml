@@ -10,6 +10,10 @@
 
 	<artifactId>cache</artifactId>
 
+	<name>Mobicents Cluster Framework Cache</name>
+	<description>Mobicents Cluster Framework Cache</description>
+	<url>http://code.google.com/p/commscale.cluster</url>	
+
 	<dependencies>
 		<dependency>
 			<groupId>org.jboss.cache</groupId>

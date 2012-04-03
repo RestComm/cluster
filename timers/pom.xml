@@ -1,8 +1,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-  <modelVersion>4.0.0</modelVersion>
+  	<modelVersion>4.0.0</modelVersion>
 
-   <parent>
+   	<parent>
 		<groupId>org.mobicents.cluster</groupId>
 		<artifactId>mobicents-cluster</artifactId>
 		<version>1.14-SNAPSHOT</version>
@@ -10,11 +10,15 @@
 	
 	<artifactId>timers</artifactId>
 	
+	<name>Mobicents Cluster Framework Timers</name>
+	<description>Mobicents Cluster Framework Timers</description>
+	<url>http://code.google.com/p/commscale.cluster</url>
+	
 	<dependencies>
 		<dependency>
-			<groupId>${pom.groupId}</groupId>
+			<groupId>${project.groupId}</groupId>
            	<artifactId>core</artifactId>
-           	<version>${pom.version}</version>           	
+           	<version>${project.version}</version>           	
 		</dependency>
 	</dependencies>
 	
