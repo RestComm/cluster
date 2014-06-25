@@ -4,9 +4,9 @@ import javax.management.MBeanServer;
 
 import org.apache.log4j.Logger;
 import org.infinispan.Cache;
-import org.infinispan.config.Configuration;
-import org.infinispan.config.Configuration.CacheMode;
-import org.infinispan.config.GlobalConfiguration;
+import org.infinispan.configuration.cache.Configuration;
+import org.infinispan.configuration.cache.CacheMode;
+//import org.infinispan.configuration.cache.GlobalConfiguration;
 import org.infinispan.lifecycle.ComponentStatus;
 import org.infinispan.manager.DefaultCacheManager;
 import org.mobicents.cluster.data.ClusterData;
@@ -27,7 +27,7 @@ public class InfinispanClusterDataSource implements ClusterDataSource<Cache> {
 	private static final Logger LOGGER = Logger
 			.getLogger(InfinispanClusterDataSource.class);
 
-	private GlobalConfiguration globalConfiguration;
+	//private GlobalConfiguration globalConfiguration;
 	private Configuration configuration;
 	private MBeanServer mBeanServer;
 	
@@ -40,9 +40,10 @@ public class InfinispanClusterDataSource implements ClusterDataSource<Cache> {
 	 * @param configuration
 	 * @param mBeanServer
 	 */
-	public InfinispanClusterDataSource(GlobalConfiguration globalConfiguration,
+	public InfinispanClusterDataSource(
+			//GlobalConfiguration globalConfiguration,
 			Configuration configuration, MBeanServer mBeanServer) {
-		this.globalConfiguration = globalConfiguration;
+//		this.globalConfiguration = globalConfiguration;
 		this.configuration = configuration;
 		this.mBeanServer = mBeanServer;
 	}
@@ -59,16 +60,16 @@ public class InfinispanClusterDataSource implements ClusterDataSource<Cache> {
 	 * 
 	 * @return
 	 */
-	public GlobalConfiguration getGlobalConfiguration() throws IllegalStateException {
+	/*public GlobalConfiguration getGlobalConfiguration() throws IllegalStateException {
 		return globalConfiguration;
-	}
+	}*/
 	
 	/**
 	 * 
 	 * @return
 	 */
 	public boolean isLocalMode() {
-		return configuration.getCacheMode() == CacheMode.LOCAL;
+		return cache.getCacheConfiguration().clustering().cacheMode() == CacheMode.LOCAL;
 	}
 	
 	/**
@@ -84,22 +85,22 @@ public class InfinispanClusterDataSource implements ClusterDataSource<Cache> {
 				started = true;
 			}
 			// add key externalizer
-			globalConfiguration.fluent().serialization().addAdvancedExternalizer(new InfinispanClusterDataKeyExternalizer());
+			//globalConfiguration.fluent().serialization().addAdvancedExternalizer(new InfinispanClusterDataKeyExternalizer());
 			// add mbean server
 			if (mBeanServer != null) {
-				globalConfiguration.fluent().globalJmxStatistics().mBeanServerLookup(new MBeanServerLookupImpl(
-								mBeanServer));			
+				//globalConfiguration.fluent().globalJmxStatistics().mBeanServerLookup(new MBeanServerLookupImpl(
+				//				mBeanServer));			
 			}
-			cache = new DefaultCacheManager(globalConfiguration,configuration,false).getCache();
-			configuration = cache.getConfiguration();
-			globalConfiguration = cache.getConfiguration().getGlobalConfiguration();
+			cache = new DefaultCacheManager(configuration,false).getCache();
+			configuration = cache.getCacheConfiguration();
+//			globalConfiguration = cache.getConfiguration().getGlobalConfiguration();
 			if (cache.getStatus() != ComponentStatus.RUNNING) {
 				cache.start();			
 			}		
 			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info("Mobicents Infinispan DataSource started, status: "
+				LOGGER.info("Restcomm Infinispan DataSource started, status: "
 						+ cache.getStatus() + ", mode: "
-						+ cache.getConfiguration().getCacheModeString());
+						+ cache.getCacheConfiguration().clustering().cacheMode().friendlyCacheModeString());
 			}
 		}		
 	}

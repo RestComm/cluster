@@ -17,34 +17,6 @@
 	<description>Restcomm Cluster Framework Parent</description>
 	<url>http://code.google.com/p/commscale.cluster</url>
 
-	
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<artifactId>infinispan-core</artifactId>
-				<groupId>org.infinispan</groupId>
-				<version>5.0.0.CR7</version>
-			</dependency>
-			<!-- 
-			<dependency>
-				<groupId>org.jboss.marshalling</groupId>
-    			<artifactId>marshalling-api</artifactId>
-    			<version>1.2.3.GA</version>
-			</dependency>
-			<dependency>
-				<groupId>org.jboss.marshalling</groupId>
-    			<artifactId>river</artifactId>
-    			<version>1.2.3.GA</version>
-			</dependency>
-			<dependency>
-         		<groupId>org.jgroups</groupId>
-         		<artifactId>jgroups</artifactId>
-         		<version>2.12.0.Alpha1</version>
-      		</dependency>
-      		 -->
-		</dependencies>
-	</dependencyManagement>
-		
 	<scm>
 		<connection>scm:git:https://github.com/RestComm/cluster.git</connection>
 		<developerConnection>scm:git:git@github.com:RestComm/cluster.git</developerConnection>

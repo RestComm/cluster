@@ -4,7 +4,7 @@ import java.util.Properties;
 
 import org.infinispan.remoting.transport.jgroups.JGroupsChannelLookup;
 import org.jgroups.Channel;
-import org.jgroups.ChannelFactory;
+//import org.jgroups.ChannelFactory;
 
 @SuppressWarnings("deprecation")
 public class JGroupsChannelLookupImpl implements JGroupsChannelLookup {
@@ -15,7 +15,7 @@ public class JGroupsChannelLookupImpl implements JGroupsChannelLookup {
 		
 	@Override
 	public Channel getJGroupsChannel(Properties properties) {		
-        final ChannelFactory channelFactory = (ChannelFactory) properties.get(CHANNEL_FACTORY_PROPERTY_NAME);
+        /**final ChannelFactory channelFactory = (ChannelFactory) properties.get(CHANNEL_FACTORY_PROPERTY_NAME);
 		final String stack = properties.getProperty(STACK_PROPERTY_NAME);
         final String id = properties.getProperty(CHANNEL_ID_PROPERTY_NAME);
         try {
@@ -23,16 +23,22 @@ public class JGroupsChannelLookupImpl implements JGroupsChannelLookup {
         }
         catch (Throwable e) {
            throw new IllegalArgumentException(e);
-        }
+        }*/
+		return null;
 	}
 
 	@Override
-	public boolean shouldStartAndConnect() {
+	public boolean shouldClose() {
 		return true;
 	}
 
 	@Override
-	public boolean shouldStopAndDisconnect() {
+	public boolean shouldDisconnect() {
+		return true;
+	}
+
+	@Override
+	public boolean shouldConnect() {
 		return true;
 	}
 

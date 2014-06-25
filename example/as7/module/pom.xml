@@ -5,26 +5,26 @@
 
 	<parent>
 		<groupId>org.mobicents.cluster</groupId>
-		<artifactId>mobicents-cluster-example-as7</artifactId>
+		<artifactId>restcomm-cluster-example-as7</artifactId>
 		<version>2.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>mobicents-cluster-example-as7-module</artifactId>
+	<artifactId>restcomm-cluster-example-as7-module</artifactId>
 
 	<dependencies>
 		<dependency>
 			<groupId>${pom.groupId}</groupId>
-			<artifactId>mobicents-cluster-timers</artifactId>
+			<artifactId>restcomm-cluster-timers</artifactId>
 			<version>${pom.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>${pom.groupId}</groupId>
-			<artifactId>mobicents-cluster-spi</artifactId>
+			<artifactId>restcomm-cluster-spi</artifactId>
 			<version>${pom.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>${pom.groupId}</groupId>
-			<artifactId>mobicents-cluster-infinispan</artifactId>
+			<artifactId>restcomm-cluster-infinispan</artifactId>
 			<version>${pom.version}</version>
 		</dependency>
 	</dependencies>
@@ -40,7 +40,7 @@
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<build>
-				<finalName>mobicents-cluster-example-as7</finalName>
+				<finalName>restcomm-cluster-example-as7</finalName>
 				<plugins>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>

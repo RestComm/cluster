@@ -1,30 +1,31 @@
 /*
- * JBoss, Home of Professional Open Source
- * Copyright 2008, Red Hat Middleware LLC, and individual contributors
- * by the @authors tag. See the copyright.txt in the distribution for a
- * full listing of individual contributors.
+ * TeleStax, Open Source Cloud Communications
+ * Copyright 2011-2016, Telestax Inc and individual contributors
+ * by the @authors tag.
  *
- * This is free software; you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation; either version 2.1 of
+ * This program is free software: you can redistribute it and/or modify
+ * under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation; either version 3 of
  * the License, or (at your option) any later version.
  *
- * This software is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this software; if not, write to the Free
- * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
- * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>
+ *
+ * This file incorporates work covered by the following copyright contributed under the GNU LGPL : Copyright 2007-2011 Red Hat.
  */
 package org.mobicents.timers;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import javax.transaction.Transaction;
@@ -127,40 +128,55 @@ public class FaultTolerantScheduler {
 	public <T extends TimerTaskData> FaultTolerantScheduler(String name, int corePoolSize,
 			Cluster<?> cluster, byte priority, TransactionManager txManager,
 			TimerTaskFactory timerTaskFactory, int purgePeriod) {
-		this.name = name;
-		this.executor = new ScheduledThreadPoolExecutor(corePoolSize);
-		if(purgePeriod > 0) {
-			Runnable r = new Runnable() {			
-				@Override
-				public void run() {
-					try {
-						executor.purge();				
-					}
-					catch (Exception e) {
-						logger.error("failed to execute purge",e);
-					}
-				}
-			};
-			this.executor.scheduleWithFixedDelay(r, purgePeriod, purgePeriod, TimeUnit.MINUTES);
-		}
-		this.clusterDataKey = new FaultTolerantSchedulerClusterDataKey(name);
-		this.cluster = cluster;
-		this.schedulerClusterData = cluster.getClusterDataSource()
-				.getClusterData(clusterDataKey);
-		this.timerTaskFactory = timerTaskFactory;
-		this.txManager = txManager;
-		if (!cluster.isLocalMode()) {
-			clusterClientLocalListener = new ClientLocalListener(priority);
-			cluster.addFailOverListener(clusterClientLocalListener);
-			cluster.addDataRemovalListener(clusterClientLocalListener);
-			if (cluster.isStarted()) {
-				schedulerClusterData.initReferences();
-			}
-		}		
-		else {
-			clusterClientLocalListener = null;
-		}
+		this(name, corePoolSize, cluster, priority, txManager, timerTaskFactory, purgePeriod, Executors.defaultThreadFactory());
 	}
+
+    /**
+     *
+     * @param name
+     * @param corePoolSize
+     * @param cluster
+     * @param priority
+     * @param txManager
+     * @param timerTaskFactory
+     * @param purgePeriod
+     * @param threadFactory
+     */
+    public <T extends TimerTaskData> FaultTolerantScheduler(String name, int corePoolSize, Cluster<?> cluster, byte priority, TransactionManager txManager,TimerTaskFactory timerTaskFactory, int purgePeriod, ThreadFactory threadFactory) {
+        this.name = name;
+        this.executor = new ScheduledThreadPoolExecutor(corePoolSize, threadFactory);
+        if(purgePeriod > 0) {
+            Runnable r = new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        executor.purge();
+                    }
+                    catch (Exception e) {
+                        logger.error("failed to execute purge",e);
+                    }
+                }
+            };
+            this.executor.scheduleWithFixedDelay(r, purgePeriod, purgePeriod, TimeUnit.MINUTES);
+        }
+        this.clusterDataKey = new FaultTolerantSchedulerClusterDataKey(name);
+	this.cluster = cluster;
+	this.schedulerClusterData = cluster.getClusterDataSource()
+			.getClusterData(clusterDataKey);
+	this.timerTaskFactory = timerTaskFactory;
+	this.txManager = txManager;
+	if (!cluster.isLocalMode()) {
+		clusterClientLocalListener = new ClientLocalListener(priority);
+		cluster.addFailOverListener(clusterClientLocalListener);
+		cluster.addDataRemovalListener(clusterClientLocalListener);
+		if (cluster.isStarted()) {
+			schedulerClusterData.initReferences();
+		}
+	}		
+	else {
+		clusterClientLocalListener = null;
+	}
+    }
 
 	/**
 	 * Retrieves the {@link TimerTaskData} associated with the specified taskID.
