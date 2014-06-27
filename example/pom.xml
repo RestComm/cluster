@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.mobicents.cluster</groupId>
 		<artifactId>mobicents-cluster</artifactId>
-		<version>7.0.0-TelScale-SNAPSHOT</version>
+		<version>7.0.3-TelScale-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>example-parent</artifactId>

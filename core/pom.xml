@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.mobicents.cluster</groupId>
 		<artifactId>mobicents-cluster</artifactId>
-		<version>7.0.0-TelScale-SNAPSHOT</version>
+		<version>7.0.3-TelScale-SNAPSHOT</version>
 	</parent>
 	
 	<artifactId>core</artifactId>
@@ -32,7 +32,7 @@
 						<docletArtifact>
 							<groupId>org.jboss.apiviz</groupId>
 							<artifactId>apiviz</artifactId>
-							<version>1.3.1.GA</version>
+							<version>1.3.2.GA</version>
 						</docletArtifact>
 						<useStandardDocletOptions>true</useStandardDocletOptions>
 						<charset>UTF-8</charset>
