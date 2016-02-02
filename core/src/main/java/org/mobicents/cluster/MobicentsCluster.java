@@ -94,7 +94,7 @@ public interface MobicentsCluster {
 	
 	/**
 	 *  
-	 * @return the mobicents cache controlled by the cluster
+	 * @return the restcomm cache controlled by the cluster
 	 */
 	public MobicentsCache getMobicentsCache();
 	

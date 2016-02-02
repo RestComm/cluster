@@ -4,15 +4,15 @@
 
 	<parent>
 		<groupId>org.mobicents.cluster</groupId>
-		<artifactId>mobicents-cluster</artifactId>
+		<artifactId>restcomm-cluster</artifactId>
 		<version>1.15.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>example-parent</artifactId>
 	<packaging>pom</packaging>
 
-	<name>Mobicents Cluster Framework Examples Parent</name>
-	<description>Mobicents Cluster Framework Examples Parent</description>
+	<name>Restcomm Cluster Framework Examples Parent</name>
+	<description>Restcomm Cluster Framework Examples Parent</description>
 	<url>http://code.google.com/p/commscale.cluster</url>
 
 	<modules>

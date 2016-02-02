@@ -127,7 +127,7 @@ public abstract class TimerTask implements Runnable {
 	}
 	
 	public final void run() {		
-		// Fix for Issue 1612 : Mobicents Cluster does not remove non recurring tasks when they fired
+		// Fix for Issue 1612 : Restcomm Cluster does not remove non recurring tasks when they fired
 		if(data.getPeriod() < 0 && autoRemoval) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Task with id "

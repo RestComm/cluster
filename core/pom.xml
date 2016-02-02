@@ -3,14 +3,14 @@
 
 	<parent>
 		<groupId>org.mobicents.cluster</groupId>
-		<artifactId>mobicents-cluster</artifactId>
+		<artifactId>restcomm-cluster</artifactId>
 		<version>1.15.0-SNAPSHOT</version>
 	</parent>
 	
 	<artifactId>core</artifactId>
 	
-	<name>Mobicents Cluster Framework Core</name>
-	<description>Mobicents Cluster Framework Core</description>
+	<name>Restcomm Cluster Framework Core</name>
+	<description>Restcomm Cluster Framework Core</description>
 	<url>http://code.google.com/p/commscale.cluster</url>
 
 	<dependencies>

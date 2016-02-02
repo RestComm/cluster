@@ -28,7 +28,7 @@ import org.jgroups.Address;
 
 /**
  * Start time:22:12:21 2009-09-01<br>
- * Project: mobicents-jainslee-server-core<br>
+ * Project: restcomm-jainslee-server-core<br>
  * 
  * @author <a href="mailto:baranowb@gmail.com">Bartosz Baranowski
  *         </a>

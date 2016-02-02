@@ -13,7 +13,7 @@
          <!-- Must use REPL since used for timestamp caching. 
               Must use SYNC to maintain cache coherency for entities. -->
          <property name="cacheMode">REPL_SYNC</property> 
-         <property name="clusterName">${jboss.partition.name:DefaultPartition}-mobicents-slee</property>        
+         <property name="clusterName">${jboss.partition.name:DefaultPartition}-restcomm-slee</property>        
          <property name="multiplexerStack">${jboss.default.jgroups.stack:udp}</property>
          <!-- Used for timestamps, so must fetch state. 
          <property name="fetchInMemoryState">true</property>

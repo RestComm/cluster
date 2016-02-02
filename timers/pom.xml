@@ -4,14 +4,14 @@
 
    	<parent>
 		<groupId>org.mobicents.cluster</groupId>
-		<artifactId>mobicents-cluster</artifactId>
+		<artifactId>restcomm-cluster</artifactId>
 		<version>1.15.0-SNAPSHOT</version>
 	</parent>
 	
 	<artifactId>timers</artifactId>
 	
-	<name>Mobicents Cluster Framework Timers</name>
-	<description>Mobicents Cluster Framework Timers</description>
+	<name>Restcomm Cluster Framework Timers</name>
+	<description>Restcomm Cluster Framework Timers</description>
 	<url>http://code.google.com/p/commscale.cluster</url>
 	
 	<dependencies>

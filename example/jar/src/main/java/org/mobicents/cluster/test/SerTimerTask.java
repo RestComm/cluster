@@ -22,7 +22,7 @@
 
 /**
  * Start time:11:29:01 2009-08-10<br>
- * Project: mobicents-jainslee-server-core<br>
+ * Project: restcomm-jainslee-server-core<br>
  * 
  * @author <a href="mailto:baranowb@gmail.com">Bartosz Baranowski </a>
  */
@@ -33,7 +33,7 @@ import java.util.TimerTask;
 
 /**
  * Start time:11:29:01 2009-08-10<br>
- * Project: mobicents-jainslee-server-core<br>
+ * Project: restcomm-jainslee-server-core<br>
  * 
  * @author <a href="mailto:baranowb@gmail.com">Bartosz Baranowski
  *         </a>

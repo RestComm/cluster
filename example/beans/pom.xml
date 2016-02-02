@@ -10,8 +10,8 @@
 	
 	<artifactId>example-beans</artifactId>
 		
-	<name>Mobicents Cluster Framework Example Beans</name>
-	<description>Mobicents Cluster Framework Example Beans</description>
+	<name>Restcomm Cluster Framework Example Beans</name>
+	<description>Restcomm Cluster Framework Example Beans</description>
 	<url>http://code.google.com/p/commscale.cluster</url>	
 
 	<properties>
@@ -42,7 +42,7 @@
 	</dependencies>
 
 	<build>
-		<finalName>mobicents-cluster-example</finalName>
+		<finalName>restcomm-cluster-example</finalName>
 		<plugins>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>		

@@ -74,7 +74,7 @@ public class FaultTolerantScheduler {
 	private TimerTaskFactory timerTaskFactory;
 	
 	/**
-	 * the base fqn used to store tasks data in mobicents cluster's cache
+	 * the base fqn used to store tasks data in restcomm cluster's cache
 	 */
 	@SuppressWarnings("unchecked")
 	private final Fqn baseFqn;
@@ -87,12 +87,12 @@ public class FaultTolerantScheduler {
 	private final String name;
 		
 	/**
-	 * the mobicents cluster 
+	 * the restcomm cluster 
 	 */
 	private final MobicentsCluster cluster;
 	
 	/**
-	 * listener for fail over events in mobicents cluster
+	 * listener for fail over events in restcomm cluster
 	 */
 	private final ClientLocalListener clusterClientLocalListener;
 	
@@ -237,7 +237,7 @@ public class FaultTolerantScheduler {
 	}
 	
 	/**
-	 *  Retrieves the priority of the scheduler as a client local listener of the mobicents cluster.
+	 *  Retrieves the priority of the scheduler as a client local listener of the restcomm cluster.
 	 * @return the priority
 	 */
 	public byte getPriority() {
@@ -448,7 +448,7 @@ public class FaultTolerantScheduler {
 	private class ClientLocalListener implements FailOverListener, DataRemovalListener {
 
 		/**
-		 * the priority of the scheduler as a client local listener of the mobicents cluster
+		 * the priority of the scheduler as a client local listener of the restcomm cluster
 		 */
 		private final byte priority;
 				
