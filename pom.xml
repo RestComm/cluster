@@ -18,9 +18,9 @@
 	<url>http://code.google.com/p/commscale.cluster</url>
 	
 	<scm>
-		<connection>scm:git:https://code.google.com/p/commscale.cluster/</connection>
-		<developerConnection>scm:git:https://code.google.com/p/commscale.cluster/</developerConnection>
-		<url>https://code.google.com/p/commscale.cluster/</url>
+		<connection>scm:git:https://github.com/RestComm/cluster.git</connection>
+		<developerConnection>scm:git:git@github.com:RestComm/cluster.git</developerConnection>
+		<url>https://github.com/RestComm/cluster</url>
 	</scm>
 
 	<modules>
