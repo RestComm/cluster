@@ -22,9 +22,9 @@
 		</dependency>
 		<dependency>
 			<groupId>javax.transaction</groupId>
-			<artifactId>jta</artifactId>
-		    <version>1.0.1B</version>
-		</dependency>		
+			<artifactId>javax.transaction-api</artifactId>
+		    <version>1.2</version>
+		</dependency>	
 	</dependencies>
 	
 </project>
