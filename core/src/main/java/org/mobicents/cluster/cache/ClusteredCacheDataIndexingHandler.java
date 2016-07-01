@@ -22,12 +22,13 @@
 
 package org.mobicents.cluster.cache;
 
-import org.jgroups.Address;
+import org.infinispan.remoting.transport.Address;
 
 /**
  * Object that handles the management of cluster indexing for {@link ClusteredCacheData}.
  * 
  * @author martins
+ * @author András Kőkuti
  *
  */
 public interface ClusteredCacheDataIndexingHandler {

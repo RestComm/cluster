@@ -24,9 +24,16 @@ package org.mobicents.cluster.election;
 
 import java.util.List;
 
-import org.jgroups.Address;
+import org.infinispan.remoting.transport.Address;
 import org.mobicents.cluster.cache.ClusteredCacheData;
 
+/**
+ * Listener for the node election.
+ * 
+ * @author martins
+ * @author András Kőkuti
+ *
+ */
 public interface ClientLocalListenerElector {
 
 	/**

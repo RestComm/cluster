@@ -34,6 +34,19 @@
 			<id>example</id>
 			<modules>
 				<module>example</module>
+				<module>example_temp</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>jboss-as-7</id>
+		</profile>
+		<profile>
+			<id>jboss-eap-6.4</id>
+		</profile>
+		<profile>
+			<id>jboss-eap-6.4-example</id>
+			<modules>
+				<module>example</module>
 			</modules>
 		</profile>
 		<profile>

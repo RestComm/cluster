@@ -22,13 +22,14 @@
 
 package org.mobicents.cluster.cache;
 
-import org.jgroups.Address;
+import org.infinispan.remoting.transport.Address;
 
 /**
  * Default impl for cluster cache data indexing, which relies on storing a data
  * field with the cluster node address.
  * 
  * @author martins
+ * @author András Kőkuti
  * 
  */
 public class DefaultClusteredCacheDataIndexingHandler implements ClusteredCacheDataIndexingHandler {

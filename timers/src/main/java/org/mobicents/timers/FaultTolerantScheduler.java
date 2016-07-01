@@ -34,8 +34,8 @@ import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 
 import org.apache.log4j.Logger;
-import org.jboss.cache.Fqn;
-import org.jgroups.Address;
+import org.infinispan.remoting.transport.Address;
+import org.infinispan.tree.Fqn;
 import org.mobicents.cluster.DataRemovalListener;
 import org.mobicents.cluster.FailOverListener;
 import org.mobicents.cluster.MobicentsCluster;
@@ -47,6 +47,7 @@ import org.mobicents.timers.cache.TimerTaskCacheData;
 /**
  * 
  * @author martins
+ * @author András Kőkuti
  *
  */
 public class FaultTolerantScheduler {
@@ -67,6 +68,8 @@ public class FaultTolerantScheduler {
 	 * the local running tasks. NOTE: never ever check for values, class instances may differ due cache replication, ALWAYS use keys.
 	 */
 	private final ConcurrentHashMap<Serializable, TimerTask> localRunningTasks = new ConcurrentHashMap<Serializable, TimerTask>();
+
+	
 	
 	/**
 	 * the timer task factory associated with this scheduler
@@ -280,9 +283,11 @@ public class FaultTolerantScheduler {
 			logger.debug("Scheduling task with id " + taskID);
 		}
 		
+		
 		// store the task and data
 		final TimerTaskCacheData timerTaskCacheData = new TimerTaskCacheData(taskID, baseFqn, cluster);
 		if (timerTaskCacheData.create()) {
+			logger.info("Storing task data");
 			timerTaskCacheData.setTaskData(taskData);
 		} else if(checkIfAlreadyPresent) {
             throw new IllegalStateException("timer task " + taskID + " already scheduled");
@@ -366,16 +371,21 @@ public class FaultTolerantScheduler {
 			}		
 		}
 		else {
+			logger.debug("Not a local task");
 			// not found locally
 			// if there is a tx context there may be a set timer action there
 			if (txManager != null) {
+				logger.debug("Txmanager not null");
 				try {
 					Transaction tx = txManager.getTransaction();
 					if (tx != null) {
+						logger.debug("Tx not null");
 						TransactionContext txContext = TransactionContextThreadLocal.getTransactionContext();
 						if (txContext != null) {
+							logger.debug("Tx context not null");
 							final AfterTxCommitRunnable r = txContext.remove(taskID);
 							if (r != null) {
+								logger.debug("removing");
 								task = r.task;
 								// remove from cluster
 								new TimerTaskCacheData(taskID, baseFqn, cluster).remove();

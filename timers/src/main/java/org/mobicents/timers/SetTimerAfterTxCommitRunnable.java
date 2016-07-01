@@ -31,6 +31,7 @@ import org.apache.log4j.Logger;
  * Runnable to set a timer task after the tx commits.
  * 
  * @author martins
+ * @author András Kőkuti
  *
  */
 public class SetTimerAfterTxCommitRunnable extends AfterTxCommitRunnable {

@@ -24,7 +24,7 @@ package org.mobicents.cluster;
 
 import java.util.List;
 
-import org.jgroups.Address;
+import org.infinispan.remoting.transport.Address;
 import org.mobicents.cache.MobicentsCache;
 import org.mobicents.cluster.cache.ClusteredCacheData;
 import org.mobicents.cluster.cache.ClusteredCacheDataIndexingHandler;
@@ -32,6 +32,7 @@ import org.mobicents.cluster.cache.ClusteredCacheDataIndexingHandler;
 /**
  * 
  * @author martins
+ * @author András Kőkuti
  *
  */
 public interface MobicentsCluster {

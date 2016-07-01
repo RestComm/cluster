@@ -34,6 +34,7 @@ import org.mobicents.timers.TimerTask;
  * A concrete {@link FaultTolerantScheduler} {@link TimerTask} to wrap a {@link java.util.TimerTask}.
  * 
  * @author martins
+ * @author András Kőkuti
  *
  */
 public class FaultTolerantTimerTimerTask extends TimerTask {

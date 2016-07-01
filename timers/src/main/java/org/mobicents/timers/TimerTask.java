@@ -33,6 +33,9 @@ import org.apache.log4j.Logger;
  *
  */
 public abstract class TimerTask implements Runnable {
+	/**
+	 * 
+	 */
 	private static final Logger logger = Logger.getLogger(TimerTask.class);
 	/**
 	 * the data associated with the task
@@ -42,6 +45,7 @@ public abstract class TimerTask implements Runnable {
 	/**
 	 * the schedule future object that returns from the task scheduling
 	 */
+	
 	private ScheduledFuture<?> scheduledFuture;
 	
 	/**

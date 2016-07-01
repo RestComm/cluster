@@ -40,6 +40,7 @@ import org.mobicents.timers.PeriodicScheduleStrategy;
  * There is no guarantee that fail over recover works correctly with not serializable {@link TimerTask}s
  * 
  * @author martins
+ * @author András Kőkuti
  * 
  */
 public class FaultTolerantTimer extends java.util.Timer {

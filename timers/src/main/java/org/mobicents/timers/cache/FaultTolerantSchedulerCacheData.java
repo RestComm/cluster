@@ -25,17 +25,18 @@ package org.mobicents.timers.cache;
 import java.util.Collections;
 import java.util.Set;
 
-import org.jboss.cache.Fqn;
-import org.jboss.cache.Node;
 import org.mobicents.cache.CacheData;
 import org.mobicents.cluster.MobicentsCluster;
 
+import org.infinispan.tree.Node;
+import org.infinispan.tree.Fqn;
 
 /**
  * 
- * Proxy object for timer facility entity data management through JBoss Cache
+ * Proxy object for timer facility entity data management through Infinispan Cache
  * 
  * @author martins
+ * @author András Kőkuti
  * 
  */
 
@@ -46,14 +47,14 @@ public class FaultTolerantSchedulerCacheData extends CacheData {
 	 * @param txManager 
 	 * @param txManager
 	 */
-	@SuppressWarnings("unchecked")
+	//@SuppressWarnings("unchecked")
 	public FaultTolerantSchedulerCacheData(Fqn baseFqn, MobicentsCluster cluster) {
 		super(baseFqn,cluster.getMobicentsCache());
 	}
 
 	public Set<?> getTaskIDs() {
 		final Node<?,?> node = getNode();
-		if (!node.isLeaf()) {
+		if (!node.getChildren().isEmpty()) {
 			return node.getChildrenNames();			
 		}
 		else {
