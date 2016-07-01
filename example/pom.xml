@@ -2,8 +2,8 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-   <parent>
-		<groupId>org.mobicents.cluster</groupId>
+   	<parent>
+		<groupId>org.restcomm.cluster</groupId>
 		<artifactId>restcomm-cluster</artifactId> 
 		<version>3.0.0-SNAPSHOT</version>
 	</parent>
@@ -13,7 +13,7 @@
 	
 	<name>Restcomm Cluster Framework Example WAR</name>
 	<description>Restcomm Cluster Framework Example War</description>
-	<url>http://code.google.com/p/commscale.cluster</url>
+	<url>https://github.com/Restcomm/cluster</url>
 
 	<dependencies>		
 		<dependency>
