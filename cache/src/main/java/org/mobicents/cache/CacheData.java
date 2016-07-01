@@ -1,51 +1,51 @@
 /*
- * JBoss, Home of Professional Open Source
- * Copyright 2011, Red Hat, Inc. and individual contributors
- * by the @authors tag. See the copyright.txt in the distribution for a
- * full listing of individual contributors.
+ * TeleStax, Open Source Cloud Communications
+ * Copyright 2011-2016, Telestax Inc and individual contributors
+ * by the @authors tag.
  *
- * This is free software; you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation; either version 2.1 of
+ * This program is free software: you can redistribute it and/or modify
+ * under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation; either version 3 of
  * the License, or (at your option) any later version.
  *
- * This software is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this software; if not, write to the Free
- * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
- * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
 package org.mobicents.cache;
 
 import org.apache.log4j.Logger;
-import org.jboss.cache.Fqn;
-import org.jboss.cache.Node;
+import org.infinispan.tree.Fqn;
+import org.infinispan.tree.Node;
 
 /**
  * Common base proxy for runtime cached data. 
  * @author martins
+ * @author András Kőkuti
  *
  */
 public class CacheData {
 
 	private static final Logger logger = Logger.getLogger(CacheData.class);
 	
-	@SuppressWarnings("unchecked")
+	
+	@SuppressWarnings("rawtypes")
 	private Node node;
-	@SuppressWarnings("unchecked")
+	
 	private final Fqn nodeFqn;
+	
+	
 	
 	private boolean isRemoved;
 	private final MobicentsCache mobicentsCache;
 	
 	private final static boolean doTraceLogs = logger.isTraceEnabled();  
 	
-	@SuppressWarnings("unchecked")
 	public CacheData(Fqn nodeFqn, MobicentsCache mobicentsCache) {		
 		this.nodeFqn = nodeFqn;	
 		this.mobicentsCache = mobicentsCache;
@@ -53,7 +53,10 @@ public class CacheData {
 		if (doTraceLogs) {
 			logger.trace("cache node "+nodeFqn+" retrieved, result = "+this.node);
 		}
+		logger.info("cache node "+nodeFqn+" retrieved, result = "+this.node);
 	}
+	
+
 	
 	/**
 	 * Verifies if node where data is stored exists in cache
@@ -70,8 +73,8 @@ public class CacheData {
 		if (!exists()) {
 			node = mobicentsCache.getJBossCache().getRoot().addChild(nodeFqn);
 			if (doTraceLogs) {
-				logger.trace("created cache node "+nodeFqn);
-			}
+				logger.trace("created cache node "+ node);
+			}			
 			return true;
 		}
 		else {
@@ -95,7 +98,7 @@ public class CacheData {
 			isRemoved = true;
 			node.getParent().removeChild(nodeFqn.getLastElement());
 			if (doTraceLogs) {
-				logger.trace("removed cache node "+nodeFqn);
+				logger.trace("removed cache node "+ node);
 			}	
 			return true;
 		}
@@ -110,7 +113,7 @@ public class CacheData {
 	 * 
 	 * Throws {@link IllegalStateException} if remove() was invoked
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "rawtypes" })
 	protected Node getNode() {
 		if (isRemoved()) {
 			throw new IllegalStateException();
@@ -130,7 +133,7 @@ public class CacheData {
 	 * Retrieves the node fqn
 	 * @return the nodeFqn
 	 */
-	@SuppressWarnings("unchecked")
+	
 	public Fqn getNodeFqn() {
 		return nodeFqn;
 	}

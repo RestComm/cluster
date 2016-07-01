@@ -1,40 +1,39 @@
 /*
- * JBoss, Home of Professional Open Source
- * Copyright 2011, Red Hat, Inc. and individual contributors
- * by the @authors tag. See the copyright.txt in the distribution for a
- * full listing of individual contributors.
+ * TeleStax, Open Source Cloud Communications
+ * Copyright 2011-2016, Telestax Inc and individual contributors
+ * by the @authors tag.
  *
- * This is free software; you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation; either version 2.1 of
+ * This program is free software: you can redistribute it and/or modify
+ * under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation; either version 3 of
  * the License, or (at your option) any later version.
  *
- * This software is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this software; if not, write to the Free
- * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
- * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
 package org.mobicents.timers.cache;
 
 import java.io.Serializable;
 
-import org.jboss.cache.Fqn;
 import org.mobicents.cluster.MobicentsCluster;
 import org.mobicents.cluster.cache.ClusteredCacheData;
 import org.mobicents.timers.TimerTask;
 import org.mobicents.timers.TimerTaskData;
 
+import org.infinispan.tree.Fqn;
+
 /**
  * 
- * Proxy object for timer task data management through JBoss Cache
+ * Proxy object for timer task data management through Infinispan Cache
  * 
  * @author martins
+ * @author András Kőkuti
  * 
  */
 
@@ -48,7 +47,7 @@ public class TimerTaskCacheData extends ClusteredCacheData {
 	/**
 	 * 
 	 */
-	@SuppressWarnings("unchecked")
+	//@SuppressWarnings("unchecked")
 	public TimerTaskCacheData(Serializable taskID, Fqn baseFqn, MobicentsCluster mobicentsCluster) {
 		super(Fqn.fromRelativeElements(baseFqn, taskID),mobicentsCluster);
 	}
@@ -56,7 +55,7 @@ public class TimerTaskCacheData extends ClusteredCacheData {
 	/**
 	 * 
 	 */
-	@SuppressWarnings("unchecked")
+	//@SuppressWarnings("unchecked")
 	public TimerTaskCacheData(Fqn fqn, MobicentsCluster mobicentsCluster) {
 		super(fqn,mobicentsCluster);
 	}

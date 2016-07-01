@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.mobicents.cluster</groupId>
 		<artifactId>restcomm-cluster</artifactId>
-		<version>1.15.0-SNAPSHOT</version>
+		<version>3.0.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>cache</artifactId>
@@ -15,17 +15,17 @@
 	<url>http://code.google.com/p/commscale.cluster</url>	
 
 	<dependencies>
-		<dependency>
+		<!--dependency>
 			<groupId>org.jboss.cache</groupId>
 			<artifactId>jbosscache-core</artifactId>
-		</dependency>
+		</dependency-->
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 		</dependency>
 		
 	</dependencies>
-
+	
 	<build>
 		<finalName>restcomm-slee-core-cache</finalName>
 		<plugins>

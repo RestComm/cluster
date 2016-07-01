@@ -1,30 +1,28 @@
 /*
- * JBoss, Home of Professional Open Source
- * Copyright 2011, Red Hat, Inc. and individual contributors
- * by the @authors tag. See the copyright.txt in the distribution for a
- * full listing of individual contributors.
+ * TeleStax, Open Source Cloud Communications
+ * Copyright 2011-2016, Telestax Inc and individual contributors
+ * by the @authors tag.
  *
- * This is free software; you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation; either version 2.1 of
+ * This program is free software: you can redistribute it and/or modify
+ * under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation; either version 3 of
  * the License, or (at your option) any later version.
  *
- * This software is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this software; if not, write to the Free
- * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
- * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
 package org.mobicents.cluster.cache;
 
-import org.jboss.cache.Fqn;
-import org.jboss.cache.Node;
-import org.jgroups.Address;
+
+import org.infinispan.remoting.transport.Address;
+import org.infinispan.tree.Fqn;
+import org.infinispan.tree.Node;
 import org.mobicents.cache.CacheData;
 import org.mobicents.cluster.MobicentsCluster;
 
@@ -33,6 +31,7 @@ import org.mobicents.cluster.MobicentsCluster;
  * Abstract class for a clustered {@link CacheData}.
  * 
  * @author martins
+ * @author András Kőkuti
  *
  */
 public class ClusteredCacheData extends CacheData {
@@ -43,7 +42,7 @@ public class ClusteredCacheData extends CacheData {
 	 * @param nodeFqn
 	 * @param mobicentsCache
 	 */
-	public ClusteredCacheData(Fqn<?> nodeFqn, MobicentsCluster mobicentsCluster) {
+	public ClusteredCacheData(Fqn nodeFqn, MobicentsCluster mobicentsCluster) {
 		super(nodeFqn, mobicentsCluster.getMobicentsCache());
 		indexingHandler = mobicentsCluster.getClusteredCacheDataIndexingHandler();
 	}
@@ -56,7 +55,7 @@ public class ClusteredCacheData extends CacheData {
 		if (super.create()) {
 			// store local address if we are not running in local mode
 			if (!getMobicentsCache().isLocalMode()) {
-				setClusterNodeAddress(getMobicentsCache().getJBossCache().getLocalAddress());
+				setClusterNodeAddress(getMobicentsCache().getJBossCache().getCache().getCacheManager().getAddress());
 			}
 			return true;
 		}
@@ -86,7 +85,8 @@ public class ClusteredCacheData extends CacheData {
 	 * @see org.mobicents.cache.CacheData#getNode()
 	 */
 	@Override
-	protected Node getNode() {
+	@SuppressWarnings("rawtypes")
+	protected Node getNode(){
 		return super.getNode();
 	}
 }
