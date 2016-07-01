@@ -27,9 +27,9 @@
 			<id>jboss-eap-6.4-example</id>
 			<dependencies>					
 				<dependency>
-					<groupId>javax.annotation.api</groupId>
-					<artifactId>jboss-annotations-api_1.1_spec</artifactId>
-					<version>1.0.1.Final-redhat-3</version>
+				    <groupId>org.jboss.spec.javax.annotation</groupId>
+				    <artifactId>jboss-annotations-api_1.1_spec</artifactId>
+				    <version>1.0.1.Final</version>
 				</dependency>
 			</dependencies>
 		</profile>

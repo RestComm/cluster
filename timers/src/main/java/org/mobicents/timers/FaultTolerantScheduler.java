@@ -1,6 +1,6 @@
 /*
  * TeleStax, Open Source Cloud Communications
- * Copyright 2011-2014, Telestax Inc and individual contributors
+ * Copyright 2011-2016, Telestax Inc and individual contributors
  * by the @authors tag.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,8 +15,6 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
- *
- * This file incorporates work covered by the following copyright contributed under the GNU LGPL : Copyright 2007-2011 Red Hat.
  */
 
 package org.mobicents.timers;
@@ -283,11 +281,12 @@ public class FaultTolerantScheduler {
 			logger.debug("Scheduling task with id " + taskID);
 		}
 		
-		
 		// store the task and data
 		final TimerTaskCacheData timerTaskCacheData = new TimerTaskCacheData(taskID, baseFqn, cluster);
 		if (timerTaskCacheData.create()) {
-			logger.info("Storing task data");
+			if (logger.isInfoEnabled()) {
+				logger.info("Storing task data " + taskID);
+			}
 			timerTaskCacheData.setTaskData(taskData);
 		} else if(checkIfAlreadyPresent) {
             throw new IllegalStateException("timer task " + taskID + " already scheduled");
@@ -371,18 +370,26 @@ public class FaultTolerantScheduler {
 			}		
 		}
 		else {
-			logger.debug("Not a local task");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Not a local task");
+			}
 			// not found locally
 			// if there is a tx context there may be a set timer action there
 			if (txManager != null) {
-				logger.debug("Txmanager not null");
+				if (logger.isDebugEnabled()) {
+					logger.debug("Txmanager not null");
+				}
 				try {
 					Transaction tx = txManager.getTransaction();
 					if (tx != null) {
-						logger.debug("Tx not null");
+						if (logger.isDebugEnabled()) {
+							logger.debug("Tx not null");
+						}
 						TransactionContext txContext = TransactionContextThreadLocal.getTransactionContext();
 						if (txContext != null) {
-							logger.debug("Tx context not null");
+							if (logger.isDebugEnabled()) {
+								logger.debug("Tx context not null");
+							}
 							final AfterTxCommitRunnable r = txContext.remove(taskID);
 							if (r != null) {
 								logger.debug("removing");
