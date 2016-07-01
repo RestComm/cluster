@@ -26,69 +26,6 @@
 		
 	</dependencies>
 	
-	<profiles>
-		<profile>
-			<id>jboss-as-7</id>
-			<dependencies>
-				<dependency>
-					<groupId>org.jboss.as</groupId>
-					<artifactId>jboss-as-clustering-infinispan</artifactId>
-					<version>7.1.1.Final</version>
-				</dependency>
-				<dependency>
-					<groupId>org.infinispan</groupId>
-					<artifactId>infinispan-tree</artifactId>
-					<version>5.1.2.Final</version>
-				</dependency>
-				<dependency>
-					<groupId>org.infinispan</groupId>
-					<artifactId>infinispan-core</artifactId>
-					<version>5.1.2.FINAL</version>
-				</dependency>
-			</dependencies>
-		</profile>
-		<profile>
-			<id>jboss-eap-6.4</id>
-			<dependencies>
-				<dependency>
-					<groupId>org.jboss.as</groupId>
-					<artifactId>jboss-as-clustering-infinispan</artifactId>
-					<version>7.5.0.Final-redhat-21</version>
-				</dependency>
-				<dependency>
-					<groupId>org.infinispan</groupId>
-					<artifactId>infinispan-tree</artifactId>
-					<version>5.2.10.Final-redhat-1</version>
-				</dependency>
-				<dependency>
-					<groupId>org.infinispan</groupId>
-					<artifactId>infinispan-core</artifactId>
-					<version>5.2.11.Final-redhat-2</version>
-				</dependency>
-			</dependencies>
-		</profile>
-		<profile>
-			<id>jboss-eap-6.4-example</id>
-			<dependencies>
-				<dependency>
-					<groupId>org.jboss.as</groupId>
-					<artifactId>jboss-as-clustering-infinispan</artifactId>
-					<version>7.5.0.Final-redhat-21</version>
-				</dependency>
-				<dependency>
-					<groupId>org.infinispan</groupId>
-					<artifactId>infinispan-tree</artifactId>
-					<version>5.2.10.Final-redhat-1</version>
-				</dependency>
-				<dependency>
-					<groupId>org.infinispan</groupId>
-					<artifactId>infinispan-core</artifactId>
-					<version>5.2.11.Final-redhat-2</version>
-				</dependency>
-			</dependencies>
-		</profile>
-	</profiles>
-
 	<build>
 		<finalName>restcomm-slee-core-cache</finalName>
 		<plugins>
