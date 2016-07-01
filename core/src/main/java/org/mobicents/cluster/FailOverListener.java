@@ -22,10 +22,12 @@
 
 package org.mobicents.cluster;
 
-import org.jboss.cache.Fqn;
-import org.jgroups.Address;
+
+import org.infinispan.remoting.transport.Address;
 import org.mobicents.cluster.cache.ClusteredCacheData;
 import org.mobicents.cluster.election.ClientLocalListenerElector;
+
+import org.infinispan.tree.Fqn;
 
 /**
  * 
@@ -35,6 +37,7 @@ import org.mobicents.cluster.election.ClientLocalListenerElector;
  * 
  * @author <a href="mailto:baranowb@gmail.com">Bartosz Baranowski </a>
  * @author martins
+ * @author András Kőkuti
  * 
  */
 public interface FailOverListener {
@@ -43,7 +46,7 @@ public interface FailOverListener {
 	 * Retrieves the base fqn the listener has interest.
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
+	
 	public Fqn getBaseFqn();
 	
 	/**

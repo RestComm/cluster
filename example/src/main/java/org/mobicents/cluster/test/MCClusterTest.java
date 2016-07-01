@@ -22,6 +22,12 @@
 
 package org.mobicents.cluster.test;
 
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.UUID;
+
+import javax.annotation.Resource;
 import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
 import javax.transaction.NotSupportedException;
@@ -29,7 +35,6 @@ import javax.transaction.RollbackException;
 import javax.transaction.SystemException;
 import javax.transaction.TransactionManager;
 
-import org.jboss.cache.factories.annotations.Start;
 import org.mobicents.timers.timer.FaultTolerantTimer;
 
 
@@ -38,10 +43,10 @@ public class MCClusterTest implements MCClusterTestMBean {
 	private TransactionManager jta;
 	private FaultTolerantTimer faultTolerantTimer;
 
-	@Start
+/*	@Start
 	public void start() {
 		System.err.println("Started");
-	}
+	}*/
 	
 	public TransactionManager getJta() {
 		return jta;
@@ -89,6 +94,62 @@ public class MCClusterTest implements MCClusterTestMBean {
 			e.printStackTrace();
 		}
 		
+		
+	}
+	
+	public void removeTimer(String id){
+		try {
+			jta.begin();
+		} catch (NotSupportedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SystemException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		//this.faultTolerantTimer.getScheduler().remove(this.faultTolerantTimer.getData().);
+		//this.faultTolerantTimer.getScheduler().cancel(UUID.fromString(id));
+		try {
+			Method remove = this.faultTolerantTimer.getScheduler().getClass().getDeclaredMethod("remove", Serializable.class, boolean.class);
+			remove.setAccessible(true);
+			remove.invoke(this.faultTolerantTimer.getScheduler(), UUID.fromString(id), true);
+		} catch (NoSuchMethodException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (SecurityException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			jta.commit();
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalStateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (RollbackException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (HeuristicMixedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (HeuristicRollbackException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SystemException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 	}
 

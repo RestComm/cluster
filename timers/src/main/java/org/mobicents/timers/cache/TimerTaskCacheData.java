@@ -24,17 +24,19 @@ package org.mobicents.timers.cache;
 
 import java.io.Serializable;
 
-import org.jboss.cache.Fqn;
 import org.mobicents.cluster.MobicentsCluster;
 import org.mobicents.cluster.cache.ClusteredCacheData;
 import org.mobicents.timers.TimerTask;
 import org.mobicents.timers.TimerTaskData;
 
+import org.infinispan.tree.Fqn;
+
 /**
  * 
- * Proxy object for timer task data management through JBoss Cache
+ * Proxy object for timer task data management through Infinispan Cache
  * 
  * @author martins
+ * @author András Kőkuti
  * 
  */
 
@@ -48,7 +50,7 @@ public class TimerTaskCacheData extends ClusteredCacheData {
 	/**
 	 * 
 	 */
-	@SuppressWarnings("unchecked")
+	//@SuppressWarnings("unchecked")
 	public TimerTaskCacheData(Serializable taskID, Fqn baseFqn, MobicentsCluster mobicentsCluster) {
 		super(Fqn.fromRelativeElements(baseFqn, taskID),mobicentsCluster);
 	}
@@ -56,7 +58,7 @@ public class TimerTaskCacheData extends ClusteredCacheData {
 	/**
 	 * 
 	 */
-	@SuppressWarnings("unchecked")
+	//@SuppressWarnings("unchecked")
 	public TimerTaskCacheData(Fqn fqn, MobicentsCluster mobicentsCluster) {
 		super(fqn,mobicentsCluster);
 	}

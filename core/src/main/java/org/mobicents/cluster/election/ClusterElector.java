@@ -24,7 +24,9 @@ package org.mobicents.cluster.election;
 
 import java.util.List;
 
-import org.jgroups.Address;
+import org.infinispan.remoting.transport.Address;
+
+
 
 /**
  * Start time:22:12:21 2009-09-01<br>
@@ -32,6 +34,7 @@ import org.jgroups.Address;
  * 
  * @author <a href="mailto:baranowb@gmail.com">Bartosz Baranowski
  *         </a>
+ * @author András Kőkuti
  */
 public interface ClusterElector {
 

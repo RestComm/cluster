@@ -22,9 +22,10 @@
 
 package org.mobicents.cluster.cache;
 
-import org.jboss.cache.Fqn;
-import org.jboss.cache.Node;
-import org.jgroups.Address;
+
+import org.infinispan.remoting.transport.Address;
+import org.infinispan.tree.Fqn;
+import org.infinispan.tree.Node;
 import org.mobicents.cache.CacheData;
 import org.mobicents.cluster.MobicentsCluster;
 
@@ -33,6 +34,7 @@ import org.mobicents.cluster.MobicentsCluster;
  * Abstract class for a clustered {@link CacheData}.
  * 
  * @author martins
+ * @author András Kőkuti
  *
  */
 public class ClusteredCacheData extends CacheData {
@@ -43,7 +45,7 @@ public class ClusteredCacheData extends CacheData {
 	 * @param nodeFqn
 	 * @param mobicentsCache
 	 */
-	public ClusteredCacheData(Fqn<?> nodeFqn, MobicentsCluster mobicentsCluster) {
+	public ClusteredCacheData(Fqn nodeFqn, MobicentsCluster mobicentsCluster) {
 		super(nodeFqn, mobicentsCluster.getMobicentsCache());
 		indexingHandler = mobicentsCluster.getClusteredCacheDataIndexingHandler();
 	}
@@ -56,7 +58,7 @@ public class ClusteredCacheData extends CacheData {
 		if (super.create()) {
 			// store local address if we are not running in local mode
 			if (!getMobicentsCache().isLocalMode()) {
-				setClusterNodeAddress(getMobicentsCache().getJBossCache().getLocalAddress());
+				setClusterNodeAddress(getMobicentsCache().getJBossCache().getCache().getCacheManager().getAddress());
 			}
 			return true;
 		}
@@ -86,7 +88,8 @@ public class ClusteredCacheData extends CacheData {
 	 * @see org.mobicents.cache.CacheData#getNode()
 	 */
 	@Override
-	protected Node getNode() {
+	@SuppressWarnings("rawtypes")
+	protected Node getNode(){
 		return super.getNode();
 	}
 }

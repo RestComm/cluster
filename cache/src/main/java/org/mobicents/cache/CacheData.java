@@ -23,29 +23,32 @@
 package org.mobicents.cache;
 
 import org.apache.log4j.Logger;
-import org.jboss.cache.Fqn;
-import org.jboss.cache.Node;
+import org.infinispan.tree.Fqn;
+import org.infinispan.tree.Node;
 
 /**
  * Common base proxy for runtime cached data. 
  * @author martins
+ * @author András Kőkuti
  *
  */
 public class CacheData {
 
 	private static final Logger logger = Logger.getLogger(CacheData.class);
 	
-	@SuppressWarnings("unchecked")
+	
+	@SuppressWarnings("rawtypes")
 	private Node node;
-	@SuppressWarnings("unchecked")
+	
 	private final Fqn nodeFqn;
+	
+	
 	
 	private boolean isRemoved;
 	private final MobicentsCache mobicentsCache;
 	
 	private final static boolean doTraceLogs = logger.isTraceEnabled();  
 	
-	@SuppressWarnings("unchecked")
 	public CacheData(Fqn nodeFqn, MobicentsCache mobicentsCache) {		
 		this.nodeFqn = nodeFqn;	
 		this.mobicentsCache = mobicentsCache;
@@ -53,7 +56,10 @@ public class CacheData {
 		if (doTraceLogs) {
 			logger.trace("cache node "+nodeFqn+" retrieved, result = "+this.node);
 		}
+		logger.info("cache node "+nodeFqn+" retrieved, result = "+this.node);
 	}
+	
+
 	
 	/**
 	 * Verifies if node where data is stored exists in cache
@@ -70,8 +76,8 @@ public class CacheData {
 		if (!exists()) {
 			node = mobicentsCache.getJBossCache().getRoot().addChild(nodeFqn);
 			if (doTraceLogs) {
-				logger.trace("created cache node "+nodeFqn);
-			}
+				logger.trace("created cache node "+ node);
+			}			
 			return true;
 		}
 		else {
@@ -95,7 +101,7 @@ public class CacheData {
 			isRemoved = true;
 			node.getParent().removeChild(nodeFqn.getLastElement());
 			if (doTraceLogs) {
-				logger.trace("removed cache node "+nodeFqn);
+				logger.trace("removed cache node "+ node);
 			}	
 			return true;
 		}
@@ -110,7 +116,7 @@ public class CacheData {
 	 * 
 	 * Throws {@link IllegalStateException} if remove() was invoked
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "rawtypes" })
 	protected Node getNode() {
 		if (isRemoved()) {
 			throw new IllegalStateException();
@@ -130,7 +136,7 @@ public class CacheData {
 	 * Retrieves the node fqn
 	 * @return the nodeFqn
 	 */
-	@SuppressWarnings("unchecked")
+	
 	public Fqn getNodeFqn() {
 		return nodeFqn;
 	}

@@ -24,13 +24,16 @@ package org.mobicents.cluster.election;
 
 import java.util.List;
 
-import org.jgroups.Address;
+import org.infinispan.remoting.transport.Address;
+
+
 
 /**
  * Simplest of elector. Use reminder of fixed index to determine master.
  * 
  * @author <a href="mailto:baranowb@gmail.com">Bartosz Baranowski </a>
  * @author martins
+ * @author András Kőkuti
  */
 public class DefaultClusterElector implements ClusterElector{
 

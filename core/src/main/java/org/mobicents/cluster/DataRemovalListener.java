@@ -22,11 +22,12 @@
 
 package org.mobicents.cluster;
 
-import org.jboss.cache.Fqn;
+import org.infinispan.tree.Fqn;
 
 /**
  * 
  * @author martins
+ * @author Kőkuti András
  *
  */
 public interface DataRemovalListener {
@@ -35,13 +36,13 @@ public interface DataRemovalListener {
 	 * Retrieves the base fqn the listener has interest.
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
+	//@SuppressWarnings("unchecked")
 	public Fqn getBaseFqn();
 	
 	/**
 	 * Indicates that the data with the specified fqn was removed. 
 	 * @param clusteredCacheDataFqn
 	 */
-	@SuppressWarnings("unchecked")
+	//@SuppressWarnings("unchecked")
 	public void dataRemoved(Fqn clusteredCacheDataFqn);
 }
