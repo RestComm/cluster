@@ -9,7 +9,7 @@
 	
 	<groupId>org.restcomm.cluster</groupId>
 	<artifactId>restcomm-cluster</artifactId>
-	<version>7.0.3-TelScale-SNAPSHOT</version>
+	<version>7.1.0-TelScale-SNAPSHOT</version>
 		
 	<packaging>pom</packaging>
 	
