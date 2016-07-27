@@ -3,37 +3,37 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>org.mobicents.cluster</groupId>
-		<artifactId>mobicents-cluster</artifactId>
+		<groupId>org.restcomm.cluster</groupId>
+		<artifactId>restcomm-cluster</artifactId>
 		<version>7.0.3-TelScale-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>cache</artifactId>
 
-	<name>Mobicents Cluster Framework Cache</name>
-	<description>Mobicents Cluster Framework Cache</description>
-	<url>http://code.google.com/p/commscale.cluster</url>	
+	<name>Restcomm Cluster Framework Cache</name>
+	<description>Restcomm Cluster Framework Cache</description>
+	<url>https://github.com/Restcomm/cluster</url>	
 
 	<dependencies>
-		<dependency>
+		<!--dependency>
 			<groupId>org.jboss.cache</groupId>
 			<artifactId>jbosscache-core</artifactId>
-		</dependency>
+		</dependency-->
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 		</dependency>
 		
 	</dependencies>
-
+	
 	<build>
-		<finalName>mobicents-slee-core-cache</finalName>
+		<finalName>restcomm-slee-core-cache</finalName>
 		<plugins>
 			<plugin>
 				<artifactId>maven-eclipse-plugin</artifactId>
 				<groupId>org.mobicents.tools</groupId>
 				<version>
-  				${mobicents.tools.mavenplugin.eclipse.version}
+  				${restcomm.tools.mavenplugin.eclipse.version}
   			</version>
 				<inherited>false</inherited>
 				<executions />

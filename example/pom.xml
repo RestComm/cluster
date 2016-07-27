@@ -1,22 +1,54 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-	<modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
 	<parent>
 		<groupId>org.mobicents.cluster</groupId>
-		<artifactId>mobicents-cluster</artifactId>
+		<artifactId>restcomm-cluster</artifactId> 
 		<version>7.0.3-TelScale-SNAPSHOT</version>
 	</parent>
+	
+	<artifactId>example-war</artifactId>
+	<packaging>war</packaging>
+	
+	<name>Restcomm Cluster Framework Example WAR</name>
+	<description>Restcomm Cluster Framework Example War</description>
+	<url>https://github.com/Restcomm/cluster</url>
 
-	<artifactId>example-parent</artifactId>
-	<packaging>pom</packaging>
+	<dependencies>		
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+           	<artifactId>timers</artifactId>
+           	<version>${project.version}</version>           	
+		</dependency>
+	</dependencies>
+	<profiles>
+		<profile>
+			<id>jboss-eap-6.4-example</id>
+			<dependencies>					
+				<dependency>
+				    <groupId>org.jboss.spec.javax.annotation</groupId>
+				    <artifactId>jboss-annotations-api_1.1_spec</artifactId>
+				    <version>1.0.1.Final</version>
+				</dependency>
+			</dependencies>
+		</profile>
+	</profiles>
+	<build>		
+		<plugins>			
+			<plugin>
+				<artifactId>maven-war-plugin</artifactId>
+				<configuration>					
+					<archive>
+						<manifestEntries>
+							<Dependencies>org.infinispan export</Dependencies>
+						</manifestEntries>
+					</archive>
+				</configuration>
+			</plugin>			
+		</plugins>
+	</build>
 
-	<name>Mobicents Cluster Framework Examples Parent</name>
-	<description>Mobicents Cluster Framework Examples Parent</description>
-	<url>http://code.google.com/p/commscale.cluster</url>
+	
 
-	<modules>
-		<module>jar</module>
-		<module>beans</module>
-	</modules>
 </project>

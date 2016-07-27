@@ -2,16 +2,16 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>org.mobicents.cluster</groupId>
-		<artifactId>mobicents-cluster</artifactId>
+		<groupId>org.restcomm.cluster</groupId>
+		<artifactId>restcomm-cluster</artifactId>
 		<version>7.0.3-TelScale-SNAPSHOT</version>
 	</parent>
 	
 	<artifactId>core</artifactId>
 	
-	<name>Mobicents Cluster Framework Core</name>
-	<description>Mobicents Cluster Framework Core</description>
-	<url>http://code.google.com/p/commscale.cluster</url>
+	<name>Restcomm Cluster Framework Core</name>
+	<description>Restcomm Cluster Framework Core</description>
+	<url>https://github.com/Restcomm/cluster</url>
 
 	<dependencies>
 		<dependency>

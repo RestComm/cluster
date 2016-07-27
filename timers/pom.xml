@@ -3,26 +3,25 @@
   	<modelVersion>4.0.0</modelVersion>
 
    	<parent>
-		<groupId>org.mobicents.cluster</groupId>
-		<artifactId>mobicents-cluster</artifactId>
+		<groupId>org.restcomm.cluster</groupId>
+		<artifactId>restcomm-cluster</artifactId>
 		<version>7.0.3-TelScale-SNAPSHOT</version>
 	</parent>
 	
 	<artifactId>timers</artifactId>
 	
-	<name>Mobicents Cluster Framework Timers</name>
-	<description>Mobicents Cluster Framework Timers</description>
-	<url>http://code.google.com/p/commscale.cluster</url>
+	<name>Restcomm Cluster Framework Timers</name>
+	<description>Restcomm Cluster Framework Timers</description>
+	<url>https://github.com/Restcomm/cluster</url>
 	
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-           	<artifactId>core</artifactId>
-           	<version>${project.version}</version>           	
+		   	<artifactId>core</artifactId>
+		   	<version>${project.version}</version>           	
 		</dependency>
 	</dependencies>
 	
-
 	<build>
 		<plugins>			
 			<plugin>
