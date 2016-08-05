@@ -19,13 +19,9 @@
 
 package org.restcomm.cache;
 
-import java.util.HashMap;
-
 import org.apache.log4j.Logger;
 import org.infinispan.tree.Fqn;
 import org.infinispan.tree.Node;
-import org.infinispan.tree.NodeKey;
-import org.infinispan.atomic.AtomicHashMap;
 
 /**
  * Common base proxy for runtime cached data. 
