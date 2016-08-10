@@ -31,6 +31,8 @@ import org.infinispan.tree.Node;
  */
 public class CacheData {
 
+	private static final String IS_REMOVED_CACHE_NODE_MAP_KEY = "isremoved";
+	
 	private static final Logger logger = Logger.getLogger(CacheData.class);
 	
 	
@@ -63,7 +65,7 @@ public class CacheData {
 	 * @return
 	 */
 	public boolean exists() {
-		return node != null;
+		return (node != null && (node.get(IS_REMOVED_CACHE_NODE_MAP_KEY) == null || (Boolean)node.get(IS_REMOVED_CACHE_NODE_MAP_KEY) == false)) ;
 	}
 
 	/**
@@ -72,9 +74,10 @@ public class CacheData {
 	public boolean create() {
 		if (!exists()) {
 			node = mobicentsCache.getJBossCache().getRoot().addChild(nodeFqn);
+			node.put(IS_REMOVED_CACHE_NODE_MAP_KEY, false);
 			if (doTraceLogs) {
 				logger.trace("created cache node "+ node);
-			}			
+			}
 			return true;
 		}
 		else {
@@ -96,10 +99,13 @@ public class CacheData {
 	public boolean remove() {
 		if (exists() && !isRemoved()) {
 			isRemoved = true;
-			node.getParent().removeChild(nodeFqn.getLastElement());
+			node.clearData();
+			node.put(IS_REMOVED_CACHE_NODE_MAP_KEY, true);
 			if (doTraceLogs) {
 				logger.trace("removed cache node "+ node);
-			}	
+			}
+			
+			node = null;
 			return true;
 		}
 		else {
