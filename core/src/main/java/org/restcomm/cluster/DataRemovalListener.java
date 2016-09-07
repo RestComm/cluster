@@ -19,7 +19,7 @@
 
 package org.restcomm.cluster;
 
-import org.infinispan.tree.Fqn;
+import org.restcomm.cache.tree.Fqn;
 
 /**
  * 

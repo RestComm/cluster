@@ -21,12 +21,11 @@ package org.restcomm.timers.cache;
 
 import java.io.Serializable;
 
+import org.restcomm.cache.tree.Fqn;
 import org.restcomm.cluster.MobicentsCluster;
 import org.restcomm.cluster.cache.ClusteredCacheData;
 import org.restcomm.timers.TimerTask;
 import org.restcomm.timers.TimerTaskData;
-
-import org.infinispan.tree.Fqn;
 
 /**
  * 

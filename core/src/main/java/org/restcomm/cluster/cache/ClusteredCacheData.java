@@ -21,9 +21,9 @@ package org.restcomm.cluster.cache;
 
 
 import org.infinispan.remoting.transport.Address;
-import org.infinispan.tree.Fqn;
-import org.infinispan.tree.Node;
 import org.restcomm.cache.CacheData;
+import org.restcomm.cache.tree.Fqn;
+import org.restcomm.cache.tree.Node;
 import org.restcomm.cluster.MobicentsCluster;
 
 /**
@@ -55,7 +55,7 @@ public class ClusteredCacheData extends CacheData {
 		if (super.create()) {
 			// store local address if we are not running in local mode
 			if (!getMobicentsCache().isLocalMode()) {
-				setClusterNodeAddress(getMobicentsCache().getJBossCache().getCache().getCacheManager().getAddress());
+				setClusterNodeAddress(getMobicentsCache().getCacheManager().getAddress());
 			}
 			return true;
 		}

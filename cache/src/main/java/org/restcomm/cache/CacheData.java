@@ -20,8 +20,10 @@
 package org.restcomm.cache;
 
 import org.apache.log4j.Logger;
-import org.infinispan.tree.Fqn;
-import org.infinispan.tree.Node;
+import org.infinispan.Cache;
+import org.restcomm.cache.tree.Fqn;
+import org.restcomm.cache.tree.Node;
+
 
 /**
  * Common base proxy for runtime cached data. 
@@ -39,7 +41,7 @@ public class CacheData {
 	@SuppressWarnings("rawtypes")
 	private Node node;
 	
-	private final Fqn nodeFqn;
+	//private final Fqn nodeFqn;
 	
 	
 	
@@ -49,9 +51,12 @@ public class CacheData {
 	private final static boolean doTraceLogs = logger.isTraceEnabled();  
 	
 	public CacheData(Fqn nodeFqn, MobicentsCache mobicentsCache) {		
-		this.nodeFqn = nodeFqn;	
+		//this.nodeFqn = nodeFqn;	
 		this.mobicentsCache = mobicentsCache;
-		this.node = mobicentsCache.getJBossCache().getRoot().getChild(nodeFqn);
+		//this.node = mobicentsCache.getJBossCache().getRoot().getChild(nodeFqn);
+		
+		this.node = new Node(this.mobicentsCache.getJBossCache(), nodeFqn);
+		
 		if (doTraceLogs) {
 			logger.trace("cache node "+nodeFqn+" retrieved, result = "+this.node);
 		}
@@ -65,7 +70,9 @@ public class CacheData {
 	 * @return
 	 */
 	public boolean exists() {
-		return (node != null && (node.get(IS_REMOVED_CACHE_NODE_MAP_KEY) == null || (Boolean)node.get(IS_REMOVED_CACHE_NODE_MAP_KEY) == false)) ;
+		return this.node.exists();
+		
+		
 	}
 
 	/**
@@ -73,8 +80,11 @@ public class CacheData {
 	 */
 	public boolean create() {
 		if (!exists()) {
-			node = mobicentsCache.getJBossCache().getRoot().addChild(nodeFqn);
-			node.put(IS_REMOVED_CACHE_NODE_MAP_KEY, false);
+			//node = mobicentsCache.getJBossCache().getRoot().addChild(nodeFqn);
+			//node.put(IS_REMOVED_CACHE_NODE_MAP_KEY, false);
+			
+			this.node.create();
+			
 			if (doTraceLogs) {
 				logger.trace("created cache node "+ node);
 			}
@@ -99,14 +109,23 @@ public class CacheData {
 	public boolean remove() {
 		if (exists() && !isRemoved()) {
 			isRemoved = true;
-			node.clearData();
+			/*node.clearData();
 			node.put(IS_REMOVED_CACHE_NODE_MAP_KEY, true);
 			if (doTraceLogs) {
 				logger.trace("removed cache node "+ node);
 			}
 			
 			node = null;
+			return true;*/
+			this.node.remove();
+			
+			
+			if (doTraceLogs) {
+				logger.trace("removed cache node "+ node);
+			}			
+			
 			return true;
+			
 		}
 		else {
 			return false;
@@ -119,7 +138,7 @@ public class CacheData {
 	 * 
 	 * Throws {@link IllegalStateException} if remove() was invoked
 	 */
-	@SuppressWarnings({ "rawtypes" })
+	
 	protected Node getNode() {
 		if (isRemoved()) {
 			throw new IllegalStateException();
@@ -141,6 +160,6 @@ public class CacheData {
 	 */
 	
 	public Fqn getNodeFqn() {
-		return nodeFqn;
+		return this.node.getNodeFqn();
 	}
 }

@@ -1,13 +1,13 @@
- <%@page import="org.mobicents.cluster.test.InitMBean"%>
-<%@page import="org.mobicents.cluster.test.MCClusterTest"%>
-<%@page import="org.mobicents.cluster.test.MCClusterTestMBean"%>
-<%@page import="org.mobicents.timers.timer.FaultTolerantTimer"%>
+ <%@page import="org.restcomm.cluster.test.InitMBean"%>
+<%@page import="org.restcomm.cluster.test.MCClusterTest"%>
+<%@page import="org.restcomm.cluster.test.MCClusterTestMBean"%>
+<%@page import="org.restcomm.timers.timer.FaultTolerantTimer"%>
 <%@page import="javax.transaction.TransactionManager"%>
-<%@page import="org.mobicents.cluster.DefaultMobicentsCluster"%>
-<%@page import="org.mobicents.cluster.election.DefaultClusterElector"%>
+<%@page import="org.restcomm.cluster.DefaultMobicentsCluster"%>
+<%@page import="org.restcomm.cluster.election.DefaultClusterElector"%>
 <%@page import="org.infinispan.manager.CacheContainer"%>
 <%@page import="javax.naming.InitialContext"%>
-<%@page import="org.mobicents.cache.MobicentsCache"%>
+<%@page import="org.restcomm.cache.MobicentsCache"%>
 <%@page import="org.infinispan.manager.DefaultCacheManager"%>
 <%@page import="org.infinispan.configuration.cache.ConfigurationBuilder"%>
 <%@page import="org.infinispan.configuration.cache.Configuration"%>
@@ -22,7 +22,7 @@
       
      MCClusterTestMBean mBean = new MCClusterTest();
      
-     InitMBean tb = (InitMBean) new InitialContext().lookup("java:app/example-war-1.15.0-SNAPSHOT/org.mobicents.cluster.test.InitMBean"); 
+     InitMBean tb = (InitMBean) new InitialContext().lookup("java:app/example-war-3.0.0-SNAPSHOT/org.restcomm.cluster.test.InitMBean"); 
     		 
      
      

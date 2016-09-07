@@ -22,9 +22,9 @@ package org.restcomm.timers.cache;
 import java.util.Collections;
 import java.util.Set;
 
-import org.infinispan.tree.Fqn;
-import org.infinispan.tree.Node;
 import org.restcomm.cache.CacheData;
+import org.restcomm.cache.tree.Fqn;
+import org.restcomm.cache.tree.Node;
 import org.restcomm.cluster.MobicentsCluster;
 
 /**
@@ -48,10 +48,10 @@ public class FaultTolerantSchedulerCacheData extends CacheData {
 		super(baseFqn,cluster.getMobicentsCache());
 	}
 
-	public Set<?> getTaskIDs() {
-		final Node<?,?> node = getNode();
-		if (!node.getChildren().isEmpty()) {
-			return node.getChildrenNames();			
+	public Set<String> getTaskIDs() {
+		final Node node = getNode();
+		if (!node.getChildNames().isEmpty()) {
+			return node.getChildNames();			
 		}
 		else {
 			return Collections.EMPTY_SET;
