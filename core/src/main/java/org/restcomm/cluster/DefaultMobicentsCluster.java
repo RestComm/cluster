@@ -19,16 +19,6 @@
 
 package org.restcomm.cluster;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.transaction.TransactionManager;
-
 import org.apache.log4j.Logger;
 import org.infinispan.configuration.cache.CacheMode;
 import org.infinispan.notifications.Listener;
@@ -38,8 +28,6 @@ import org.infinispan.notifications.cachemanagerlistener.annotation.ViewChanged;
 import org.infinispan.notifications.cachemanagerlistener.event.ViewChangedEvent;
 import org.infinispan.remoting.transport.Address;
 import org.infinispan.tree.Fqn;
-import org.infinispan.tree.NodeKey;
-import org.infinispan.tree.NodeKey.Type;
 import org.infinispan.tree.TreeCache;
 import org.restcomm.cache.MobicentsCache;
 import org.restcomm.cluster.cache.ClusteredCacheData;
@@ -47,6 +35,12 @@ import org.restcomm.cluster.cache.ClusteredCacheDataIndexingHandler;
 import org.restcomm.cluster.cache.DefaultClusteredCacheDataIndexingHandler;
 import org.restcomm.cluster.election.ClientLocalListenerElector;
 import org.restcomm.cluster.election.ClusterElector;
+
+import javax.transaction.TransactionManager;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -211,13 +205,60 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 		if (logger.isDebugEnabled()) {
 			logger.debug("cacheEntryRemoved : event[ "+ event +"]");
 		}
-		if(!event.isPre() && !event.isOriginLocal() && event.getKey() != null && (event.getKey() instanceof NodeKey)  && ((NodeKey)event.getKey()).getContents() == Type.STRUCTURE){
-			
-			Fqn changed = ((NodeKey)event.getKey()).getFqn();
-			
-			final DataRemovalListener dataRemovalListener = dataRemovalListeners.get(changed.getParent());
-			if (dataRemovalListener != null) {
-				dataRemovalListener.dataRemoved(changed);
+
+		if (!event.isPre() && !event.isOriginLocal() && event.getKey() != null) {
+			//
+			Method getContentsMethod = null;
+			try {
+				getContentsMethod = event.getKey().getClass().getMethod("getContents", (Class<?>[]) null);
+			} catch (NoSuchMethodException ex) {
+
+			}
+
+			if (getContentsMethod != null) {
+				String contents = null;
+				try {
+					contents = getContentsMethod.invoke(event.getKey(), (Object[]) null).toString();
+				}
+				catch(InvocationTargetException ex)
+				{
+
+				}
+				catch(IllegalAccessException ex2)
+				{
+
+				}
+
+				if (contents != null && contents.equals("STRUCTURE")) {
+					Method getFqnMethod = null;
+					try {
+						getFqnMethod = event.getKey().getClass().getMethod("getFqn", (Class<?>[]) null);
+					} catch (NoSuchMethodException ex) {
+
+					}
+
+					if (getFqnMethod != null) {
+						Fqn changed = null;
+						try {
+							changed=(Fqn)getContentsMethod.invoke(event.getKey(), (Object[]) null);
+						}
+						catch(InvocationTargetException ex)
+						{
+
+						}
+						catch(IllegalAccessException ex2)
+						{
+
+						}
+
+						if(changed!=null) {
+							final DataRemovalListener dataRemovalListener = dataRemovalListeners.get(changed.getParent());
+							if (dataRemovalListener != null) {
+								dataRemovalListener.dataRemoved(changed);
+							}
+						}
+					}
+				}
 			}
 		}
 	}
@@ -487,7 +528,7 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 			final TreeCache cache = mobicentsCache.getJBossCache();
 			if (!cache.getCache().getCacheConfiguration().clustering().cacheMode().equals(CacheMode.LOCAL)) {
 				
-				logger.info("registring listener!");
+				logger.info("registering listener!");
 				
 				// get current cluster members
 				currentView = new ArrayList<Address>(cache.getCache().getCacheManager().getMembers());
