@@ -21,9 +21,9 @@ package org.restcomm.cluster;
 
 
 import org.infinispan.remoting.transport.Address;
+import org.restcomm.cache.tree.Fqn;
 import org.restcomm.cluster.cache.ClusteredCacheData;
 import org.restcomm.cluster.election.ClientLocalListenerElector;
-import org.infinispan.tree.Fqn;
 
 /**
  * 
@@ -75,5 +75,6 @@ public interface FailOverListener {
 	 * Notifies the local client that it lost ownership of the specified {@link ClusteredCacheData}.
 	 * @param clusteredCacheData
 	 */
-	public void lostOwnership(ClusteredCacheData clusteredCacheData);
+	public void lostOwnership(ClusteredCacheData clusteredCacheData);	
+	
 }
