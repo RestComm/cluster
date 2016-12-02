@@ -75,6 +75,5 @@ public interface FailOverListener {
 	 * Notifies the local client that it lost ownership of the specified {@link ClusteredCacheData}.
 	 * @param clusteredCacheData
 	 */
-	public void lostOwnership(ClusteredCacheData clusteredCacheData);	
-	
+	public void lostOwnership(ClusteredCacheData clusteredCacheData);
 }

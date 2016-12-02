@@ -330,7 +330,7 @@ public class FaultTolerantScheduler {
 	public TimerTask cancel(Serializable taskID) {
 		
 		if (logger.isDebugEnabled()) {
-			logger.debug("Canceling task with timer id "+taskID);			
+			logger.debug("Canceling task with timer id "+taskID);
 		}
 		
 		TimerTask task = localRunningTasks.get(taskID);
@@ -410,7 +410,7 @@ public class FaultTolerantScheduler {
 		return task;
 	}
 	
-	void remove(Serializable taskID,boolean removeFromCache) {		
+	void remove(Serializable taskID,boolean removeFromCache) {
 		if(logger.isDebugEnabled())
 		{
 			logger.debug("remove() : "+taskID+" - "+removeFromCache);
@@ -546,28 +546,10 @@ public class FaultTolerantScheduler {
 		public void dataRemoved(Fqn clusteredCacheDataFqn) {
 			Object lastElement = clusteredCacheDataFqn.getLastElement();
 			if (logger.isDebugEnabled()) {
-				logger.debug("remote notification dataRemoved( clusterCacheDataFqn = "+clusteredCacheDataFqn+"), lastElement " + lastElement + lastElement.getClass());
+				logger.debug("remote notification dataRemoved( clusterCacheDataFqn = "+clusteredCacheDataFqn+"), lastElement " + lastElement);
 			}
-			
-			TimerTask task = localRunningTasks.remove(lastElement);
-			
-			if(task == null){
-				
-				Enumeration<Serializable> keys = localRunningTasks.keys();
-				while(keys.hasMoreElements()){
-					
-					Object key = keys.nextElement();
-					if(key.toString().equals(lastElement.toString())){
-						task = localRunningTasks.remove(key);
-						break;
-					}
-					
-				}
-				
-			}
-			
+			final TimerTask task = localRunningTasks.remove(lastElement);
 			if (task != null) {
-				
 				if (logger.isDebugEnabled()) {
 					logger.debug("remote notification dataRemoved( task = "+task.getData().getTaskID()+" removed locally cancelling it");
 				}

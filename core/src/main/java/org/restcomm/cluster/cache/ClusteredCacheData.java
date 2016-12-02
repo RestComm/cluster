@@ -55,7 +55,7 @@ public class ClusteredCacheData extends CacheData {
 		if (super.create()) {
 			// store local address if we are not running in local mode
 			if (!getMobicentsCache().isLocalMode()) {
-				setClusterNodeAddress(getMobicentsCache().getCacheManager().getAddress());
+				setClusterNodeAddress(getMobicentsCache().getJBossCache().getCache().getCacheManager().getAddress());
 			}
 			return true;
 		}

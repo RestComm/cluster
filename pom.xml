@@ -37,12 +37,14 @@
 			<version>5.2.1.Final</version>
 			<scope>provided</scope>
 		</dependency>
+		<!--
 		<dependency>
 			<groupId>org.infinispan</groupId>
 			<artifactId>infinispan-tree</artifactId>
 			<version>5.2.1.Final</version>
 			<scope>provided</scope>
 		</dependency>
+		-->
 	</dependencies>
 
 	<profiles>
@@ -68,11 +70,13 @@
 					<artifactId>infinispan-core</artifactId>
 					<version>5.1.2.FINAL</version>
 				</dependency>
+				<!--
 				<dependency>
 					<groupId>org.infinispan</groupId>
 					<artifactId>infinispan-tree</artifactId>
 					<version>5.1.2.Final</version>
 				</dependency>
+				-->
 			</dependencies>
 		</profile>
 		<profile>
@@ -99,12 +103,13 @@
 					<version>5.2.1.Final</version>
 					<!--<scope>provided</scope>-->
 				</dependency>
+				<!--
 				<dependency>
 					<groupId>org.infinispan</groupId>
 					<artifactId>infinispan-tree</artifactId>
 					<version>5.2.1.Final</version>
-					<!--<scope>provided</scope>-->
 				</dependency>
+				-->
 			</dependencies>
 		</profile>
 		<profile>
@@ -130,11 +135,13 @@
 					<artifactId>infinispan-core</artifactId>
 					<version>5.2.1.Final</version>
 				</dependency>
+				<!--
 				<dependency>
 					<groupId>org.infinispan</groupId>
 					<artifactId>infinispan-tree</artifactId>
 					<version>5.2.1.Final</version>
 				</dependency>
+				-->
 			</dependencies>
 			<modules>
 				<module>example</module>
@@ -158,11 +165,13 @@
 					<artifactId>infinispan-core</artifactId>
 					<version>8.1.0.Final</version>
 				</dependency>
+				<!--
 				<dependency>
 					<groupId>org.infinispan</groupId>
 					<artifactId>infinispan-tree</artifactId>
 					<version>8.1.0.Final</version>
 				</dependency>
+				-->
 			</dependencies>
 		</profile>
 		<profile>
@@ -175,11 +184,13 @@
 					<version>7.5.0.Final-redhat-21</version>
 				</dependency>
 				-->
+				<!--
 				<dependency>
 					<groupId>org.infinispan</groupId>
 					<artifactId>infinispan-tree</artifactId>
 					<version>5.2.10.Final-redhat-1</version>
 				</dependency>
+				-->
 				<dependency>
 					<groupId>org.infinispan</groupId>
 					<artifactId>infinispan-core</artifactId>
@@ -197,11 +208,13 @@
 					<version>7.5.0.Final-redhat-21</version>
 				</dependency>
 				-->
+				<!--
 				<dependency>
 					<groupId>org.infinispan</groupId>
 					<artifactId>infinispan-tree</artifactId>
 					<version>5.2.10.Final-redhat-1</version>
 				</dependency>
+				-->
 				<dependency>
 					<groupId>org.infinispan</groupId>
 					<artifactId>infinispan-core</artifactId>

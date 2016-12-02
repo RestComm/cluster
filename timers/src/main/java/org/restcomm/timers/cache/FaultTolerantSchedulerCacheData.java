@@ -40,18 +40,18 @@ public class FaultTolerantSchedulerCacheData extends CacheData {
 			
 	/**
 	 * 
-	 * @param txManager 
-	 * @param txManager
+	 * @param baseFqn
+	 * @param cluster
 	 */
 	//@SuppressWarnings("unchecked")
 	public FaultTolerantSchedulerCacheData(Fqn baseFqn, MobicentsCluster cluster) {
 		super(baseFqn,cluster.getMobicentsCache());
 	}
 
-	public Set<String> getTaskIDs() {
-		final Node node = getNode();
-		if (!node.getChildNames().isEmpty()) {
-			return node.getChildNames();			
+	public Set<?> getTaskIDs() {
+		final Node<?,?> node = getNode();
+		if (!node.getChildren().isEmpty()) {
+			return node.getChildrenNames();			
 		}
 		else {
 			return Collections.EMPTY_SET;
