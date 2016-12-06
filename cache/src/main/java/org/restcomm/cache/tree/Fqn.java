@@ -25,16 +25,13 @@ package org.restcomm.cache.tree;
 
 import net.jcip.annotations.Immutable;
 import org.infinispan.marshall.AbstractExternalizer;
-import org.infinispan.util.ReflectionUtil;
-import org.infinispan.util.Util;
+import org.restcomm.cache.util.Util;
 
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A Fully Qualified Name (Fqn) is a list of names (typically Strings but can be any Object), which represent a path to
@@ -100,7 +97,7 @@ public class Fqn implements Comparable<Fqn>, Serializable {
     * A cached string representation of this Fqn, used by toString to it isn't calculated again every time.
     */
    protected String stringRepresentation;
-   private static final Object[] EMPTY_ARRAY = ReflectionUtil.EMPTY_CLASS_ARRAY;
+   private static final Object[] EMPTY_ARRAY = new Class[0]; // ReflectionUtil.EMPTY_CLASS_ARRAY;
 
    // ----------------- START: Private constructors for use by factory methods only. ----------------------
 
@@ -515,5 +512,6 @@ public class Fqn implements Comparable<Fqn>, Serializable {
       public Set<Class<? extends Fqn>> getTypeClasses() {
          return Util.<Class<? extends Fqn>>asSet(Fqn.class);
       }
+
    }
 }

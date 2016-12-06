@@ -23,12 +23,11 @@
 package org.restcomm.cache.tree;
 
 import org.infinispan.AdvancedCache;
-import org.infinispan.atomic.AtomicHashMapProxy;
 import org.infinispan.atomic.AtomicMap;
 import org.infinispan.batch.BatchContainer;
 import org.infinispan.context.Flag;
-import org.infinispan.util.Immutables;
-import org.infinispan.util.Util;
+import org.restcomm.cache.util.Immutables;
+import org.restcomm.cache.util.Util;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -279,7 +278,9 @@ public class NodeImpl<K, V> extends TreeStructureSupport implements Node<K, V> {
    private V put(AdvancedCache cache, K key, V value) {
       startAtomic();
       try {
-         AtomicHashMapProxy<K, V> map = (AtomicHashMapProxy<K, V>) getDataInternal(cache);
+         //AtomicHashMapProxy<K, V> map = (AtomicHashMapProxy<K, V>) getDataInternal(cache);
+         AtomicMap<K, V> map = getDataInternal(cache);
+         //System.out.println("map type: "+map.getClass().getCanonicalName());
          return map.put(key, value);
       }
       finally {

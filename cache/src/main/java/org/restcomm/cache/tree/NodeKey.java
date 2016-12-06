@@ -30,10 +30,13 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.infinispan.marshall.AbstractExternalizer;
-import org.infinispan.util.Util;
+import org.restcomm.cache.util.Util;
 
 /**
  * A class that represents the key to a node

@@ -26,7 +26,6 @@ import org.infinispan.AdvancedCache;
 import org.infinispan.Cache;
 import org.infinispan.CacheException;
 import org.infinispan.atomic.AtomicMap;
-import org.infinispan.config.ConfigurationException;
 import org.infinispan.context.Flag;
 import org.infinispan.util.logging.Log;
 import org.infinispan.util.logging.LogFactory;
@@ -48,8 +47,10 @@ public class TreeCacheImpl<K, V> extends TreeStructureSupport implements TreeCac
 
    public TreeCacheImpl(AdvancedCache<?, ?> cache) {
       super(cache, cache.getBatchContainer());
-      if (cache.getCacheConfiguration().indexing().enabled())
-         throw new ConfigurationException("TreeCache cannot be used with a Cache instance configured to use indexing!");
+      if (cache.getCacheConfiguration().indexing().enabled()) {
+         //throw new ConfigurationException("TreeCache cannot be used with a Cache instance configured to use indexing!");
+         throw new RuntimeException("TreeCache cannot be used with a Cache instance configured to use indexing!");
+      }
       assertBatchingSupported(cache.getCacheConfiguration());
       createRoot();
    }
