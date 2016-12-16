@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.restcomm</groupId>
 		<artifactId>restcomm-parent</artifactId>
-		<version>3.0.46</version>
+		<version>3.0.4</version>
 	</parent>
 	
 	<groupId>org.restcomm.cluster</groupId>
@@ -34,7 +34,7 @@
 			<id>example</id>
 			<modules>
 				<module>example</module>
-				<module>example_temp</module>
+				<!--<module>example_temp</module>-->
 			</modules>
 		</profile>
 		<profile>
@@ -44,7 +44,7 @@
 					<groupId>org.jboss.as</groupId>
 					<artifactId>jboss-as-clustering-infinispan</artifactId>
 					<version>7.1.1.Final</version>
-				</dependency>				
+				</dependency>
 				<dependency>
 					<groupId>org.infinispan</groupId>
 					<artifactId>infinispan-core</artifactId>
@@ -53,16 +53,28 @@
 			</dependencies>
 		</profile>
 		<profile>
+			<id>jboss-as-72</id>
+			<dependencies>
+				<dependency>
+					<groupId>org.jboss.as</groupId>
+					<artifactId>jboss-as-clustering-infinispan</artifactId>
+					<version>7.2.0.Final</version>
+				</dependency>
+				<dependency>
+					<groupId>org.infinispan</groupId>
+					<artifactId>infinispan-core</artifactId>
+					<version>5.2.1.Final</version>
+				</dependency>
+			</dependencies>
+		</profile>
+		<profile>
 			<id>jboss-eap-6.4</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
 			<dependencies>
 				<dependency>
 					<groupId>org.jboss.as</groupId>
 					<artifactId>jboss-as-clustering-infinispan</artifactId>
 					<version>7.5.0.Final-redhat-21</version>
-				</dependency>				
+				</dependency>
 				<dependency>
 					<groupId>org.infinispan</groupId>
 					<artifactId>infinispan-core</artifactId>
@@ -77,7 +89,7 @@
 					<groupId>org.jboss.as</groupId>
 					<artifactId>jboss-as-clustering-infinispan</artifactId>
 					<version>7.5.0.Final-redhat-21</version>
-				</dependency>				
+				</dependency>
 				<dependency>
 					<groupId>org.infinispan</groupId>
 					<artifactId>infinispan-core</artifactId>
@@ -104,7 +116,7 @@
 						</configuration>
 					</plugin>
 				</plugins>
-			</build>		
+			</build>
 		</profile>
 	</profiles>
 	

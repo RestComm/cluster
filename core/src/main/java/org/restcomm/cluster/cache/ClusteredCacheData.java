@@ -40,7 +40,7 @@ public class ClusteredCacheData extends CacheData {
 	
 	/**
 	 * @param nodeFqn
-	 * @param mobicentsCache
+	 * @param mobicentsCluster
 	 */
 	public ClusteredCacheData(Fqn nodeFqn, MobicentsCluster mobicentsCluster) {
 		super(nodeFqn, mobicentsCluster.getMobicentsCache());
