@@ -54,6 +54,14 @@
 		</profile>
 		<profile>
 			<id>jboss-as-72</id>
+			<activation>
+				<!--
+				Never use <activeByDefault>
+				<activeByDefault>true</activeByDefault>
+				https://dzone.com/articles/maven-profile-best-practices
+				-->
+				<property><name>!foo.bar</name></property>
+			</activation>
 			<dependencies>
 				<dependency>
 					<groupId>org.jboss.as</groupId>
