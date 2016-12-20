@@ -86,7 +86,7 @@ public class ClusteredCacheData extends CacheData {
 	 */
 	@Override
 	@SuppressWarnings("rawtypes")
-	protected Node getNode(){
+	public Node getNode(){
 		return super.getNode();
 	}
 }
