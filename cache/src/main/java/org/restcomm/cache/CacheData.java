@@ -20,7 +20,6 @@
 package org.restcomm.cache;
 
 import org.apache.log4j.Logger;
-import org.infinispan.Cache;
 import org.restcomm.cache.tree.Fqn;
 import org.restcomm.cache.tree.Node;
 
@@ -84,6 +83,8 @@ public class CacheData {
 			//node.put(IS_REMOVED_CACHE_NODE_MAP_KEY, false);
 			
 			this.node.create();
+			//Node rootNode = new Node(mobicentsCache.getJBossCache(), Fqn.ROOT);
+			//rootNode.addChild(node.getFqn());
 			
 			if (doTraceLogs) {
 				logger.trace("created cache node "+ node);
@@ -139,7 +140,7 @@ public class CacheData {
 	 * Throws {@link IllegalStateException} if remove() was invoked
 	 */
 	
-	protected Node getNode() {
+	public Node getNode() {
 		if (isRemoved()) {
 			throw new IllegalStateException();
 		}

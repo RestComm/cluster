@@ -24,9 +24,9 @@
 package org.restcomm.cache.tree;
 
 import net.jcip.annotations.Immutable;
-import org.infinispan.marshall.AbstractExternalizer;
-import org.infinispan.util.ReflectionUtil;
-import org.infinispan.util.Util;
+import org.infinispan.commons.marshall.AbstractExternalizer;
+import org.infinispan.commons.util.ReflectionUtil;
+import org.infinispan.commons.util.Util;
 
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -38,7 +38,7 @@ import java.util.Set;
 
 /**
  * A Fully Qualified Name (Fqn) is a list of names (typically Strings but can be any Object), which represent a path to
- * a particular {@link Node} in a {@link TreeCache}.
+ * a particular {@link Node} in a {link TreeCache}.
  * <p/>
  * This name can be absolute (i.e., relative from the root node - {@link #ROOT}), or relative to any node in the cache.
  * Reading the documentation on each API call that makes use of {@link Fqn}s will tell you whether the API expects a

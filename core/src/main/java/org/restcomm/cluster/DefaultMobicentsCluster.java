@@ -32,24 +32,19 @@ import javax.transaction.TransactionManager;
 import org.apache.log4j.Logger;
 import org.infinispan.configuration.cache.CacheMode;
 import org.infinispan.notifications.Listener;
-import org.infinispan.notifications.cachelistener.annotation.CacheEntryModified;
 import org.infinispan.notifications.cachelistener.annotation.CacheEntryRemoved;
-import org.infinispan.notifications.cachelistener.event.CacheEntryModifiedEvent;
 import org.infinispan.notifications.cachelistener.event.CacheEntryRemovedEvent;
-import org.infinispan.notifications.cachemanagerlistener.annotation.CacheStarted;
 import org.infinispan.notifications.cachemanagerlistener.annotation.ViewChanged;
-import org.infinispan.notifications.cachemanagerlistener.event.CacheStartedEvent;
 import org.infinispan.notifications.cachemanagerlistener.event.ViewChangedEvent;
 import org.infinispan.remoting.transport.Address;
 import org.restcomm.cache.tree.Fqn;
-import org.restcomm.cache.CacheData;
 import org.restcomm.cache.MobicentsCache;
+import org.restcomm.cache.tree.Node;
 import org.restcomm.cluster.cache.ClusteredCacheData;
 import org.restcomm.cluster.cache.ClusteredCacheDataIndexingHandler;
 import org.restcomm.cluster.cache.DefaultClusteredCacheDataIndexingHandler;
 import org.restcomm.cluster.election.ClientLocalListenerElector;
 import org.restcomm.cluster.election.ClusterElector;
-import org.restcomm.cache.tree.Node;
 
 /**
  * Listener that is to be used for cluster wide replication(meaning no buddy
@@ -241,7 +236,7 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 			final Fqn rootFqnOfChanges = localListener.getBaseFqn();			
 			
 			
-			Set<String> children = new Node(mobicentsCache.getJBossCache(), rootFqnOfChanges).getChildNames();	
+			Set<String> children = new Node(mobicentsCache.getJBossCache(), rootFqnOfChanges).getChildNames();
 			
 			
 			

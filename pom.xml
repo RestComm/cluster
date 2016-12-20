@@ -30,11 +30,17 @@
 	</modules>
 
 	<dependencies>
-		<!-- Infinispan dependencies for JBoss 7.2.0.Final -->
+		<!-- Infinispan dependencies for WildFly 10.0.0.Final -->
 		<dependency>
 			<groupId>org.infinispan</groupId>
 			<artifactId>infinispan-core</artifactId>
-			<version>5.2.1.Final</version>
+			<version>8.1.0.Final</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.wildfly</groupId>
+			<artifactId>wildfly-clustering-infinispan-extension</artifactId>
+			<version>10.0.0.Final</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
