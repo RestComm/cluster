@@ -122,7 +122,7 @@ public class CacheData {
 	 * Throws {@link IllegalStateException} if remove() was invoked
 	 */
 	@SuppressWarnings({ "rawtypes" })
-	protected Node getNode() {
+	public Node getNode() {
 		if (isRemoved()) {
 			throw new IllegalStateException();
 		}
