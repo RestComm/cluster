@@ -1,10 +1,10 @@
 package org.restcomm.cache.tree;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.apache.log4j.Logger;
 import org.infinispan.Cache;
+
+import java.util.HashSet;
+import java.util.Set;
 
 
 public class Node {
@@ -17,6 +17,8 @@ public class Node {
 	
 	private final static String DATA_SEPARATOR = "_/_";
 	private final static String NODE = "node";
+
+	//1.2
 	private final static String KEY = "_KEYOBJ";
 	private final static String VALUE = "_VALUEOBJ";
 	
@@ -37,7 +39,8 @@ public class Node {
 	}
 	
 	public void remove() {
-		//
+		logger.debug("@@@@ remove: "+this.getInfo());
+
 		String stringFqn = nodeFqn.toString();
 		// remove NODE
 		this.cache.remove(stringFqn);
@@ -57,39 +60,22 @@ public class Node {
 		
 	}
 
-	public void create(){
+	public void create() {
 		this.cache.put(nodeFqn.toString(), NODE);
+		this.cache.put(nodeFqn.toString() + DATA_SEPARATOR + "Node", this);
 	}
 
 	//public Object put(Object key, Object value){
-	//	return this.cache.put(nodeFqn.toString() + DATA_SEPARATOR + key.toString(), value);
+	//	return this.cache.put(nodeFqn.toString() + DATA_SEPARATOR + key, value);
 	//}
-
-	public Object put(Object key, Object value){
-		this.cache.put(nodeFqn.toString() + DATA_SEPARATOR + key.toString() + KEY, key);
-		return this.cache.put(nodeFqn.toString() + DATA_SEPARATOR + key.toString() + VALUE, value);
-	}
 
 	//public Object get(Object key){
-	//	return this.cache.get(nodeFqn.toString() + DATA_SEPARATOR + key.toString());
+	//	return this.cache.get(nodeFqn.toString() + DATA_SEPARATOR + key);
 	//}
-
-	public Object getKey(Object key){
-		return this.cache.get(nodeFqn.toString() + DATA_SEPARATOR + key.toString() + KEY);
-	}
-
-	public Object get(Object key){
-		return this.cache.get(nodeFqn.toString() + DATA_SEPARATOR + key.toString());
-	}
 
 	//public Object remove(Object key) {
-	//	return this.cache.remove(nodeFqn.toString() + DATA_SEPARATOR + key.toString());
+	//	return this.cache.remove(nodeFqn.toString() + DATA_SEPARATOR + key);
 	//}
-
-	public Object remove(Object key) {
-		this.cache.remove(nodeFqn.toString() + DATA_SEPARATOR + key.toString() + KEY);
-		return this.cache.remove(nodeFqn.toString() + DATA_SEPARATOR + key.toString());
-	}
 
 	public Fqn getNodeFqn() {
 		return nodeFqn;
@@ -98,90 +84,203 @@ public class Node {
 	public Fqn getFqn() {
 		return nodeFqn;
 	}
+	
+	//1.2
+	public Object put(Object key, Object value) {
+		this.cache.put(nodeFqn.toString() + DATA_SEPARATOR + key.toString() + KEY, key);
+		return this.cache.put(nodeFqn.toString() + DATA_SEPARATOR + key.toString() + VALUE, value);
+	}
+
+	//1.2
+	public Object getKey(Object key) {
+		return this.cache.get(nodeFqn.toString() + DATA_SEPARATOR + key.toString() + KEY);
+	}
+
+	public Object get(Object key) {
+		return this.cache.get(nodeFqn.toString() + DATA_SEPARATOR + key.toString() + VALUE);
+	}
+
+	public Object remove(Object key) {
+		this.cache.remove(nodeFqn.toString() + DATA_SEPARATOR + key.toString() + KEY);
+		return this.cache.remove(nodeFqn.toString() + DATA_SEPARATOR + key.toString() + VALUE);
+	}
 
 
 	// Sets: ChildNames (old), ChildrenNames, ChildrenKeys, ChildrenValues
 
+	public Set<String> getNames() {
+		Set<String> res = new HashSet<String>();
+
+		String stringFqn = nodeFqn.toString();
+		logger.debug("@@@@ getNames stringFqn: "+stringFqn);
+
+		String stringKey;
+		for (Object key: this.cache.keySet()) {
+			if (key instanceof String) {
+				stringKey = (String) key;
+				logger.debug("@@@@ stringKey: " + stringKey);
+
+				if (stringKey.startsWith(stringFqn) &&
+						!stringKey.equals(stringFqn)) {
+					//Object value = this.cache.get(key);
+					//logger.debug("@@@@ FOUND value: " + value);
+					res.add(stringKey);
+				}
+			}
+		}
+
+		return res;
+	}
+
 	public Set<Object> getKeys() {
-		logger.debug("**** nodeFqn: "+this.nodeFqn);
-		logger.debug("**** getKeys: "+this.cache.keySet());
-		logger.debug("**** getChildrenValues: "+this.getChildrenValues());
-		return this.getChildrenKeys();
+		Set<Object> res = new HashSet<Object>();
+
+		String stringFqn = nodeFqn.toString();
+		logger.debug("@@@@ getKeys stringFqn: "+stringFqn);
+
+		String stringKey;
+		for (Object key: this.cache.keySet()) {
+			if (key instanceof String) {
+				stringKey = (String) key;
+				logger.trace("@@@@ getKeys stringKey: " + stringKey);
+
+				if (stringKey.startsWith(stringFqn) &&
+						!stringKey.equals(stringFqn) &&
+						stringKey.contains(KEY)) {
+
+					Object okey = this.cache.get(key);
+					logger.debug("@@@@ getKeys FOUND okey: " + okey);
+					res.add(okey);
+				}
+			}
+		}
+
+		return res;
+	}
+
+	public Set<Object> getValues() {
+		Set<Object> res = new HashSet<Object>();
+
+		String stringFqn = nodeFqn.toString();
+		logger.debug("@@@@ getValues stringFqn: "+stringFqn);
+
+		String stringKey;
+		for (Object key: this.cache.keySet()) {
+			if (key instanceof String) {
+				stringKey = (String) key;
+				logger.debug("@@@@ getValues stringKey: " + stringKey);
+
+				if (stringKey.startsWith(stringFqn) &&
+						!stringKey.equals(stringFqn) &&
+						stringKey.contains(VALUE)) {
+
+					Object ovalue = this.cache.get(key);
+					logger.debug("@@@@ getValues FOUND ovalue: " + ovalue);
+					res.add(ovalue);
+				}
+			}
+		}
+
+		return res;
 	}
 
 	public Set<String> getChildNames() {
 		Set<String> res = new HashSet<String>();
-		for (Object key : this.cache.keySet()) {
-			if (key instanceof String){
-				if (((String)key).startsWith(nodeFqn.toString()) &&
-						!key.equals(nodeFqn.toString()) &&
-						cache.get(key).equals(NODE)) {
-					//Separator as well!
-					String name = ((String)key).substring(nodeFqn.toString().length()+1);
-					res.add(name);
-				}
-			}
-		}
-		return res;
-	}
 
-	public Set<Object> getChildrenNames() {
-		Set<Object> res = new HashSet<Object>();
-		for (Object key : this.cache.keySet()) {
-			if (key instanceof String){
-				if (((String)key).startsWith(nodeFqn.toString()) &&
-						!key.equals(nodeFqn.toString()) &&
-						cache.get(key).equals(NODE)) {
-					//Separator as well!
-					String name = ((String)key).substring(nodeFqn.toString().length()+1);
-					res.add(name);
-				}
-			}
-		}
-		return res;
-	}
-
-	public Set<Object> getChildrenKeys() {
-		Set<Object> res = new HashSet<Object>();
 		String stringFqn = nodeFqn.toString();
-		logger.debug("**** getChildrenKeys stringFqn: "+stringFqn);
+		logger.debug("@@@@ getChildNames stringFqn: "+stringFqn);
+
+		String stringKey;
+		for (Object key : this.cache.keySet()) {
+			//logger.trace("@@@@ getChildNames key: " + key);
+			if (key instanceof String) {
+				stringKey = (String)key;
+
+				//if (stringKey.startsWith(stringFqn) &&
+				//		!key.equals(stringFqn) &&
+				//		cache.get(key).equals(NODE)) {
+				if (stringKey.startsWith(stringFqn + "/") &&
+						!key.equals(stringFqn) &&
+						cache.get(key).equals(NODE)) {
+
+					logger.trace("@@@@ getChildNames stringKey: " + stringKey);
+					//Separator as well!
+					String name = stringKey.substring(stringFqn.length()+1);
+					logger.debug("@@@@ getChildNames name: " + name);
+					res.add(name);
+				}
+			} else {
+				logger.warn("@@@@ getChildNames [IS NOT STRING] key: " + key +
+						", class: " + key.getClass().getCanonicalName());
+			}
+		}
+		return res;
+	}
+
+	//1.1 - String, 1.2 - Object
+	public Set<Object> getChildKeys() {
+		Set<Object> res = new HashSet<Object>();
+
+		String stringFqn = nodeFqn.toString();
+		logger.debug("@@@@ getChildKeys stringFqn: "+stringFqn);
+
 		String stringKey;
 		for (Object key : this.cache.keySet()) {
 			if (key instanceof String) {
 				stringKey = (String)key;
-				if (stringKey.startsWith(stringFqn) &&
-						!key.equals(stringFqn)) {
+
+				Fqn fqnKey = Fqn.fromString(stringKey);
+
+				// FIXME: if stringFqn is "/ac", then "/aci-names" includes too
+				if (stringKey.startsWith(stringFqn + "/") &&
+						!stringKey.equals(stringFqn)) {
 					if (stringKey.contains(KEY)) {
 						Object objectKey = this.cache.get(key);
-						logger.debug("**** getChildrenKeys cacheKey: " + key);
-						logger.debug("**** getChildrenKeys objectKey: " + objectKey + ", " +
+						logger.debug("@@@@ getChildKeys cacheKey: " + key);
+
+						logger.trace("@@@@ getChildKeys fqnKey: " + fqnKey);
+						logger.trace("@@@@ getChildKeys fqnKey: " + fqnKey.getLastElement());
+						logger.trace("@@@@ getChildKeys fqnKey: " + fqnKey.getLastElement().getClass().getCanonicalName());
+
+						logger.debug("@@@@ getChildKeys objectKey: " + objectKey + ", " +
 								objectKey.getClass().getCanonicalName());
+						//logger.debug("@@@@ getChildKeys stringKey: " + stringKey + ", " +
+						//		stringKey.getClass().getCanonicalName());
 						res.add(objectKey);
+
 					}
 				}
+			} else {
+				logger.warn("@@@@ getChildKeys [IS NOT STRING] cacheKey: " + key +
+						", class: " + key.getClass().getCanonicalName());
 			}
 		}
 		return res;
 	}
 
-	public Set<Object> getChildrenValues() {
+	public Set<Object> getChildValues() {
 		Set<Object> res = new HashSet<Object>();
+
 		String stringFqn = nodeFqn.toString();
-		logger.debug("**** getChildrenKeys stringFqn: "+stringFqn);
+		logger.debug("@@@@ getChildValues stringFqn: "+stringFqn);
+
 		String stringKey;
 		for (Object key : this.cache.keySet()) {
 			if (key instanceof String){
 				stringKey = (String)key;
-				if (stringKey.startsWith(stringFqn) &&
+				if (stringKey.startsWith(stringFqn + "/") &&
 						!key.equals(stringFqn)) {
 					if (stringKey.contains(VALUE)) {
 						Object objectKey = this.cache.get(key);
-						logger.debug("**** getChildrenKeys cacheKey: " + key);
-						logger.debug("**** getChildrenKeys objectKey: " + objectKey + ", " +
+						logger.debug("@@@@ getChildValues cacheKey: " + key);
+						logger.debug("@@@@ getChildValues objectKey: " + objectKey + ", " +
 								objectKey.getClass().getCanonicalName());
 						res.add(objectKey);
 					}
 				}
+			} else {
+				logger.warn("@@@@ getChildValues [IS NOT STRING] cacheKey: " + key +
+						", class: " + key.getClass().getCanonicalName());
 			}
 		}
 		return res;
@@ -191,24 +290,26 @@ public class Node {
 	// Child: add, has, get, remove
 
 	public Node addChild(Fqn childFqn) {
-		logger.debug("**** ADD CHILD: "+childFqn+"["+childFqn.size()+"] FOR nodeFqn: "+this.nodeFqn);
+		logger.debug("@@@@ ADD CHILD: "+childFqn+"["+childFqn.size()+"] FOR nodeFqn: "+this.nodeFqn);
 		if (childFqn.size() > 0) {
 			for (int i = 0; i < childFqn.size(); i++) {
-				logger.debug("**** childFqn: ["+i+"]: "+childFqn.get(i)+
+				logger.trace("@@@@ childFqn: ["+i+"]: "+childFqn.get(i)+
 						", class: "+childFqn.get(i).getClass().getCanonicalName());
 			}
 		}
+		logger.debug("@@@@ addChild: "+this.getInfo());
 
 		Fqn absoluteChildFqn = Fqn.fromRelativeFqn(this.nodeFqn, childFqn);
-		logger.debug("**** absoluteChildFqn: "+absoluteChildFqn);
+		logger.debug("@@@@ absoluteChildFqn: "+absoluteChildFqn);
 
 		Node node = new Node(this.cache, absoluteChildFqn);
-		logger.debug("**** node: "+node);
+		logger.trace("@@@@ node: "+node);
 
 		node.create();
 		this.children.add(node);
 
-		logger.debug("**** node: "+node);
+		logger.debug("@@@@ node: "+node);
+		logger.debug("@@@@ children: "+children);
 		return node;
 	}
 
@@ -217,54 +318,89 @@ public class Node {
 	//}
 
 	public boolean hasChild(Object childObject) {
+		logger.debug("@@@@ HAS CHILD: "+childObject+
+				" CLASS: "+childObject.getClass().getCanonicalName()+
+				" FOR nodeFqn: "+this.nodeFqn);
+		//logger.debug("@@@@ this.children: "+this.children);
+		logger.debug("@@@@ hasChild: "+this.getInfo());
 
-		logger.debug("**** nodeFqn: "+this.nodeFqn);
-		logger.debug("**** hasChild: "+childObject);
-		//logger.debug("**** hasChild: "+childObject.getClass().getCanonicalName());
-		//logger.debug("**** keySet: "+this.cache.keySet());
-		logger.debug("**** this.children: "+this.children);
+		if (childObject instanceof Fqn) {
+			logger.debug("@@@@ childObject if Fqn");
+			childObject = ((Fqn) childObject).getLastElementAsString();
+			logger.debug("@@@@ update childObject: "+childObject);
+		}
 
 		for (Node child : this.children) {
-			logger.debug("**** HAS CHILD: "+child);
-			logger.debug("**** childFqn.size(): "+child.getNodeFqn().size());
+			logger.debug("@@@@ TEST CHILD: "+child);
+			logger.debug("@@@@ childFqn.size(): "+child.getNodeFqn().size());
+
+			// last?!
+			if (child.getNodeFqn().size() > 0) {
+				for (int i = 0; i < child.getNodeFqn().size(); i++) {
+					logger.trace("@@@@ childFqn: ["+i+"]: "+child.getNodeFqn().get(i)+
+							", class: "+child.getNodeFqn().get(i).getClass().getCanonicalName());
+				}
+			}
 
 			Object last = child.getFqn().getLastElement();
-			logger.debug("**** last: "+last);
-			logger.debug("**** last: "+last.getClass().getCanonicalName());
-
-			if (last.equals(childObject)) {
-				logger.debug("**** childObject was found");
-				return true;
+			logger.debug("@@@@ last: "+last);
+			if (last != null) {
+				logger.debug("@@@@ last: " + last.getClass().getCanonicalName());
+				if (last.equals(childObject)) {
+					logger.debug("@@@@ childObject was found");
+					return true;
+				}
 			}
 		}
 
-		/*
-		for (Object key : this.cache.keySet()) {
-			//logger.debug("key: "+key);
-			if (key.equals(childObject)) {
-				logger.debug("**** key "+key+" is "+childObject);
-				return true;
-			}
-		}
-		*/
-
-		logger.debug("**** childObject did not find");
+		logger.debug("@@@@ childObject did not find");
 		return false;
 	}
 
-	public Node getChild(Object childName) {
-		logger.debug("**** nodeFqn: "+this.nodeFqn);
-		logger.debug("**** getChild: "+childName);
-		if (hasChild(childName)) {
+	public Node getChild(Object childObject) {
+		logger.debug("@@@@ GET CHILD: "+childObject+" FOR nodeFqn: "+this.nodeFqn);
+		//logger.debug("@@@@ this.children: "+this.children);
+		logger.debug("@@@@ getChild: "+this.getInfo());
 
-			Fqn childFqn = Fqn.fromRelativeElements(this.nodeFqn, childName);
-			logger.debug("**** childFqn: "+childFqn);
-			Node node = new Node(this.cache, childFqn);
-			logger.debug("**** node: "+node);
-			return node;
+		if (childObject instanceof Fqn) {
+			logger.debug("@@@@ childObject if Fqn");
+			childObject = ((Fqn) childObject).getLastElementAsString();
+			logger.debug("@@@@ update childObject: "+childObject);
+		}
 
-		} else
-			return null;
+		if (hasChild(childObject)) {
+			Fqn childFqn = Fqn.fromRelativeElements(this.nodeFqn, childObject);
+			logger.debug("@@@@ childFqn: "+childFqn);
+
+			// TODO: Refactoring to more quickly
+			for (Node child : this.children) {
+				logger.debug("@@@@ TEST CHILD: "+child);
+				logger.debug("@@@@ childFqn.size(): "+child.getNodeFqn().size());
+
+				// last?!
+				/*
+				if (child.getNodeFqn().size() > 0) {
+					for (int i = 0; i < child.getNodeFqn().size(); i++) {
+						logger.trace("@@@@ childFqn: ["+i+"]: "+child.getNodeFqn().get(i)+
+								", class: "+child.getNodeFqn().get(i).getClass().getCanonicalName());
+					}
+				}
+				*/
+
+				Object last = child.getFqn().getLastElement();
+				logger.debug("@@@@ last: "+last);
+				if (last != null) {
+					logger.debug("@@@@ last: " + last.getClass().getCanonicalName());
+					if (last.equals(childObject)) {
+						logger.debug("@@@@ childObject was found");
+						return child;
+					}
+				}
+			}
+
+		}
+
+		return null;
 	}
 
 	//public boolean removeChild(String childName) {
@@ -272,73 +408,100 @@ public class Node {
 	//}
 
 	public boolean removeChild(Object childObject) {
+		logger.debug("@@@@ REMOVE CHILD: "+childObject+" FOR nodeFqn: "+this.nodeFqn);
+		//logger.debug("@@@@ this.children: "+this.children);
+		logger.debug("@@@@ removeChild: "+this.getInfo());
+
+		if (childObject instanceof Fqn) {
+			logger.debug("@@@@ childObject if Fqn");
+			childObject = ((Fqn) childObject).getLastElementAsString();
+			logger.debug("@@@@ update childObject: "+childObject);
+		}
+
+		if (hasChild(childObject)) {
+			for (Node child : this.children) {
+				logger.debug("@@@@ TEST CHILD: "+child);
+				logger.debug("@@@@ childFqn.size(): "+child.getNodeFqn().size());
+
+				// last?!
+				/*
+				if (child.getNodeFqn().size() > 0) {
+					for (int i = 0; i < child.getNodeFqn().size(); i++) {
+						logger.trace("@@@@ childFqn: ["+i+"]: "+child.getNodeFqn().get(i)+
+								", class: "+child.getNodeFqn().get(i).getClass().getCanonicalName());
+					}
+				}
+				*/
+
+				Object last = child.getFqn().getLastElement();
+				logger.debug("@@@@ last: "+last);
+				if (last != null) {
+					logger.debug("@@@@ last: " + last.getClass().getCanonicalName());
+					if (last.equals(childObject)) {
+						logger.debug("@@@@ childObject was found");
+						this.children.remove(child);
+						return true;
+					}
+				}
+			}
+		}
+
 		return false;
 	}
 
+	// Structure & Children
 
-	// Children
+	//public Node getParent() {
+	//	return null;
+	//}
 
 	public Set<Node> getChildren() {
-		logger.debug("**** nodeFqn: "+this.nodeFqn);
-		Set<Node> res = this.children;
+		//logger.debug("@@@@ getChildren nodeFqn: "+this.nodeFqn);
+		//logger.debug("@@@@ getChildren this.children: "+this.children);
+		logger.debug("@@@@ getChildren: "+this.getInfo());
 
+		Set<Node> res = this.children;
 		for (Node child : res) {
-			logger.debug("**** childFqn.size(): "+child.getNodeFqn().size());
+			logger.debug("@@@@ getChildren child: "+child.toString());
+			logger.debug("@@@@ getChildren childFqn.size(): "+child.getNodeFqn().size());
 			if (child.getNodeFqn().size() > 0) {
 				for (int i = 0; i < child.getNodeFqn().size(); i++) {
-					logger.debug("**** childFqn: ["+i+"]: "+child.getNodeFqn().get(i));
-					logger.debug("**** childFqn: ["+i+"]: "+child.getNodeFqn().get(i).getClass().getCanonicalName());
+					logger.debug("@@@@ getChildren childFqn: ["+i+"]: "+child.getNodeFqn().get(i));
+					logger.debug("@@@@ getChildren childFqn: ["+i+"]: "+child.getNodeFqn().get(i).getClass().getCanonicalName());
 				}
 			}
 		}
 
-		/*
-		for (Object key : this.cache.keySet()){
-			//logger.debug("**** ALL: "+key);
-			if (key instanceof String){
-				if (((String)key).startsWith(nodeFqn.toString()) &&
-						!key.equals(nodeFqn.toString())) {
-					logger.debug("**** OBJECT key: "+key);
-					Object obj = this.cache.get(key);
-					logger.debug("**** OBJECT: "+obj);
-					logger.debug("**** OBJECT: "+obj.getClass().getCanonicalName());
+		return res;
+	}
 
-					Node node = new Node(this.cache, Fqn.fromString((String)key));
-					Object last = node.getNodeFqn().getLastElement();
-					logger.debug("**** last: "+last);
+	public Set<Object> getChildrenNames() {
+		Set<Object> res = new HashSet<Object>();
 
-					logger.debug("**** childFqn.size(): "+node.getNodeFqn().size());
-					if (node.getNodeFqn().size() > 0) {
-						for (int i = 0; i < node.getNodeFqn().size(); i++) {
-							logger.debug("**** childFqn: ["+i+"]: "+node.getNodeFqn().get(i));
-							logger.debug("**** childFqn: ["+i+"]: "+node.getNodeFqn().get(i).getClass().getCanonicalName());
-						}
-					}
+		String stringFqn = nodeFqn.toString();
+		logger.debug("@@@@ getChildrenNames stringFqn: "+stringFqn);
 
-					res.add(node);
-				}
+		if (nodeFqn.size() > 0) {
+			for (int i = 0; i < nodeFqn.size(); i++) {
+				logger.debug("@@@@ getChildrenNames childFqn: ["+i+"]: "+nodeFqn.get(i));
+				logger.debug("@@@@ getChildrenNames childFqn: ["+i+"]: "+nodeFqn.get(i).getClass().getCanonicalName());
 			}
 		}
-		*/
+
 		return res;
 	}
 
 	public void removeChildren() {
+		logger.debug("@@@@ removeChildren: "+this.getInfo());
+		for (Node child : this.children) {
+			logger.debug("@@@@ removeChildren child: "+child.toString());
+			child.removeChildren();
+			child.remove();
+		}
 	}
 
-
-	// Structure?
-
-	public Node getParent() {
-		return null;
+	public String getInfo() {
+		return "[object="+this.toString()+", fqn="+this.nodeFqn+", children="+this.children.toString()+"]";
 	}
-
-
-
-
-
-
-
-
 
 }
