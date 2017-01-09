@@ -6,29 +6,20 @@ import org.infinispan.Cache;
 import java.util.HashSet;
 import java.util.Set;
 
-
 public class Node {
-	// TODO 1: Node vs Node<K,V>? Data/Structure? Fqn? Keys/Values?
-	// TODO 2: constructor, create, exists, put, set, remove, getKeys, getValues
-	// TODO 3: Child: add, has, get, remove
-	// TODO 4: Children: get, remove
 
 	private static final Logger logger = Logger.getLogger(Node.class);
 	
 	private final static String DATA_SEPARATOR = "_/_";
 	private final static String NODE = "node";
-
-	//1.2
 	private final static String KEY = "_KEYOBJ";
 	private final static String VALUE = "_VALUEOBJ";
 	
 	private final Cache cache;
 	private final Fqn nodeFqn;
-
-	// FIXME
 	private final Set<Node> children;
 
-	public Node(Cache c, Fqn fqn){
+	public Node(Cache c, Fqn fqn) {
 		this.cache = c;
 		this.nodeFqn = fqn;
 		this.children = new HashSet<Node>();
@@ -68,11 +59,11 @@ public class Node {
 	//public Object put(Object key, Object value){
 	//	return this.cache.put(nodeFqn.toString() + DATA_SEPARATOR + key, value);
 	//}
-
+	//
 	//public Object get(Object key){
 	//	return this.cache.get(nodeFqn.toString() + DATA_SEPARATOR + key);
 	//}
-
+	//
 	//public Object remove(Object key) {
 	//	return this.cache.remove(nodeFqn.toString() + DATA_SEPARATOR + key);
 	//}
