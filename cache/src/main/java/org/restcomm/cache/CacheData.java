@@ -43,23 +43,29 @@ public class CacheData {
 	public CacheData(Fqn nodeFqn, MobicentsCache mobicentsCache) {
 		this.mobicentsCache = mobicentsCache;
 
-		logger.debug("@@@@ CacheData: nodeFqn: " + nodeFqn);
+		logger.trace("@@@@ CacheData: nodeFqn: " + nodeFqn);
 		Node foundNode = null;
 		if (this.mobicentsCache.getJBossCache().keySet()
 				.contains(nodeFqn.toString())) {
+
 			Object checkNode = this.mobicentsCache.getJBossCache().get(nodeFqn.toString() + "_/_" + "Node");
-			logger.info("@@@@ FOUND checkNode: "+checkNode);
+			logger.trace("@@@@ FOUND checkNode: "+checkNode);
+
 			if (checkNode instanceof Node) {
 				foundNode = (Node) checkNode;
+
+				if (logger.isDebugEnabled()) {
+					logger.debug("@@@@ FOUND foundNode: "+foundNode);
+				}
 			}
 		}
 
 		if (foundNode == null) {
 			this.node = new Node(this.mobicentsCache.getJBossCache(), nodeFqn);
-			logger.debug("@@@@ new Node");
+			logger.trace("@@@@ new Node");
 		} else {
 			this.node = foundNode;
-			logger.debug("@@@@ found Node");
+			logger.trace("@@@@ found Node");
 			logger.trace("@@@@ found Node: this.node.getChildren(): " + this.node.getChildren());
 			logger.trace("@@@@ found Node: this.node.getChildNames(): " + this.node.getChildNames());
 		}
