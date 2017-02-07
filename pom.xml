@@ -30,17 +30,17 @@
 	</modules>
 
 	<dependencies>
-		<!-- Infinispan dependencies for JBoss 7.2.0.Final -->
+		<!-- Infinispan dependencies for WildFly 10.x -->
 		<dependency>
 			<groupId>org.infinispan</groupId>
 			<artifactId>infinispan-core</artifactId>
-			<version>5.2.1.Final</version>
+			<version>8.2.4.Final</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.infinispan</groupId>
 			<artifactId>infinispan-tree</artifactId>
-			<version>5.2.1.Final</version>
+			<version>8.2.4.Final</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>

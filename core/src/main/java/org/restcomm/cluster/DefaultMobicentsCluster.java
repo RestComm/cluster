@@ -29,6 +29,7 @@ import org.infinispan.notifications.cachemanagerlistener.event.ViewChangedEvent;
 import org.infinispan.remoting.transport.Address;
 import org.infinispan.tree.Fqn;
 import org.infinispan.tree.TreeCache;
+import org.infinispan.tree.impl.NodeKey;
 import org.restcomm.cache.MobicentsCache;
 import org.restcomm.cluster.cache.ClusteredCacheData;
 import org.restcomm.cluster.cache.ClusteredCacheDataIndexingHandler;
@@ -37,8 +38,6 @@ import org.restcomm.cluster.election.ClientLocalListenerElector;
 import org.restcomm.cluster.election.ClusterElector;
 
 import javax.transaction.TransactionManager;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -206,59 +205,17 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 			logger.debug("cacheEntryRemoved : event[ "+ event +"]");
 		}
 
-		if (!event.isPre() && !event.isOriginLocal() && event.getKey() != null) {
-			//
-			Method getContentsMethod = null;
-			try {
-				getContentsMethod = event.getKey().getClass().getMethod("getContents", (Class<?>[]) null);
-			} catch (NoSuchMethodException ex) {
+		if (!event.isPre()
+			&& !event.isOriginLocal()
+			&& event.getKey() != null
+			&& (event.getKey() instanceof NodeKey)
+			&& ((NodeKey)event.getKey()).getContents() == NodeKey.Type.STRUCTURE){
 
-			}
+			Fqn changed = ((NodeKey)event.getKey()).getFqn();
 
-			if (getContentsMethod != null) {
-				String contents = null;
-				try {
-					contents = getContentsMethod.invoke(event.getKey(), (Object[]) null).toString();
-				}
-				catch(InvocationTargetException ex)
-				{
-
-				}
-				catch(IllegalAccessException ex2)
-				{
-
-				}
-
-				if (contents != null && contents.equals("STRUCTURE")) {
-					Method getFqnMethod = null;
-					try {
-						getFqnMethod = event.getKey().getClass().getMethod("getFqn", (Class<?>[]) null);
-					} catch (NoSuchMethodException ex) {
-
-					}
-
-					if (getFqnMethod != null) {
-						Fqn changed = null;
-						try {
-							changed=(Fqn)getContentsMethod.invoke(event.getKey(), (Object[]) null);
-						}
-						catch(InvocationTargetException ex)
-						{
-
-						}
-						catch(IllegalAccessException ex2)
-						{
-
-						}
-
-						if(changed!=null) {
-							final DataRemovalListener dataRemovalListener = dataRemovalListeners.get(changed.getParent());
-							if (dataRemovalListener != null) {
-								dataRemovalListener.dataRemoved(changed);
-							}
-						}
-					}
-				}
+			final DataRemovalListener dataRemovalListener = dataRemovalListeners.get(changed.getParent());
+			if (dataRemovalListener != null) {
+				dataRemovalListener.dataRemoved(changed);
 			}
 		}
 	}
