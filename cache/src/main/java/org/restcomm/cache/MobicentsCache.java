@@ -20,6 +20,7 @@
 package org.restcomm.cache;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.apache.log4j.Logger;
 
@@ -38,140 +39,161 @@ import org.infinispan.tree.TreeCacheFactory;
 
 /**
  * The container's HA and FT data source.
- * 
+ *
  * @author martins
  * @author András Kőkuti
- * 
  */
 public class MobicentsCache {
 
-	private static Logger logger = Logger.getLogger(MobicentsCache.class);
+    private static Logger logger = Logger.getLogger(MobicentsCache.class);
 
-	
-	private final CacheContainer jBossCacheContainer;
-	@SuppressWarnings("rawtypes")
-	private final TreeCache jBossDefaultCache;
-	
-	private boolean localMode;
-	private final boolean managedCache;
 
-	public MobicentsCache(Configuration cacheConfiguration,
-												GlobalConfiguration globalCacheConfiguration,
-												ClassLoader classLoader) {
-		this.jBossCacheContainer = new DefaultCacheManager(globalCacheConfiguration, cacheConfiguration, false);
+    private final CacheContainer jBossCacheContainer;
+    @SuppressWarnings("rawtypes")
+    private final TreeCache jBossDefaultCache;
 
-		if (cacheConfiguration.clustering().cacheMode().isClustered()) {
-			this.jBossDefaultCache = new TreeCacheFactory()
-					.createTreeCache(new DecoratedCache(this.jBossCacheContainer.getCache().getAdvancedCache(), classLoader));
-		} else {
-			this.jBossDefaultCache = new TreeCacheFactory().createTreeCache(this.jBossCacheContainer.getCache());
-		}
+    private boolean localMode;
+    private final boolean managedCache;
 
-		this.managedCache = false;
-		setLocalMode();
-	}
-	
-	public MobicentsCache(Configuration cacheConfiguration, GlobalConfiguration globalCacheConfiguration) {
-		this.jBossCacheContainer = new DefaultCacheManager(globalCacheConfiguration, cacheConfiguration, false);
-		this.jBossDefaultCache = new TreeCacheFactory().createTreeCache(this.jBossCacheContainer.getCache());
-		this.managedCache = false;
-		setLocalMode();
-	}
+    public MobicentsCache(Configuration cacheConfiguration,
+                          GlobalConfiguration globalCacheConfiguration,
+                          ClassLoader classLoader) {
+        this.jBossCacheContainer = new DefaultCacheManager(globalCacheConfiguration, cacheConfiguration, false);
 
-  public MobicentsCache(String cacheConfigurationLocation, ClassLoader classLoader) throws IOException {
-    this.jBossCacheContainer = new DefaultCacheManager(cacheConfigurationLocation, false);
+        if (cacheConfiguration.clustering().cacheMode().isClustered()) {
+            this.jBossDefaultCache = new TreeCacheFactory()
+                    .createTreeCache(new DecoratedCache(this.jBossCacheContainer.getCache().getAdvancedCache(), classLoader));
+        } else {
+            this.jBossDefaultCache = new TreeCacheFactory().createTreeCache(this.jBossCacheContainer.getCache());
+        }
 
-		if (this.jBossCacheContainer.getCache().getCacheConfiguration().clustering().cacheMode().isClustered()) {
-			this.jBossDefaultCache = new TreeCacheFactory()
-					.createTreeCache(new DecoratedCache(this.jBossCacheContainer.getCache().getAdvancedCache(), classLoader));
-		} else {
-			this.jBossDefaultCache = new TreeCacheFactory().createTreeCache(this.jBossCacheContainer.getCache());
-		}
+        this.managedCache = false;
+        setLocalMode();
+    }
 
-    this.managedCache = false;
-    setLocalMode();
-  }
+    public MobicentsCache(Configuration cacheConfiguration, GlobalConfiguration globalCacheConfiguration) {
+        this.jBossCacheContainer = new DefaultCacheManager(globalCacheConfiguration, cacheConfiguration, false);
+        this.jBossDefaultCache = new TreeCacheFactory().createTreeCache(this.jBossCacheContainer.getCache());
+        this.managedCache = false;
+        setLocalMode();
+    }
 
-	public MobicentsCache(String cacheConfigurationLocation) throws IOException {
-		//this.jBossCache = new DefaultCacheFactory().createCache(cacheConfigurationLocation,false);
-		this.jBossCacheContainer = new DefaultCacheManager(cacheConfigurationLocation, false);
-		this.jBossDefaultCache = new TreeCacheFactory().createTreeCache(this.jBossCacheContainer.getCache());
-		this.managedCache = false;
-		setLocalMode();
-	}
+    public MobicentsCache(String cacheConfigurationLocation, ClassLoader classLoader) throws IOException {
+        this.jBossCacheContainer = new DefaultCacheManager(cacheConfigurationLocation, false);
 
-	public MobicentsCache(CacheContainer cacheContainer) {
-		this.jBossCacheContainer = cacheContainer;
-		this.jBossDefaultCache = new TreeCacheFactory().createTreeCache(this.jBossCacheContainer.getCache());
-		this.managedCache = true;									
-		setLocalMode();
-	}
-	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public MobicentsCache(Cache cache){
-		this.jBossDefaultCache = new TreeCacheFactory().createTreeCache(cache);
-		this.jBossCacheContainer = cache.getCacheManager();
-		this.managedCache = true;
-		setLocalMode();
-	}
-	
-	private void setLocalMode() {
-		if(jBossDefaultCache.getCache().getCacheConfiguration().clustering().cacheMode() == CacheMode.LOCAL){
-			localMode = true;
-		}
-		
-	}
-	
-	public void startCache() {
-		if(!(jBossDefaultCache.getCache().getStatus() == ComponentStatus.RUNNING)){
-			logger.info("Starting JBoss Cache...");
-			jBossDefaultCache.start();
-		}
-		if (logger.isInfoEnabled()) {
-			logger.info("Mobicents Cache started, status: " + this.jBossDefaultCache.getCache().getStatus() + ", Mode: " + jBossDefaultCache.getCache().getCacheConfiguration().clustering().cacheMode());
-		}
-	}
-	
-	public CacheContainer getJBossCacheContainer() {
-		return jBossCacheContainer;
-	}
-	
-	@SuppressWarnings("rawtypes")
-	public TreeCache getJBossCache() {
-		return jBossDefaultCache;
-	}
-	
-	public void stopCache() {
-		if (!managedCache) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Mobicents Cache stopping...");
-			}			
-			this.jBossCacheContainer.stop();
-			//this.jBossCacheManager.destroy();
-		}
-		if (logger.isInfoEnabled()) {
-			logger.info("Mobicents Cache stopped.");
-		}		
-	}
+        if (this.jBossCacheContainer.getCache().getCacheConfiguration().clustering().cacheMode().isClustered()) {
+            this.jBossDefaultCache = new TreeCacheFactory()
+                    .createTreeCache(new DecoratedCache(this.jBossCacheContainer.getCache().getAdvancedCache(), classLoader));
+        } else {
+            this.jBossDefaultCache = new TreeCacheFactory().createTreeCache(this.jBossCacheContainer.getCache());
+        }
 
-	/**
-	 * Indicates if the cache is not in a cluster environment. 
-	 * @return the localMode
-	 */
-	public boolean isLocalMode() {
-		return localMode;
-	}
-	
-	/**
-	 * Sets the class loader to be used on serialization operations, for data
-	 * stored in the specified fqn and child nodes. Note that if another class
-	 * loader is set for a specific child node tree, the cache will use instead
-	 * that class loader.
-	 * 
-	 * @param regionFqn
-	 * @param classLoader
-	 */
-	/*@SuppressWarnings("rawtypes")
+        this.managedCache = false;
+        setLocalMode();
+    }
+
+    public MobicentsCache(String cacheConfigurationLocation) throws IOException {
+        //this.jBossCache = new DefaultCacheFactory().createCache(cacheConfigurationLocation,false);
+        this.jBossCacheContainer = new DefaultCacheManager(cacheConfigurationLocation, false);
+        this.jBossDefaultCache = new TreeCacheFactory().createTreeCache(this.jBossCacheContainer.getCache());
+        this.managedCache = false;
+        setLocalMode();
+    }
+
+    public MobicentsCache(InputStream configurationStream, ClassLoader classLoader) throws IOException {
+        this.jBossCacheContainer = new DefaultCacheManager(configurationStream, false);
+
+        if (this.jBossCacheContainer.getCache().getCacheConfiguration().clustering().cacheMode().isClustered()) {
+            this.jBossDefaultCache = new TreeCacheFactory()
+                    .createTreeCache(new DecoratedCache(this.jBossCacheContainer.getCache().getAdvancedCache(), classLoader));
+        } else {
+            this.jBossDefaultCache = new TreeCacheFactory().createTreeCache(this.jBossCacheContainer.getCache());
+        }
+
+        this.managedCache = false;
+        setLocalMode();
+    }
+
+    public MobicentsCache(InputStream configurationStream) throws IOException {
+        this.jBossCacheContainer = new DefaultCacheManager(configurationStream, false);
+        this.jBossDefaultCache = new TreeCacheFactory().createTreeCache(this.jBossCacheContainer.getCache());
+        this.managedCache = false;
+        setLocalMode();
+    }
+
+    public MobicentsCache(CacheContainer cacheContainer) {
+        this.jBossCacheContainer = cacheContainer;
+        this.jBossDefaultCache = new TreeCacheFactory().createTreeCache(this.jBossCacheContainer.getCache());
+        this.managedCache = true;
+        setLocalMode();
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public MobicentsCache(Cache cache) {
+        this.jBossDefaultCache = new TreeCacheFactory().createTreeCache(cache);
+        this.jBossCacheContainer = cache.getCacheManager();
+        this.managedCache = true;
+        setLocalMode();
+    }
+
+    private void setLocalMode() {
+        if (jBossDefaultCache.getCache().getCacheConfiguration().clustering().cacheMode() == CacheMode.LOCAL) {
+            localMode = true;
+        }
+
+    }
+
+    public void startCache() {
+        if (!(jBossDefaultCache.getCache().getStatus() == ComponentStatus.RUNNING)) {
+            logger.info("Starting JBoss Cache...");
+            jBossDefaultCache.start();
+        }
+        if (logger.isInfoEnabled()) {
+            logger.info("Mobicents Cache started, status: " + this.jBossDefaultCache.getCache().getStatus() + ", Mode: " + jBossDefaultCache.getCache().getCacheConfiguration().clustering().cacheMode());
+        }
+    }
+
+    public CacheContainer getJBossCacheContainer() {
+        return jBossCacheContainer;
+    }
+
+    @SuppressWarnings("rawtypes")
+    public TreeCache getJBossCache() {
+        return jBossDefaultCache;
+    }
+
+    public void stopCache() {
+        if (!managedCache) {
+            if (logger.isInfoEnabled()) {
+                logger.info("Mobicents Cache stopping...");
+            }
+            this.jBossCacheContainer.stop();
+            //this.jBossCacheManager.destroy();
+        }
+        if (logger.isInfoEnabled()) {
+            logger.info("Mobicents Cache stopped.");
+        }
+    }
+
+    /**
+     * Indicates if the cache is not in a cluster environment.
+     *
+     * @return the localMode
+     */
+    public boolean isLocalMode() {
+        return localMode;
+    }
+
+    /**
+     * Sets the class loader to be used on serialization operations, for data
+     * stored in the specified fqn and child nodes. Note that if another class
+     * loader is set for a specific child node tree, the cache will use instead
+     * that class loader.
+     *
+     * @param regionFqn
+     * @param classLoader
+     */
+    /*@SuppressWarnings("rawtypes")
 	public void setReplicationClassLoader(Fqn regionFqn, ClassLoader classLoader) {
 		if (!isLocalMode()) {
 			final Region region = jBossCache.getRegion(regionFqn, true);
@@ -181,24 +203,24 @@ public class MobicentsCache {
 			}			
 		}
 	}*/
-	
-	/**
-	 * Sets the class loader to be used on serialization operations, for all
-	 * data stored. Note that if another class loader is set for a specific
-	 * child node tree, the cache will use instead that class loader.
-	 * 
-	 * @param classLoader
-	 */
+
+    /**
+     * Sets the class loader to be used on serialization operations, for all
+     * data stored. Note that if another class loader is set for a specific
+     * child node tree, the cache will use instead that class loader.
+     *
+     * @param classLoader
+     */
 	/*public void setReplicationClassLoader(ClassLoader classLoader) {
 		setReplicationClassLoader(Fqn.ROOT, classLoader);
 	}*/
-	
-	/**
-	 * Unsets the class loader to be used on serialization operations, for data
-	 * stored in the specified fqn and child nodes.
-	 * @param regionFqn
-	 * @param classLoader
-	 */
+
+    /**
+     * Unsets the class loader to be used on serialization operations, for data
+     * stored in the specified fqn and child nodes.
+     * @param regionFqn
+     * @param classLoader
+     */
 	/*@SuppressWarnings("rawtypes")
 	public void unsetReplicationClassLoader(Fqn regionFqn, ClassLoader classLoader) {
 		if (!isLocalMode()) {
@@ -212,20 +234,20 @@ public class MobicentsCache {
 			}	
 		}
 	}*/
-	
-	/**
-	 * Unsets the class loader to be used on serialization operations, for all
-	 * data stored.
-	 * @param classLoader
-	 */
+
+    /**
+     * Unsets the class loader to be used on serialization operations, for all
+     * data stored.
+     * @param classLoader
+     */
 	/*public void unsetReplicationClassLoader(ClassLoader classLoader) {
 		unsetReplicationClassLoader(Fqn.ROOT,classLoader);
 	}*/
-	
-	/**
-	 * Retrieves the cache content as a string.
-	 * @return
-	 */
+
+    /**
+     * Retrieves the cache content as a string.
+     * @return
+     */
 	/*public String getCacheContent() {
 		return "Mobicents Cache: " 
 		+ "\n+-- Content:\n" + CachePrinter.printCacheDetails(jBossCache);
