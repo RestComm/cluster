@@ -41,6 +41,7 @@ import org.infinispan.tree.Fqn;
 import org.infinispan.tree.NodeKey;
 import org.infinispan.tree.NodeKey.Type;
 import org.infinispan.tree.TreeCache;
+import org.infinispan.tree.impl.NodeKey;
 import org.restcomm.cache.MobicentsCache;
 import org.restcomm.cluster.cache.ClusteredCacheData;
 import org.restcomm.cluster.cache.ClusteredCacheDataIndexingHandler;
@@ -211,10 +212,15 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 		if (logger.isDebugEnabled()) {
 			logger.debug("cacheEntryRemoved : event[ "+ event +"]");
 		}
-		if(!event.isPre() && !event.isOriginLocal() && event.getKey() != null && (event.getKey() instanceof NodeKey)  && ((NodeKey)event.getKey()).getContents() == Type.STRUCTURE){
-			
+
+		if (!event.isPre()
+			&& !event.isOriginLocal()
+			&& event.getKey() != null
+			&& (event.getKey() instanceof NodeKey)
+			&& ((NodeKey)event.getKey()).getContents() == NodeKey.Type.STRUCTURE){
+
 			Fqn changed = ((NodeKey)event.getKey()).getFqn();
-			
+
 			final DataRemovalListener dataRemovalListener = dataRemovalListeners.get(changed.getParent());
 			if (dataRemovalListener != null) {
 				dataRemovalListener.dataRemoved(changed);

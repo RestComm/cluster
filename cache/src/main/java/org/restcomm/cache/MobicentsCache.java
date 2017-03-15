@@ -23,13 +23,16 @@ import java.io.IOException;
 
 import org.apache.log4j.Logger;
 
+import org.infinispan.AdvancedCache;
 import org.infinispan.Cache;
+import org.infinispan.cache.impl.DecoratedCache;
 import org.infinispan.configuration.cache.CacheMode;
 import org.infinispan.configuration.cache.Configuration;
 import org.infinispan.configuration.global.GlobalConfiguration;
 import org.infinispan.lifecycle.ComponentStatus;
 import org.infinispan.manager.CacheContainer;
 import org.infinispan.manager.DefaultCacheManager;
+import org.infinispan.tree.Fqn;
 import org.infinispan.tree.TreeCache;
 import org.infinispan.tree.TreeCacheFactory;
 
@@ -52,6 +55,21 @@ public class MobicentsCache {
 	private boolean localMode;
 	private final boolean managedCache;
 
+	public MobicentsCache(Configuration cacheConfiguration,
+												GlobalConfiguration globalCacheConfiguration,
+												ClassLoader classLoader) {
+		this.jBossCacheContainer = new DefaultCacheManager(globalCacheConfiguration, cacheConfiguration, false);
+
+		if (cacheConfiguration.clustering().cacheMode().isClustered()) {
+			this.jBossDefaultCache = new TreeCacheFactory()
+					.createTreeCache(new DecoratedCache(this.jBossCacheContainer.getCache().getAdvancedCache(), classLoader));
+		} else {
+			this.jBossDefaultCache = new TreeCacheFactory().createTreeCache(this.jBossCacheContainer.getCache());
+		}
+
+		this.managedCache = false;
+		setLocalMode();
+	}
 	
 	public MobicentsCache(Configuration cacheConfiguration, GlobalConfiguration globalCacheConfiguration) {
 		this.jBossCacheContainer = new DefaultCacheManager(globalCacheConfiguration, cacheConfiguration, false);
@@ -60,6 +78,20 @@ public class MobicentsCache {
 		setLocalMode();
 	}
 
+  public MobicentsCache(String cacheConfigurationLocation, ClassLoader classLoader) throws IOException {
+    this.jBossCacheContainer = new DefaultCacheManager(cacheConfigurationLocation, false);
+
+		if (this.jBossCacheContainer.getCache().getCacheConfiguration().clustering().cacheMode().isClustered()) {
+			this.jBossDefaultCache = new TreeCacheFactory()
+					.createTreeCache(new DecoratedCache(this.jBossCacheContainer.getCache().getAdvancedCache(), classLoader));
+		} else {
+			this.jBossDefaultCache = new TreeCacheFactory().createTreeCache(this.jBossCacheContainer.getCache());
+		}
+
+    this.managedCache = false;
+    setLocalMode();
+  }
+
 	public MobicentsCache(String cacheConfigurationLocation) throws IOException {
 		//this.jBossCache = new DefaultCacheFactory().createCache(cacheConfigurationLocation,false);
 		this.jBossCacheContainer = new DefaultCacheManager(cacheConfigurationLocation, false);
@@ -67,8 +99,7 @@ public class MobicentsCache {
 		this.managedCache = false;
 		setLocalMode();
 	}
-	
-		
+
 	public MobicentsCache(CacheContainer cacheContainer) {
 		this.jBossCacheContainer = cacheContainer;
 		this.jBossDefaultCache = new TreeCacheFactory().createTreeCache(this.jBossCacheContainer.getCache());
