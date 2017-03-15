@@ -10,7 +10,7 @@
 	<groupId>org.restcomm.cluster</groupId>
 	<artifactId>restcomm-cluster</artifactId>
 	<version>7.1.0-TelScale-SNAPSHOT</version>
-		
+	
 	<packaging>pom</packaging>
 	
 	<name>Restcomm Cluster Framework Parent</name>
@@ -39,7 +39,7 @@
 			<id>example</id>
 			<modules>
 				<module>example</module>
-				<module>example_temp</module>
+				<!--<module>example_temp</module>-->
 			</modules>
 		</profile>
 		<profile>
@@ -52,21 +52,38 @@
 				</dependency>
 				<dependency>
 					<groupId>org.infinispan</groupId>
+					<artifactId>infinispan-core</artifactId>
+					<version>5.1.2.FINAL</version>
+				</dependency>
+				<dependency>
+					<groupId>org.infinispan</groupId>
 					<artifactId>infinispan-tree</artifactId>
 					<version>5.1.2.Final</version>
+				</dependency>
+			</dependencies>
+		</profile>
+		<profile>
+			<id>jboss-as-72</id>
+			<dependencies>
+				<dependency>
+					<groupId>org.jboss.as</groupId>
+					<artifactId>jboss-as-clustering-infinispan</artifactId>
+					<version>7.2.0.Final</version>
 				</dependency>
 				<dependency>
 					<groupId>org.infinispan</groupId>
 					<artifactId>infinispan-core</artifactId>
-					<version>5.1.2.FINAL</version>
+					<version>5.2.1.Final</version>
+				</dependency>
+				<dependency>
+					<groupId>org.infinispan</groupId>
+					<artifactId>infinispan-tree</artifactId>
+					<version>5.2.1.Final</version>
 				</dependency>
 			</dependencies>
 		</profile>
 		<profile>
 			<id>jboss-eap-6.4</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
 			<dependencies>
 				<dependency>
 					<groupId>org.jboss.as</groupId>
