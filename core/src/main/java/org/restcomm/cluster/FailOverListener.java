@@ -22,8 +22,8 @@
 
 package org.restcomm.cluster;
 
-import org.jboss.cache.Fqn;
 import org.jgroups.Address;
+import org.restcomm.cache.FqnWrapper;
 import org.restcomm.cluster.cache.ClusteredCacheData;
 import org.restcomm.cluster.election.ClientLocalListenerElector;
 
@@ -44,7 +44,7 @@ public interface FailOverListener {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public Fqn getBaseFqn();
+	public FqnWrapper getBaseFqn();
 	
 	/**
 	 * Retrieves the listener's elector, used to elect the node which does

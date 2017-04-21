@@ -28,6 +28,7 @@ import org.jboss.cache.CacheManager;
 import org.jboss.cache.CacheStatus;
 import org.jboss.cache.DefaultCacheFactory;
 import org.jboss.cache.Fqn;
+import org.jboss.cache.Node;
 import org.jboss.cache.Region;
 import org.jboss.cache.config.Configuration;
 import org.jboss.cache.config.Configuration.CacheMode;
@@ -95,6 +96,20 @@ public class MobicentsCache {
 	@SuppressWarnings("rawtypes")
 	public Cache getJBossCache() {
 		return jBossCache;
+	}
+
+	public Object getCacheNode(FqnWrapper fqn) {
+		return jBossCache.getNode(fqn.getFqn());
+	}
+
+	public Object putCacheNodeValue(FqnWrapper fqn, Object key, Object value) {
+		Node n = jBossCache.getNode(fqn.getFqn());
+		return n.put(key, value);
+	}
+
+	public Object getCacheNodeValue(FqnWrapper fqn, Object key) {
+		Node n = jBossCache.getNode(fqn.getFqn());
+		return n.get(key);
 	}
 	
 	public void stopCache() {

@@ -134,4 +134,25 @@ public class CacheData {
 	public Fqn getNodeFqn() {
 		return nodeFqn;
 	}
+
+	public FqnWrapper getNodeFqnWrapper() {
+		return new FqnWrapper(nodeFqn);
+	}
+
+	public Object getNodeFqnLastElement() {
+		return nodeFqn.getLastElement();
+	}
+
+	public Object putNodeValue(Object key, Object value) {
+		return getNode().put(key, value);
+	}
+
+	public Object getNodeValue(Object key) {
+		return getNode().get(key);
+	}
+
+	public Object removeNodeValue(Object key) {
+		return getNode().remove(key);
+	}
+
 }

@@ -26,6 +26,7 @@ import org.jboss.cache.Fqn;
 import org.jboss.cache.Node;
 import org.jgroups.Address;
 import org.restcomm.cache.CacheData;
+import org.restcomm.cache.FqnWrapper;
 import org.restcomm.cluster.MobicentsCluster;
 
 /**
@@ -40,11 +41,11 @@ public class ClusteredCacheData extends CacheData {
 	private final ClusteredCacheDataIndexingHandler indexingHandler;
 	
 	/**
-	 * @param nodeFqn
-	 * @param mobicentsCache
+	 * @param nodeFqnWrapper
+	 * @param mobicentsCluster
 	 */
-	public ClusteredCacheData(Fqn<?> nodeFqn, MobicentsCluster mobicentsCluster) {
-		super(nodeFqn, mobicentsCluster.getMobicentsCache());
+	public ClusteredCacheData(FqnWrapper nodeFqnWrapper, MobicentsCluster mobicentsCluster) {
+		super(nodeFqnWrapper.getFqn(), mobicentsCluster.getMobicentsCache());
 		indexingHandler = mobicentsCluster.getClusteredCacheDataIndexingHandler();
 	}
 

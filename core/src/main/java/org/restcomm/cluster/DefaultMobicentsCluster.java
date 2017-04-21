@@ -47,6 +47,7 @@ import org.jboss.cache.notifications.event.BuddyGroupChangedEvent;
 import org.jboss.cache.notifications.event.NodeRemovedEvent;
 import org.jboss.cache.notifications.event.ViewChangedEvent;
 import org.jgroups.Address;
+import org.restcomm.cache.FqnWrapper;
 import org.restcomm.cache.MobicentsCache;
 import org.restcomm.cluster.cache.ClusteredCacheData;
 import org.restcomm.cluster.cache.ClusteredCacheDataIndexingHandler;
@@ -233,7 +234,7 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 		}
 		//final boolean useLocalListenerElector = localListener.getElector()!=null;
 			final Cache jbossCache = mobicentsCache.getJBossCache();
-			final Fqn rootFqnOfChanges = localListener.getBaseFqn();
+			final Fqn rootFqnOfChanges = localListener.getBaseFqn().getFqn();
 			
 			boolean createdTx = false;
 			boolean doRollback = true;
@@ -247,7 +248,7 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 				if(isBuddyReplicationEnabled) {     
 					// replace column to underscore in the couple ipaddress:port of the jgroups address
 					// to match the BUDDY GROUP Fqn pattern in the cache
-					String fqn = getBuddyBackupFqn(lostMember)  + localListener.getBaseFqn();					
+					String fqn = getBuddyBackupFqn(lostMember)  + localListener.getBaseFqn().getFqn();
 					
 					
 					Node buddyGroupRootNode = jbossCache.getNode(Fqn.fromString(fqn));
@@ -261,7 +262,7 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 						// we want to retrieve from the buddy that died
 						for (Node child : children) {
 	
-							Fqn childFqn = Fqn.fromRelativeElements(localListener.getBaseFqn(), child.getFqn().getLastElement());
+							Fqn childFqn = Fqn.fromRelativeElements(localListener.getBaseFqn().getFqn(), child.getFqn().getLastElement());
 							if (logger.isDebugEnabled()) {
 								logger.debug("forcing data gravitation on following child fqn " + childFqn);
 							}
@@ -291,7 +292,7 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 				for (Object childName : children) {
 					// Here in values we store data and... inet node., we must match
 					// passed one.
-					final ClusteredCacheData clusteredCacheData = new ClusteredCacheData(Fqn.fromRelativeElements(rootFqnOfChanges, childName),this);
+					final ClusteredCacheData clusteredCacheData = new ClusteredCacheData(FqnWrapper.fromRelativeElementsWrapper(new FqnWrapper(rootFqnOfChanges), childName),this);
 					if (clusteredCacheData.exists()) {
 						Address address = clusteredCacheData.getClusterNodeAddress();
 						if (address != null && address.equals(lostMember)) {
@@ -344,7 +345,7 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 		if(!event.isOriginLocal() && !event.isPre()) {			
 			final DataRemovalListener dataRemovalListener = dataRemovalListeners.get(event.getFqn().getParent());
 			if (dataRemovalListener != null) {
-				dataRemovalListener.dataRemoved(event.getFqn());
+				dataRemovalListener.dataRemoved(new FqnWrapper(event.getFqn()));
 			}
 		}
 	}
@@ -424,7 +425,7 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 		if(isBuddyReplicationEnabled)
 		{
 			//1. clean backup of the base fqn only
-			String fqn = getBuddyBackupFqn(deadMember) + localListener.getBaseFqn();
+			String fqn = getBuddyBackupFqn(deadMember) + localListener.getBaseFqn().getFqn();
 			jbossCache.getInvocationContext().getOptionOverrides().setCacheModeLocal(true);
 			jbossCache.removeNode(Fqn.fromString(fqn));
 			//2. if that member is our single buddy, we need to clean MC_BUDDIES
@@ -536,7 +537,7 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 			logger.debug("Adding local listener " + localListener);
 		}
 		for(FailOverListener failOverListener : failOverListeners) {
-			if (failOverListener.getBaseFqn().equals(localListener.getBaseFqn())) {
+			if (failOverListener.getBaseFqn().getFqn().equals(localListener.getBaseFqn().getFqn())) {
 				return false; 
 			}
 		}
@@ -559,7 +560,7 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 	 * @see MobicentsCluster#addDataRemovalListener(DataRemovalListener)
 	 */
 	public boolean addDataRemovalListener(DataRemovalListener listener) {
-		return dataRemovalListeners.putIfAbsent(listener.getBaseFqn(), listener) == null;
+		return dataRemovalListeners.putIfAbsent(listener.getBaseFqn().getFqn(), listener) == null;
 	}
 	
 	/*
@@ -567,7 +568,7 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 	 * @see MobicentsCluster#removeDataRemovalListener(DataRemovalListener)
 	 */
 	public boolean removeDataRemovalListener(DataRemovalListener listener) {
-		return dataRemovalListeners.remove(listener.getBaseFqn()) != null;
+		return dataRemovalListeners.remove(listener.getBaseFqn().getFqn()) != null;
 	}
 	
 	/*
