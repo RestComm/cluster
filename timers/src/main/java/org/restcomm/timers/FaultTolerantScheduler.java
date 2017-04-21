@@ -34,6 +34,7 @@ import javax.transaction.TransactionManager;
 import org.apache.log4j.Logger;
 import org.infinispan.remoting.transport.Address;
 import org.infinispan.tree.Fqn;
+import org.restcomm.cache.FqnWrapper;
 import org.restcomm.cluster.DataRemovalListener;
 import org.restcomm.cluster.FailOverListener;
 import org.restcomm.cluster.MobicentsCluster;
@@ -481,8 +482,8 @@ public class FaultTolerantScheduler {
 		 * @see org.mobicents.cluster.FailOverListener#getBaseFqn()
 		 */
 		@SuppressWarnings("unchecked")
-		public Fqn getBaseFqn() {
-			return baseFqn;
+		public FqnWrapper getBaseFqn() {
+			return new FqnWrapper(baseFqn);
 		}
 
 		/*
@@ -542,7 +543,8 @@ public class FaultTolerantScheduler {
 		 * @see org.mobicents.cluster.DataRemovalListener#dataRemoved(org.jboss.cache.Fqn)
 		 */
 		@SuppressWarnings("unchecked")
-		public void dataRemoved(Fqn clusteredCacheDataFqn) {
+		public void dataRemoved(FqnWrapper clusteredCacheDataFqnWrapper) {
+			Fqn clusteredCacheDataFqn = clusteredCacheDataFqnWrapper.getFqn();
 			Object lastElement = clusteredCacheDataFqn.getLastElement();
 			if (logger.isDebugEnabled()) {
 				logger.debug("remote notification dataRemoved( clusterCacheDataFqn = "+clusteredCacheDataFqn+"), lastElement " + lastElement);
