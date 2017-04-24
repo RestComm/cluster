@@ -34,6 +34,8 @@ import org.jboss.cache.config.Configuration;
 import org.jboss.cache.config.Configuration.CacheMode;
 import org.jboss.cache.util.CachePrinter;
 
+import javax.transaction.TransactionManager;
+
 /**
  * The container's HA and FT data source.
  * 
@@ -97,6 +99,20 @@ public class MobicentsCache {
 	public Cache getJBossCache() {
 		return jBossCache;
 	}
+
+	public TransactionManager getTxManager() {
+		TransactionManager txMgr = null;
+		try {
+			Class<?> txMgrClass = Class.forName(jBossCache.getConfiguration().getTransactionManagerLookupClass());
+			Object txMgrLookup = txMgrClass.getConstructor(new Class[]{}).newInstance(new Object[]{});
+			txMgr = (TransactionManager) txMgrClass.getMethod("getTransactionManager", new Class[]{}).invoke(txMgrLookup, new Object[]{});
+		} catch (Exception e) {
+			logger.debug("Could not fetch TxMgr. Not using one.", e);
+			// let's not have Tx Manager than...
+		}
+		return txMgr;
+	}
+
 
 	public Object getCacheNode(FqnWrapper fqn) {
 		return jBossCache.getNode(fqn.getFqn());
