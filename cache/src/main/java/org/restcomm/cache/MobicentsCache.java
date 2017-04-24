@@ -37,6 +37,8 @@ import org.infinispan.tree.Node;
 import org.infinispan.tree.TreeCache;
 import org.infinispan.tree.TreeCacheFactory;
 
+import javax.transaction.TransactionManager;
+
 /**
  * The container's HA and FT data source.
  *
@@ -162,6 +164,10 @@ public class MobicentsCache {
     @SuppressWarnings("rawtypes")
     public TreeCache getJBossCache() {
         return jBossDefaultCache;
+    }
+
+    public TransactionManager getTxManager() {
+        return jBossDefaultCache.getCache().getAdvancedCache().getTransactionManager();
     }
 
     public Object getCacheNode(FqnWrapper fqn) {
