@@ -171,7 +171,7 @@ public class FaultTolerantScheduler {
         this.cluster = cluster;
         this.timerTaskFactory = timerTaskFactory;
         this.txManager = txManager;
-        cacheData = new FaultTolerantSchedulerCacheData(baseFqn,cluster);
+        cacheData = new FaultTolerantSchedulerCacheData(new FqnWrapper(baseFqn),cluster);
         if (cluster.isStarted()) {
             cacheData.create();
         }

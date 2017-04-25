@@ -26,4 +26,8 @@ public class FqnWrapper {
         return new FqnWrapper(Fqn.fromRelativeElements(base.getFqn(), relativeElements));
     }
 
+    public static FqnWrapper fromElementsWrapper(Object... elements) {
+        return new FqnWrapper(Fqn.fromElements(elements));
+    }
+
 }

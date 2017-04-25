@@ -166,8 +166,28 @@ public class MobicentsCache {
         return jBossDefaultCache;
     }
 
+    public boolean isBuddyReplicationEnabled() {
+        //only for JBoss Cache based MobicentsCache
+        return false;
+    }
+
+    public void setForceDataGravitation(boolean enableDataGravitation) {
+        //only for JBoss Cache based MobicentsCache
+    }
+
     public TransactionManager getTxManager() {
         return jBossDefaultCache.getCache().getAdvancedCache().getTransactionManager();
+    }
+
+    public void evict(FqnWrapper fqnWrapper) {
+        for (Object key: jBossDefaultCache.getNode(fqnWrapper.getFqn()).getKeys()) {
+            jBossDefaultCache.getCache().evict(key);
+        }
+    }
+
+    public void registerClassLoader(ClassLoader serializationClassLoader, FqnWrapper fqnWrapper) {
+        //only for JBoss Cache based MobicentsCache
+        // TODO
     }
 
     public Object getCacheNode(FqnWrapper fqn) {
