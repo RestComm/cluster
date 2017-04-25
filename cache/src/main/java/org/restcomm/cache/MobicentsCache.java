@@ -100,17 +100,40 @@ public class MobicentsCache {
 		return jBossCache;
 	}
 
+	public boolean isBuddyReplicationEnabled() {
+		Configuration config = jBossCache.getConfiguration();
+		return config.getBuddyReplicationConfig() != null && config.getBuddyReplicationConfig().isEnabled();
+	}
+
+	public void setForceDataGravitation(boolean enableDataGravitation) {
+		// Issue 1517 : http://code.google.com/p/restcomm/issues/detail?id=1517
+		// Adding code to handle Buddy replication to force data gravitation
+		jBossCache.getInvocationContext().getOptionOverrides().setForceDataGravitation(enableDataGravitation);
+	}
+
 	public TransactionManager getTxManager() {
 		TransactionManager txMgr = null;
 		try {
 			Class<?> txMgrClass = Class.forName(jBossCache.getConfiguration().getTransactionManagerLookupClass());
 			Object txMgrLookup = txMgrClass.getConstructor(new Class[]{}).newInstance(new Object[]{});
 			txMgr = (TransactionManager) txMgrClass.getMethod("getTransactionManager", new Class[]{}).invoke(txMgrLookup, new Object[]{});
+
+			//txMgr = jBossCache.getConfiguration().getRuntimeConfig().getTransactionManager();
 		} catch (Exception e) {
 			logger.debug("Could not fetch TxMgr. Not using one.", e);
 			// let's not have Tx Manager than...
 		}
 		return txMgr;
+	}
+
+	public void evict(FqnWrapper fqnWrapper) {
+		jBossCache.evict(fqnWrapper.getFqn());
+	}
+
+	public void registerClassLoader(ClassLoader serializationClassLoader, FqnWrapper fqnWrapper) {
+		Region region = jBossCache.getRegion(fqnWrapper.getFqn(),true);
+		region.registerContextClassLoader(serializationClassLoader);
+		region.activate();
 	}
 
 

@@ -26,6 +26,8 @@ import org.apache.log4j.Logger;
 import org.jboss.cache.Fqn;
 import org.jboss.cache.Node;
 
+import java.util.Map;
+
 /**
  * Common base proxy for runtime cached data. 
  * @author martins
@@ -44,10 +46,22 @@ public class CacheData {
 	private final MobicentsCache mobicentsCache;
 	
 	private final static boolean doTraceLogs = logger.isTraceEnabled();  
-	
+
+	/*
 	@SuppressWarnings("unchecked")
 	public CacheData(Fqn nodeFqn, MobicentsCache mobicentsCache) {		
 		this.nodeFqn = nodeFqn;	
+		this.mobicentsCache = mobicentsCache;
+		this.node = mobicentsCache.getJBossCache().getRoot().getChild(nodeFqn);
+		if (doTraceLogs) {
+			logger.trace("cache node "+nodeFqn+" retrieved, result = "+this.node);
+		}
+	}
+	*/
+
+	@SuppressWarnings("unchecked")
+	public CacheData(FqnWrapper nodeFqnWrapper, MobicentsCache mobicentsCache) {
+		this.nodeFqn = nodeFqnWrapper.getFqn();
 		this.mobicentsCache = mobicentsCache;
 		this.node = mobicentsCache.getJBossCache().getRoot().getChild(nodeFqn);
 		if (doTraceLogs) {
@@ -153,6 +167,38 @@ public class CacheData {
 
 	public Object removeNodeValue(Object key) {
 		return getNode().remove(key);
+	}
+
+	public Object addChildNode(FqnWrapper fqnWrapper) {
+		final Node childNode = getNode().addChild(fqnWrapper.getFqn());
+		return (Object) childNode;
+	}
+
+	public Object putChildNodeValue(FqnWrapper fqnWrapper, Object key, Object value) {
+		final Node childNode = getNode().getChild(fqnWrapper.getFqn());
+		if (childNode != null) {
+			return childNode.put(key, value);
+		}
+		return null;
+	}
+
+	public Object getChildNode(String child) {
+		final Node childNode = getNode().getChild(child);
+		return (Object) childNode;
+	}
+
+	public Map<String, Object> getChildNodeData(String child) {
+		final Node childNode = getNode().getChild(child);
+		return childNode.getData();
+	}
+
+	public Object getChildNodeValue(String child, Object key) {
+		final Node childNode = getNode().getChild(child);
+		return childNode.get(key);
+	}
+
+	public boolean removeChildNode(String child) {
+		return getNode().removeChild(child);
 	}
 
 }

@@ -25,9 +25,9 @@ package org.restcomm.timers.cache;
 import java.util.Collections;
 import java.util.Set;
 
-import org.jboss.cache.Fqn;
 import org.jboss.cache.Node;
 import org.restcomm.cache.CacheData;
+import org.restcomm.cache.FqnWrapper;
 import org.restcomm.cluster.MobicentsCluster;
 
 
@@ -43,12 +43,13 @@ public class FaultTolerantSchedulerCacheData extends CacheData {
 			
 	/**
 	 * 
-	 * @param txManager 
-	 * @param txManager
+	 * @param baseFqnWrapper
+	 * @param cluster
 	 */
 	@SuppressWarnings("unchecked")
-	public FaultTolerantSchedulerCacheData(Fqn baseFqn, MobicentsCluster cluster) {
-		super(baseFqn,cluster.getMobicentsCache());
+	public FaultTolerantSchedulerCacheData(FqnWrapper baseFqnWrapper, MobicentsCluster cluster) {
+		//super(baseFqn,cluster.getMobicentsCache());
+		super(baseFqnWrapper,cluster.getMobicentsCache());
 	}
 
 	public Set<?> getTaskIDs() {
