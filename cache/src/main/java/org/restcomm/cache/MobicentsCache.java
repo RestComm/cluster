@@ -24,7 +24,6 @@ import java.io.InputStream;
 
 import org.apache.log4j.Logger;
 
-import org.infinispan.AdvancedCache;
 import org.infinispan.Cache;
 import org.infinispan.cache.impl.DecoratedCache;
 import org.infinispan.configuration.cache.CacheMode;
@@ -34,6 +33,7 @@ import org.infinispan.lifecycle.ComponentStatus;
 import org.infinispan.manager.CacheContainer;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.tree.Fqn;
+import org.infinispan.tree.Node;
 import org.infinispan.tree.TreeCache;
 import org.infinispan.tree.TreeCacheFactory;
 
@@ -121,6 +121,7 @@ public class MobicentsCache {
         setLocalMode();
     }
 
+    /*
     public MobicentsCache(CacheContainer cacheContainer) {
         this.jBossCacheContainer = cacheContainer;
         this.jBossDefaultCache = new TreeCacheFactory().createTreeCache(this.jBossCacheContainer.getCache());
@@ -135,6 +136,7 @@ public class MobicentsCache {
         this.managedCache = true;
         setLocalMode();
     }
+    */
 
     private void setLocalMode() {
         if (jBossDefaultCache.getCache().getCacheConfiguration().clustering().cacheMode() == CacheMode.LOCAL) {
@@ -160,6 +162,20 @@ public class MobicentsCache {
     @SuppressWarnings("rawtypes")
     public TreeCache getJBossCache() {
         return jBossDefaultCache;
+    }
+
+    public Object getCacheNode(FqnWrapper fqn) {
+        return jBossDefaultCache.getNode(fqn.getFqn());
+    }
+
+    public Object putCacheNodeValue(FqnWrapper fqn, Object key, Object value) {
+        Node n = jBossDefaultCache.getNode(fqn.getFqn());
+        return n.put(key, value);
+    }
+
+    public Object getCacheNodeValue(FqnWrapper fqn, Object key) {
+        Node n = jBossDefaultCache.getNode(fqn.getFqn());
+        return n.get(key);
     }
 
     public void stopCache() {
