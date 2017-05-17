@@ -20,10 +20,21 @@
 package org.restcomm.cache;
 
 import org.apache.log4j.Logger;
+import org.infinispan.Cache;
+import org.infinispan.interceptors.CacheMgmtInterceptor;
+import org.infinispan.interceptors.TxInterceptor;
+import org.infinispan.interceptors.base.CommandInterceptor;
 import org.infinispan.tree.Fqn;
 import org.infinispan.tree.Node;
 
+import javax.transaction.Status;
+import javax.transaction.SystemException;
+import javax.transaction.Transaction;
+import javax.transaction.TransactionManager;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Common base proxy for runtime cached data. 
@@ -65,11 +76,38 @@ public class CacheData {
 	public CacheData(FqnWrapper nodeFqnWrapper, MobicentsCache mobicentsCache) {
 		this.nodeFqn = nodeFqnWrapper.getFqn();
 		this.mobicentsCache = mobicentsCache;
+
+		//TxInterceptor txInterceptor = null;
+		//boolean excludeTxInterceptor = isNotValidTransaction();
+		//if (excludeTxInterceptor) {
+		//	txInterceptor = excludeTxInterceptor();
+		//}
+		blockTxInterceptorIfTxNotValid();
+
 		this.node = mobicentsCache.getJBossCache().getRoot().getChild(nodeFqn);
-		if (doTraceLogs) {
-			logger.trace("cache node "+nodeFqn+" retrieved, result = "+this.node);
+
+		//if (excludeTxInterceptor & txInterceptor != null) {
+		//	this.getMobicentsCache().getJBossCache().getCache()
+		//			.getAdvancedCache().addInterceptorAfter(txInterceptor, CacheMgmtInterceptor.class);
+		//}
+		unblockTxInterceptorIfTxNotValid();
+
+		/*
+		if (this.node == null) {
+			Fqn lastFqn = Fqn.fromElements(this.nodeFqn.getLastElement());
+			if (doTraceLogs) {
+				logger.trace("cache node for " + nodeFqn + " is null, try to get node for " + lastFqn);
+			}
+			//this.node = mobicentsCache.getJBossCache().getRoot().getChild(lastFqn);
+			//if (doTraceLogs) {
+			//	logger.trace("cache node " + lastFqn + " retrieved, result = " + this.node);
+			//}
 		}
-		logger.info("cache node "+nodeFqn+" retrieved, result = "+this.node);
+		*/
+
+		if (doTraceLogs) {
+			logger.trace("cache node " + nodeFqn + " retrieved, result = " + this.node);
+		}
 	}
 	
 
@@ -114,12 +152,38 @@ public class CacheData {
 	public boolean remove() {
 		if (exists() && !isRemoved()) {
 			isRemoved = true;
+
+			blockTxInterceptorIfTxNotValid();
+
 			node.clearData();
 			//node.put(IS_REMOVED_CACHE_NODE_MAP_KEY, true);
 			node.getParent().removeChild(nodeFqn.getLastElement());
+
 			if (doTraceLogs) {
 				logger.trace("removed cache node "+ node);
+
+				/*
+				logger.trace("removed cache node "+ node.getChildrenNames());
+				logger.trace("removed cache node "+ node.getParent());
+				if (node.getParent() != null) {
+					logger.trace("removed cache node " + node.getParent().getChildrenNames());
+
+					logger.trace("removed cache node "+ mobicentsCache.getJBossCache().getRoot());
+					logger.trace("removed cache node " + mobicentsCache.getJBossCache().getRoot().getChildrenNames());
+
+					Node test = mobicentsCache.getJBossCache().getRoot().getChild(nodeFqn.getLastElement());
+					if (test != null) {
+						logger.trace("WE SHOULD TO REMOVE IT FROM ROOT! "+nodeFqn.getLastElement());
+						mobicentsCache.getJBossCache().getRoot().removeChild(nodeFqn.getLastElement());
+					}
+
+					logger.trace("removed cache node " + mobicentsCache.getJBossCache().getRoot().getChildrenNames());
+				}
+				*/
+
 			}
+
+			unblockTxInterceptorIfTxNotValid();
 			
 			//node = null;
 			return true;
@@ -173,7 +237,28 @@ public class CacheData {
 	}
 
 	public Object getNodeValue(Object key) {
-		return getNode().get(key);
+		Object result = null;
+		blockTxInterceptorIfTxNotValid();
+
+		result = getNode().get(key);
+
+		unblockTxInterceptorIfTxNotValid();
+		return result;
+	}
+
+	public Set getNodeChildrenNames() {
+		Set result = null;
+		blockTxInterceptorIfTxNotValid();
+
+		final Node node = getNode();
+		if (node != null) {
+			result = node.getChildrenNames();
+		} else {
+			result = Collections.emptySet();
+		}
+
+		unblockTxInterceptorIfTxNotValid();
+		return result;
 	}
 
 	public Object removeNodeValue(Object key) {
@@ -193,9 +278,40 @@ public class CacheData {
 		return null;
 	}
 
-	public Object getChildNode(String child) {
-		final Node childNode = getNode().getChild(child);
-		return (Object) childNode;
+	public Object putChildNodeValue(String child, boolean createIfNotExists, Object key, Object value) {
+		Object result = null;
+		blockTxInterceptorIfTxNotValid();
+
+		Node childNode = getNode().getChild(child);
+		if (childNode == null && createIfNotExists) {
+			childNode = (Node) addChildNode(FqnWrapper.fromElementsWrapper(child));
+		}
+		if (childNode != null) {
+			result = childNode.put(key, value);
+		}
+
+		unblockTxInterceptorIfTxNotValid();
+		return result;
+	}
+
+	public boolean hasChildNode(Object child) {
+		boolean result = false;
+		blockTxInterceptorIfTxNotValid();
+
+		result = getNode().hasChild(child);
+
+		unblockTxInterceptorIfTxNotValid();
+		return result;
+	}
+
+	public Object getChildNode(Object child) {
+		Object result = null;
+		blockTxInterceptorIfTxNotValid();
+
+		result = (Object) getNode().getChild(child);
+
+		unblockTxInterceptorIfTxNotValid();
+		return result;
 	}
 
 	public Map<String, Object> getChildNodeData(String child) {
@@ -203,13 +319,92 @@ public class CacheData {
 		return childNode.getData();
 	}
 
-	public Object getChildNodeValue(String child, Object key) {
+	public Set getChildNodeChildrenNames(Object child) {
+		Set result = null;
+		blockTxInterceptorIfTxNotValid();
+
 		final Node childNode = getNode().getChild(child);
-		return childNode.get(key);
+		if (childNode != null) {
+			result = childNode.getChildrenNames();
+		} else {
+			result = Collections.emptySet();
+		}
+
+		unblockTxInterceptorIfTxNotValid();
+		return result;
+	}
+
+	public Object getChildNodeValue(String child, Object key) {
+		Object result = null;
+		blockTxInterceptorIfTxNotValid();
+
+		final Node childNode = getNode().getChild(child);
+		if (childNode != null) {
+			result = childNode.get(key);
+		}
+
+		unblockTxInterceptorIfTxNotValid();
+		return result;
 	}
 
 	public boolean removeChildNode(String child) {
-		return getNode().removeChild(child);
+		boolean result = false;
+		blockTxInterceptorIfTxNotValid();
+
+		result = getNode().removeChild(child);
+
+		unblockTxInterceptorIfTxNotValid();
+		return result;
+	}
+
+	//
+
+	private boolean isNotValidTransaction() {
+		Transaction tx = null;
+		int status = 0;
+		//boolean isRollbackOnly = false;
+		try {
+			tx = this.getMobicentsCache().getTxManager().getTransaction();
+			if (tx != null) {
+				status = tx.getStatus();
+				//isRollbackOnly = (status == Status.STATUS_MARKED_ROLLBACK);
+				//logger.warn("**** TEST: isRollbackOnly: "+isRollbackOnly);
+			}
+		} catch (SystemException e) {
+			return false;
+		}
+
+		return isNotValid(status);
+	}
+
+	private boolean isNotValid(int status) {
+		return status != Status.STATUS_ACTIVE
+				&& status != Status.STATUS_PREPARING
+				&& status != Status.STATUS_COMMITTING;
+	}
+
+	private TxInterceptor txInterceptor = null;
+
+	private void blockTxInterceptorIfTxNotValid() {
+		if (isNotValidTransaction()) {
+			Cache cache = this.getMobicentsCache().getJBossCache().getCache();
+			Iterator<Object> iter = cache.getAdvancedCache().getInterceptorChain().iterator();
+			while (iter.hasNext()) {
+				CommandInterceptor ci = (CommandInterceptor) iter.next();
+				if (ci instanceof TxInterceptor) {
+					txInterceptor = (TxInterceptor) ci;
+					cache.getAdvancedCache().removeInterceptor(TxInterceptor.class);
+					break;
+				}
+			}
+		}
+	}
+
+	private void unblockTxInterceptorIfTxNotValid() {
+		if (isNotValidTransaction() & txInterceptor != null) {
+			this.getMobicentsCache().getJBossCache().getCache()
+					.getAdvancedCache().addInterceptorAfter(txInterceptor, CacheMgmtInterceptor.class);
+		}
 	}
 
 }
