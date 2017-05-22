@@ -24,7 +24,6 @@ import java.io.InputStream;
 
 import org.apache.log4j.Logger;
 
-import org.infinispan.AdvancedCache;
 import org.infinispan.Cache;
 import org.infinispan.cache.impl.DecoratedCache;
 import org.infinispan.configuration.cache.CacheMode;
@@ -34,8 +33,11 @@ import org.infinispan.lifecycle.ComponentStatus;
 import org.infinispan.manager.CacheContainer;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.tree.Fqn;
+import org.infinispan.tree.Node;
 import org.infinispan.tree.TreeCache;
 import org.infinispan.tree.TreeCacheFactory;
+
+import javax.transaction.TransactionManager;
 
 /**
  * The container's HA and FT data source.
@@ -121,6 +123,7 @@ public class MobicentsCache {
         setLocalMode();
     }
 
+    /*
     public MobicentsCache(CacheContainer cacheContainer) {
         this.jBossCacheContainer = cacheContainer;
         this.jBossDefaultCache = new TreeCacheFactory().createTreeCache(this.jBossCacheContainer.getCache());
@@ -135,6 +138,7 @@ public class MobicentsCache {
         this.managedCache = true;
         setLocalMode();
     }
+    */
 
     private void setLocalMode() {
         if (jBossDefaultCache.getCache().getCacheConfiguration().clustering().cacheMode() == CacheMode.LOCAL) {
@@ -160,6 +164,44 @@ public class MobicentsCache {
     @SuppressWarnings("rawtypes")
     public TreeCache getJBossCache() {
         return jBossDefaultCache;
+    }
+
+    public boolean isBuddyReplicationEnabled() {
+        //only for JBoss Cache based MobicentsCache
+        return false;
+    }
+
+    public void setForceDataGravitation(boolean enableDataGravitation) {
+        //only for JBoss Cache based MobicentsCache
+    }
+
+    public TransactionManager getTxManager() {
+        return jBossDefaultCache.getCache().getAdvancedCache().getTransactionManager();
+    }
+
+    public void evict(FqnWrapper fqnWrapper) {
+        for (Object key: jBossDefaultCache.getNode(fqnWrapper.getFqn()).getKeys()) {
+            jBossDefaultCache.getCache().evict(key);
+        }
+    }
+
+    public void registerClassLoader(ClassLoader serializationClassLoader, FqnWrapper fqnWrapper) {
+        //only for JBoss Cache based MobicentsCache
+        // TODO
+    }
+
+    public Object getCacheNode(FqnWrapper fqn) {
+        return jBossDefaultCache.getNode(fqn.getFqn());
+    }
+
+    public Object putCacheNodeValue(FqnWrapper fqn, Object key, Object value) {
+        Node n = jBossDefaultCache.getNode(fqn.getFqn());
+        return n.put(key, value);
+    }
+
+    public Object getCacheNodeValue(FqnWrapper fqn, Object key) {
+        Node n = jBossDefaultCache.getNode(fqn.getFqn());
+        return n.get(key);
     }
 
     public void stopCache() {

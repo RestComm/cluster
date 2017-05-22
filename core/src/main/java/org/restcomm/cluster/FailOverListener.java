@@ -23,7 +23,7 @@ package org.restcomm.cluster;
 import org.infinispan.remoting.transport.Address;
 import org.restcomm.cluster.cache.ClusteredCacheData;
 import org.restcomm.cluster.election.ClientLocalListenerElector;
-import org.infinispan.tree.Fqn;
+import org.restcomm.cache.FqnWrapper;
 
 /**
  * 
@@ -43,7 +43,7 @@ public interface FailOverListener {
 	 * @return
 	 */
 	
-	public Fqn getBaseFqn();
+	public FqnWrapper getBaseFqn();
 	
 	/**
 	 * Retrieves the listener's elector, used to elect the node which does

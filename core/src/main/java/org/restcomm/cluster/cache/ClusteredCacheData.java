@@ -24,6 +24,7 @@ import org.infinispan.remoting.transport.Address;
 import org.infinispan.tree.Fqn;
 import org.infinispan.tree.Node;
 import org.restcomm.cache.CacheData;
+import org.restcomm.cache.FqnWrapper;
 import org.restcomm.cluster.MobicentsCluster;
 
 /**
@@ -42,8 +43,9 @@ public class ClusteredCacheData extends CacheData {
 	 * @param nodeFqn
 	 * @param mobicentsCluster
 	 */
-	public ClusteredCacheData(Fqn nodeFqn, MobicentsCluster mobicentsCluster) {
-		super(nodeFqn, mobicentsCluster.getMobicentsCache());
+	public ClusteredCacheData(FqnWrapper nodeFqnWrapper, MobicentsCluster mobicentsCluster) {
+		//super(nodeFqnWrapper.getFqn(), mobicentsCluster.getMobicentsCache());
+		super(nodeFqnWrapper, mobicentsCluster.getMobicentsCache());
 		indexingHandler = mobicentsCluster.getClusteredCacheDataIndexingHandler();
 	}
 
