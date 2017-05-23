@@ -19,7 +19,7 @@
 
 package org.restcomm.cluster;
 
-import org.infinispan.tree.Fqn;
+import org.restcomm.cache.FqnWrapper;
 
 /**
  * 
@@ -34,12 +34,12 @@ public interface DataRemovalListener {
 	 * @return
 	 */
 	//@SuppressWarnings("unchecked")
-	public Fqn getBaseFqn();
+	public FqnWrapper getBaseFqn();
 	
 	/**
 	 * Indicates that the data with the specified fqn was removed. 
-	 * @param clusteredCacheDataFqn
+	 * @param clusteredCacheDataFqnWrapper
 	 */
 	//@SuppressWarnings("unchecked")
-	public void dataRemoved(Fqn clusteredCacheDataFqn);
+	public void dataRemoved(FqnWrapper clusteredCacheDataFqnWrapper);
 }

@@ -38,8 +38,9 @@ import org.infinispan.notifications.cachemanagerlistener.annotation.ViewChanged;
 import org.infinispan.notifications.cachemanagerlistener.event.ViewChangedEvent;
 import org.infinispan.remoting.transport.Address;
 import org.infinispan.tree.Fqn;
-import org.infinispan.tree.impl.NodeKey;
 import org.infinispan.tree.TreeCache;
+import org.infinispan.tree.impl.NodeKey;
+import org.restcomm.cache.FqnWrapper;
 import org.restcomm.cache.MobicentsCache;
 import org.restcomm.cluster.cache.ClusteredCacheData;
 import org.restcomm.cluster.cache.ClusteredCacheDataIndexingHandler;
@@ -221,7 +222,7 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 
 			final DataRemovalListener dataRemovalListener = dataRemovalListeners.get(changed.getParent());
 			if (dataRemovalListener != null) {
-				dataRemovalListener.dataRemoved(changed);
+				dataRemovalListener.dataRemoved(new FqnWrapper(changed));
 			}
 		}
 	}
@@ -237,7 +238,7 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 			logger.debug("onViewChangeEvent : " + localAddress + " failing over lost member " + lostMember + ", useLocalListenerElector=" + useLocalListenerElector);
 		}
 			final TreeCache jbossCache = mobicentsCache.getJBossCache();
-			final Fqn rootFqnOfChanges = localListener.getBaseFqn();
+			final Fqn rootFqnOfChanges = localListener.getBaseFqn().getFqn();
 			//final String rootCacheOfChanges = localListener.getCacheName();
 			
 			boolean createdTx = false;
@@ -265,7 +266,7 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 				for (Object childName : children) {
 					// Here in values we store data and... inet node., we must match
 					// passed one.
-					final ClusteredCacheData clusteredCacheData = new ClusteredCacheData(Fqn.fromRelativeElements(rootFqnOfChanges, childName),this);
+					final ClusteredCacheData clusteredCacheData = new ClusteredCacheData(FqnWrapper.fromRelativeElementsWrapper(new FqnWrapper(rootFqnOfChanges), childName), this);
 					if (clusteredCacheData.exists()) {
 						Address address = clusteredCacheData.getClusterNodeAddress();
 						if (address != null && address.equals(lostMember)) {
@@ -432,7 +433,7 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 			logger.debug("Adding local listener " + localListener);
 		}
 		for(FailOverListener failOverListener : failOverListeners) {
-			if (failOverListener.getBaseFqn().equals(localListener.getBaseFqn())) {
+			if (failOverListener.getBaseFqn().getFqn().equals(localListener.getBaseFqn().getFqn())) {
 				return false; 
 			}
 		}
@@ -455,7 +456,7 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 	 * @see org.mobicents.cluster.MobicentsCluster#addDataRemovalListener(org.mobicents.cluster.DataRemovalListener)
 	 */
 	public boolean addDataRemovalListener(DataRemovalListener listener) {
-		return dataRemovalListeners.putIfAbsent(listener.getBaseFqn(), listener) == null;
+		return dataRemovalListeners.putIfAbsent(listener.getBaseFqn().getFqn(), listener) == null;
 	}
 	
 	/*
@@ -463,7 +464,7 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 	 * @see org.mobicents.cluster.MobicentsCluster#removeDataRemovalListener(org.mobicents.cluster.DataRemovalListener)
 	 */
 	public boolean removeDataRemovalListener(DataRemovalListener listener) {
-		return dataRemovalListeners.remove(listener.getBaseFqn()) != null;
+		return dataRemovalListeners.remove(listener.getBaseFqn().getFqn()) != null;
 	}
 	
 	/*
