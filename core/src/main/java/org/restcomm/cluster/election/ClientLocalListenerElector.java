@@ -39,5 +39,6 @@ public interface ClientLocalListenerElector {
 	 * @param cacheData
 	 * @return
 	 */
+	@SuppressWarnings("rawtypes")
 	public Address elect(List<Address> nodes, ClusteredCacheData cacheData);
 }

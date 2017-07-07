@@ -22,6 +22,7 @@ package org.restcomm.cluster;
 import java.util.List;
 
 import org.infinispan.remoting.transport.Address;
+import org.restcomm.cache.CacheDataExecutorService;
 import org.restcomm.cache.MobicentsCache;
 import org.restcomm.cluster.cache.ClusteredCacheData;
 import org.restcomm.cluster.cache.ClusteredCacheDataIndexingHandler;
@@ -119,5 +120,11 @@ public interface MobicentsCluster {
 	 * Stops the cluster.
 	 */
 	public void stopCluster();
+	
+	/**
+     * Retrieves CacheData executor service, that performs cache operations 
+     * using it's own thread pool
+     */
+	public CacheDataExecutorService getCacheExecutorService();
 	
 }

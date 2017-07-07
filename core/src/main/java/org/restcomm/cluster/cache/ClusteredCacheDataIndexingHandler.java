@@ -34,6 +34,7 @@ public interface ClusteredCacheDataIndexingHandler {
 	 * Sets the address of the cluster node, which owns the cache data
 	 * @param clusterNodeAddress
 	 */
+	@SuppressWarnings("rawtypes")
 	public void setClusterNodeAddress(ClusteredCacheData cacheData, Address clusterNodeAddress);
 	
 	/**
@@ -41,6 +42,7 @@ public interface ClusteredCacheDataIndexingHandler {
 	 * 
 	 * @return null if this data doesn't have info about the cluster node, which owns it
 	 */
+	@SuppressWarnings("rawtypes")
 	public Address getClusterNodeAddress(ClusteredCacheData cacheData);
 	
 }

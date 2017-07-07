@@ -26,7 +26,7 @@ import java.util.UUID;
 
 import javax.transaction.TransactionManager;
 
-import org.restcomm.cluster.MobicentsCluster;
+import org.restcomm.cluster.MobicentsClusterFactory;
 import org.restcomm.timers.FaultTolerantScheduler;
 import org.restcomm.timers.PeriodicScheduleStrategy;
 
@@ -59,8 +59,8 @@ public class FaultTolerantTimer extends java.util.Timer {
 	 * @param priority
 	 * @param txManager
 	 */
-	public FaultTolerantTimer(String name, MobicentsCluster cluster, byte priority, TransactionManager txManager) {
-		this(name, cluster, priority, txManager, 0);
+	public FaultTolerantTimer(String name, MobicentsClusterFactory clusterFactory, byte priority, TransactionManager txManager) {
+		this(name, clusterFactory, priority, txManager, 0);
 	}
 	
 	/**
@@ -71,9 +71,9 @@ public class FaultTolerantTimer extends java.util.Timer {
 	 * @param txManager
 	 * @param purgePeriod
 	 */
-	public FaultTolerantTimer(String name, MobicentsCluster cluster, byte priority, TransactionManager txManager, int purgePeriod) {
+	public FaultTolerantTimer(String name, MobicentsClusterFactory clusterFactory, byte priority, TransactionManager txManager, int purgePeriod) {
 		timerTaskFactory = new FaultTolerantTimerTimerTaskFactory();
-		scheduler = new FaultTolerantScheduler(name,16, cluster, priority, txManager, timerTaskFactory,purgePeriod);
+		scheduler = new FaultTolerantScheduler(name,16, clusterFactory, priority, txManager, timerTaskFactory,purgePeriod);
 		timerTaskFactory.setScheduler(scheduler);
 	}
 	

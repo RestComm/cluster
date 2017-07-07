@@ -23,7 +23,6 @@ package org.restcomm.cluster;
 import org.infinispan.remoting.transport.Address;
 import org.restcomm.cluster.cache.ClusteredCacheData;
 import org.restcomm.cluster.election.ClientLocalListenerElector;
-import org.restcomm.cache.FqnWrapper;
 
 /**
  * 
@@ -36,14 +35,7 @@ import org.restcomm.cache.FqnWrapper;
  * @author András Kőkuti
  * 
  */
-public interface FailOverListener {
-
-	/**
-	 * Retrieves the base fqn the listener has interest.
-	 * @return
-	 */
-	
-	public FqnWrapper getBaseFqn();
+public interface FailOverListener {	
 	
 	/**
 	 * Retrieves the listener's elector, used to elect the node which does
@@ -69,11 +61,13 @@ public interface FailOverListener {
 	 * Notifies the local client that it now owns the specified {@link ClusteredCacheData}. 
 	 * @param clusteredCacheData
 	 */
+	@SuppressWarnings("rawtypes")
 	public void wonOwnership(ClusteredCacheData clusteredCacheData);
 
 	/**
 	 * Notifies the local client that it lost ownership of the specified {@link ClusteredCacheData}.
 	 * @param clusteredCacheData
 	 */
+	@SuppressWarnings("rawtypes")
 	public void lostOwnership(ClusteredCacheData clusteredCacheData);
 }

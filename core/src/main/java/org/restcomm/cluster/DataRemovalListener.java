@@ -19,8 +19,6 @@
 
 package org.restcomm.cluster;
 
-import org.restcomm.cache.FqnWrapper;
-
 /**
  * 
  * @author martins
@@ -30,16 +28,9 @@ import org.restcomm.cache.FqnWrapper;
 public interface DataRemovalListener {
 
 	/**
-	 * Retrieves the base fqn the listener has interest.
-	 * @return
-	 */
-	//@SuppressWarnings("unchecked")
-	public FqnWrapper getBaseFqn();
-	
-	/**
 	 * Indicates that the data with the specified fqn was removed. 
 	 * @param clusteredCacheDataFqnWrapper
 	 */
 	//@SuppressWarnings("unchecked")
-	public void dataRemoved(FqnWrapper clusteredCacheDataFqnWrapper);
+	public void dataRemoved(Object key);
 }

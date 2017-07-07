@@ -21,13 +21,10 @@ package org.restcomm.timers.cache;
 
 import java.io.Serializable;
 
-import org.restcomm.cache.FqnWrapper;
 import org.restcomm.cluster.MobicentsCluster;
 import org.restcomm.cluster.cache.ClusteredCacheData;
 import org.restcomm.timers.TimerTask;
 import org.restcomm.timers.TimerTaskData;
-
-import org.infinispan.tree.Fqn;
 
 /**
  * 
@@ -38,46 +35,30 @@ import org.infinispan.tree.Fqn;
  * 
  */
 
-public class TimerTaskCacheData extends ClusteredCacheData {
-	
-	/**
-	 * the node's data map key where task data is stored
-	 */
-	private static final String CACHE_NODE_MAP_KEY = "taskdata";
-	
+public class TimerTaskCacheData extends ClusteredCacheData<Serializable,TimerTaskData> {	
 	/**
 	 * 
 	 */
 	//@SuppressWarnings("unchecked")
-	public TimerTaskCacheData(Serializable taskID, Fqn baseFqn, MobicentsCluster mobicentsCluster) {
-		super(FqnWrapper.fromRelativeElementsWrapper(new FqnWrapper(baseFqn), taskID),mobicentsCluster);
+	public TimerTaskCacheData(Serializable taskID, MobicentsCluster mobicentsCluster) {
+		super(taskID,mobicentsCluster);
 	}
 
-	/**
-	 * 
-	 */
-	//@SuppressWarnings("unchecked")
-	public TimerTaskCacheData(Fqn fqn, MobicentsCluster mobicentsCluster) {
-		super(new FqnWrapper(fqn),mobicentsCluster);
-	}
-	
 	/**
 	 * Sets the task data.
 	 * 
 	 * @param taskData
 	 */
-	@SuppressWarnings("unchecked")
 	public void setTaskData(TimerTaskData taskData) {
-		getNode().put(CACHE_NODE_MAP_KEY,taskData);
+		putValue(taskData);
 	}
 
 	/**
 	 * Retrieves the task data
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public TimerTaskData getTaskData() {
-		return (TimerTaskData) getNode().get(CACHE_NODE_MAP_KEY);		
+		return getValue();		
 	}
 
 	/**
@@ -87,8 +68,7 @@ public class TimerTaskCacheData extends ClusteredCacheData {
 	 * @return
 	 *  
 	 */
-	public static Serializable getTaskID(ClusteredCacheData clusteredCacheData) throws IllegalArgumentException {
-		return (Serializable) clusteredCacheData.getNodeFqn().getLastElement();
+	public static Serializable getTaskID(ClusteredCacheData<Serializable,TimerTaskData> clusteredCacheData) throws IllegalArgumentException {
+		return (Serializable) clusteredCacheData.getKey();
 	}
-	
 }

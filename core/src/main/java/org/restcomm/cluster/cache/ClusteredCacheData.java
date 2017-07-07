@@ -21,10 +21,8 @@ package org.restcomm.cluster.cache;
 
 
 import org.infinispan.remoting.transport.Address;
-import org.infinispan.tree.Fqn;
-import org.infinispan.tree.Node;
 import org.restcomm.cache.CacheData;
-import org.restcomm.cache.FqnWrapper;
+import org.restcomm.cache.CacheDataExecutorService;
 import org.restcomm.cluster.MobicentsCluster;
 
 /**
@@ -35,35 +33,21 @@ import org.restcomm.cluster.MobicentsCluster;
  * @author András Kőkuti
  *
  */
-public class ClusteredCacheData extends CacheData {
-	
-	private final ClusteredCacheDataIndexingHandler indexingHandler;
+public class ClusteredCacheData<K,V> extends CacheData<K,ClustedCacheWrapper<V>> {
 	
 	/**
 	 * @param nodeFqn
 	 * @param mobicentsCluster
 	 */
-	public ClusteredCacheData(FqnWrapper nodeFqnWrapper, MobicentsCluster mobicentsCluster) {
-		//super(nodeFqnWrapper.getFqn(), mobicentsCluster.getMobicentsCache());
-		super(nodeFqnWrapper, mobicentsCluster.getMobicentsCache());
-		indexingHandler = mobicentsCluster.getClusteredCacheDataIndexingHandler();
+	public ClusteredCacheData(K key, MobicentsCluster mobicentsCluster) {
+		super(key, mobicentsCluster.getMobicentsCache(), mobicentsCluster.getCacheExecutorService());		
 	}
 
-	/* (non-Javadoc)
-	 * @see org.mobicents.slee.runtime.cache.CacheData#create()
-	 */
-	@Override
 	public boolean create() {
-		if (super.create()) {
-			// store local address if we are not running in local mode
-			if (!getMobicentsCache().isLocalMode()) {
-				setClusterNodeAddress(getMobicentsCache().getJBossCache().getCache().getCacheManager().getAddress());
-			}
-			return true;
+		if (!isLocal()) {
+			setClusterNodeAddress(getCacheManager().getAddress());
 		}
-		else {
-			return false;
-		}
+		return true;
 	}
 	
 	/**
@@ -71,7 +55,13 @@ public class ClusteredCacheData extends CacheData {
 	 * @param clusterNodeAddress
 	 */
 	public void setClusterNodeAddress(Address clusterNodeAddress) {
-		indexingHandler.setClusterNodeAddress(this,clusterNodeAddress);
+		ClustedCacheWrapper<V> wrappedData=(ClustedCacheWrapper<V>)get();
+		ClustedCacheWrapper<V> newData=new ClustedCacheWrapper<V>();
+		newData.setAddress(clusterNodeAddress);
+		if(wrappedData!=null && wrappedData.getRealObject()!=null)
+			newData.setRealObject(wrappedData.getRealObject());
+		
+		super.put(newData);		
 	}
 	
 	/**
@@ -80,15 +70,43 @@ public class ClusteredCacheData extends CacheData {
 	 * @return null if this data doesn't have info about the cluster node, which owns it
 	 */
 	public Address getClusterNodeAddress() {
-		return indexingHandler.getClusterNodeAddress(this);
+		ClustedCacheWrapper<V> wrappedData=(ClustedCacheWrapper<V>)get();
+		if(wrappedData==null)
+			return null;
+				
+		return wrappedData.getAddress();
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.mobicents.cache.CacheData#getNode()
-	 */
-	@Override
-	@SuppressWarnings("rawtypes")
-	public Node getNode(){
-		return super.getNode();
+	public V getValue()
+	{
+		ClustedCacheWrapper<V> wrappedData=(ClustedCacheWrapper<V>)super.get();
+		if(wrappedData==null)
+			return null;
+		
+		return wrappedData.getRealObject();				
+	}
+	
+	public V putValue(V value)
+	{
+		ClustedCacheWrapper<V> wrappedData=(ClustedCacheWrapper<V>)get();
+		ClustedCacheWrapper<V> newData=new ClustedCacheWrapper<V>();
+		newData.setRealObject(value);
+		if(wrappedData!=null && wrappedData.getAddress()!=null)
+			newData.setAddress(wrappedData.getAddress());
+		
+		super.put(newData);
+		if(wrappedData!=null)
+			return wrappedData.getRealObject();
+		
+		return null;
+	}
+	
+	public V removeElement()
+	{
+		ClustedCacheWrapper<V> wrappedData=super.remove();
+		if(wrappedData!=null)
+			return wrappedData.getRealObject();
+		
+		return null;
 	}
 }

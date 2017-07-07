@@ -35,14 +35,12 @@ import javax.transaction.TransactionManager;
 
 import org.apache.log4j.Logger;
 import org.infinispan.remoting.transport.Address;
-import org.infinispan.tree.Fqn;
-import org.restcomm.cache.FqnWrapper;
 import org.restcomm.cluster.DataRemovalListener;
 import org.restcomm.cluster.FailOverListener;
 import org.restcomm.cluster.MobicentsCluster;
+import org.restcomm.cluster.MobicentsClusterFactory;
 import org.restcomm.cluster.cache.ClusteredCacheData;
 import org.restcomm.cluster.election.ClientLocalListenerElector;
-import org.restcomm.timers.cache.FaultTolerantSchedulerCacheData;
 import org.restcomm.timers.cache.TimerTaskCacheData;
 
 /**
@@ -77,13 +75,7 @@ public class FaultTolerantScheduler {
 	 */
 	private TimerTaskFactory timerTaskFactory;
 	
-	/**
-	 * the base fqn used to store tasks data in restcomm cluster's cache
-	 */
-	@SuppressWarnings("unchecked")
-	private final Fqn baseFqn;
-	
-	private FaultTolerantSchedulerCacheData cacheData;
+	//private FaultTolerantSchedulerCacheData cacheData;
 	
 	/**
 	 * the scheduler name
@@ -94,6 +86,11 @@ public class FaultTolerantScheduler {
 	 * the restcomm cluster 
 	 */
 	private final MobicentsCluster cluster;
+	
+	/**
+	 * the restcomm cluster factory 
+	 */
+	private final MobicentsClusterFactory clusterFactory;
 	
 	/**
 	 * listener for fail over events in restcomm cluster
@@ -109,8 +106,8 @@ public class FaultTolerantScheduler {
 	 * @param txManager
 	 * @param timerTaskFactory
 	 */
-	public FaultTolerantScheduler(String name, int corePoolSize, MobicentsCluster cluster, byte priority, TransactionManager txManager, TimerTaskFactory timerTaskFactory) {
-		this(name, corePoolSize, cluster, priority, txManager, timerTaskFactory, 0, Executors.defaultThreadFactory());
+	public FaultTolerantScheduler(String name, int corePoolSize, MobicentsClusterFactory clusterFactory, byte priority, TransactionManager txManager, TimerTaskFactory timerTaskFactory) {
+		this(name, corePoolSize, clusterFactory, priority, txManager, timerTaskFactory, 0, Executors.defaultThreadFactory());
 	}
 
     /**
@@ -123,8 +120,8 @@ public class FaultTolerantScheduler {
      * @param timerTaskFactory
      * @param threadFactory
      */
-    public FaultTolerantScheduler(String name, int corePoolSize, MobicentsCluster cluster, byte priority, TransactionManager txManager, TimerTaskFactory timerTaskFactory, ThreadFactory threadFactory) {
-        this(name, corePoolSize, cluster, priority, txManager, timerTaskFactory, 0, threadFactory);
+    public FaultTolerantScheduler(String name, int corePoolSize, MobicentsClusterFactory clusterFactory, byte priority, TransactionManager txManager, TimerTaskFactory timerTaskFactory, ThreadFactory threadFactory) {
+        this(name, corePoolSize, clusterFactory, priority, txManager, timerTaskFactory, 0, threadFactory);
     }
 
     /**
@@ -137,8 +134,8 @@ public class FaultTolerantScheduler {
      * @param timerTaskFactory
      * @param purgePeriod
      */
-	public FaultTolerantScheduler(String name, int corePoolSize, MobicentsCluster cluster, byte priority, TransactionManager txManager,TimerTaskFactory timerTaskFactory, int purgePeriod) {
-        this(name, corePoolSize, cluster, priority, txManager, timerTaskFactory, purgePeriod, Executors.defaultThreadFactory());
+	public FaultTolerantScheduler(String name, int corePoolSize, MobicentsClusterFactory clusterFactory, byte priority, TransactionManager txManager,TimerTaskFactory timerTaskFactory, int purgePeriod) {
+        this(name, corePoolSize, clusterFactory, priority, txManager, timerTaskFactory, purgePeriod, Executors.defaultThreadFactory());
 	}
 
     /**
@@ -152,7 +149,7 @@ public class FaultTolerantScheduler {
      * @param purgePeriod
      * @param threadFactory
      */
-    public FaultTolerantScheduler(String name, int corePoolSize, MobicentsCluster cluster, byte priority, TransactionManager txManager,TimerTaskFactory timerTaskFactory, int purgePeriod, ThreadFactory threadFactory) {
+    public FaultTolerantScheduler(String name, int corePoolSize, MobicentsClusterFactory clusterFactory, byte priority, TransactionManager txManager,TimerTaskFactory timerTaskFactory, int purgePeriod, ThreadFactory threadFactory) {
         this.name = name;
         this.executor = new ScheduledThreadPoolExecutor(corePoolSize, threadFactory);
         if(purgePeriod > 0) {
@@ -169,17 +166,16 @@ public class FaultTolerantScheduler {
             };
             this.executor.scheduleWithFixedDelay(r, purgePeriod, purgePeriod, TimeUnit.MINUTES);
         }
-        this.baseFqn = Fqn.fromElements(name);
-        this.cluster = cluster;
+        
+        this.clusterFactory = clusterFactory;
+        this.cluster = clusterFactory.getCluster(name);
         this.timerTaskFactory = timerTaskFactory;
         this.txManager = txManager;
-        cacheData = new FaultTolerantSchedulerCacheData(new FqnWrapper(baseFqn),cluster);
-        if (cluster.isStarted()) {
-            cacheData.create();
-        }
+        
         clusterClientLocalListener = new ClientLocalListener(priority);
         cluster.addFailOverListener(clusterClientLocalListener);
         cluster.addDataRemovalListener(clusterClientLocalListener);
+        cluster.startCluster();
     }
 
 	/**
@@ -188,13 +184,8 @@ public class FaultTolerantScheduler {
 	 * @return null if there is no such timer task data
 	 */
 	public TimerTaskData getTimerTaskData(Serializable taskID) {
-		TimerTaskCacheData timerTaskCacheData = new TimerTaskCacheData(taskID, baseFqn, cluster);
-		if (timerTaskCacheData.exists()) {
-			return timerTaskCacheData.getTaskData();
-		}
-		else {
-			return null;
-		}
+		TimerTaskCacheData timerTaskCacheData = new TimerTaskCacheData(taskID, cluster);
+		return timerTaskCacheData.getTaskData();		
 	}
 	
 	/**
@@ -285,7 +276,7 @@ public class FaultTolerantScheduler {
 		}
 		
 		// store the task and data
-		final TimerTaskCacheData timerTaskCacheData = new TimerTaskCacheData(taskID, baseFqn, cluster);
+		final TimerTaskCacheData timerTaskCacheData = new TimerTaskCacheData(taskID, cluster);
 		if (timerTaskCacheData.create()) {
 			if (logger.isInfoEnabled()) {
 				logger.info("Storing task data " + taskID);
@@ -338,7 +329,7 @@ public class FaultTolerantScheduler {
 		TimerTask task = localRunningTasks.get(taskID);
 		if (task != null) {
 			// remove task data
-			new TimerTaskCacheData(taskID, baseFqn, cluster).remove();
+			new TimerTaskCacheData(taskID, cluster).removeElement();
 
 			final SetTimerAfterTxCommitRunnable setAction = task.getSetTimerTransactionalAction();
 			if (setAction != null) {
@@ -398,7 +389,7 @@ public class FaultTolerantScheduler {
 								logger.debug("removing");
 								task = r.task;
 								// remove from cluster
-								new TimerTaskCacheData(taskID, baseFqn, cluster).remove();
+								new TimerTaskCacheData(taskID, cluster).removeElement();
 							}							
 						}											
 					}
@@ -420,7 +411,7 @@ public class FaultTolerantScheduler {
 		
 		localRunningTasks.remove(taskID);
 		if(removeFromCache)
-			new TimerTaskCacheData(taskID, baseFqn, cluster).remove();
+			new TimerTaskCacheData(taskID, cluster).removeElement();
 	}
 	
 	/**
@@ -448,6 +439,7 @@ public class FaultTolerantScheduler {
 		cluster.removeFailOverListener(clusterClientLocalListener);
 		cluster.removeDataRemovalListener(clusterClientLocalListener);
 		
+		clusterFactory.stopCluster(name);
 		executor.shutdownNow();
 		localRunningTasks.clear();
 	}
@@ -458,7 +450,7 @@ public class FaultTolerantScheduler {
 	}
 	
 	public String toDetailedString() {		
-		return "FaultTolerantScheduler [ name = "+name+" , local tasks = "+localRunningTasks.size()+" , all tasks "+cacheData.getTaskIDs().size()+" ]";
+		return "FaultTolerantScheduler [ name = "+name+" , local tasks = "+localRunningTasks.size() + " ]";
 	}
 	
 	public void stop() {
@@ -477,16 +469,7 @@ public class FaultTolerantScheduler {
 		 */
 		public ClientLocalListener(byte priority) {
 			this.priority = priority;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see org.mobicents.cluster.FailOverListener#getBaseFqn()
-		 */
-		@SuppressWarnings("unchecked")
-		public FqnWrapper getBaseFqn() {
-			return new FqnWrapper(baseFqn);
-		}
+		}		
 
 		/*
 		 * (non-Javadoc)
@@ -516,7 +499,7 @@ public class FaultTolerantScheduler {
 		 * (non-Javadoc)
 		 * @see org.mobicents.cluster.FailOverListener#lostOwnership(org.mobicents.cluster.cache.ClusteredCacheData)
 		 */
-		public void lostOwnership(ClusteredCacheData clusteredCacheData) {
+		public void lostOwnership(@SuppressWarnings("rawtypes") ClusteredCacheData clusteredCacheData) {
 			
 		}
 
@@ -524,15 +507,16 @@ public class FaultTolerantScheduler {
 		 * (non-Javadoc)
 		 * @see org.mobicents.cluster.FailOverListener#wonOwnership(org.mobicents.cluster.cache.ClusteredCacheData)
 		 */
-		public void wonOwnership(ClusteredCacheData clusteredCacheData) {
+		public void wonOwnership(@SuppressWarnings("rawtypes") ClusteredCacheData clusteredCacheData) {
 			
 			if (logger.isDebugEnabled()) {
 				logger.debug("wonOwnership( clusterCacheData = "+clusteredCacheData+")");
 			}
 
 			try {
+				@SuppressWarnings("unchecked")
 				Serializable taskID = TimerTaskCacheData.getTaskID(clusteredCacheData);
-				TimerTaskCacheData timerTaskCacheData = new TimerTaskCacheData(taskID, baseFqn, cluster);
+				TimerTaskCacheData timerTaskCacheData = new TimerTaskCacheData(taskID, cluster);
 				recover(timerTaskCacheData.getTaskData());
 			}
 			catch (Throwable e) {
@@ -544,14 +528,11 @@ public class FaultTolerantScheduler {
 		 * (non-Javadoc)
 		 * @see org.mobicents.cluster.DataRemovalListener#dataRemoved(org.jboss.cache.Fqn)
 		 */
-		@SuppressWarnings("unchecked")
-		public void dataRemoved(FqnWrapper clusteredCacheDataFqnWrapper) {
-			Fqn clusteredCacheDataFqn = clusteredCacheDataFqnWrapper.getFqn();
-			Object lastElement = clusteredCacheDataFqn.getLastElement();
+		public void dataRemoved(Object key) {			
 			if (logger.isDebugEnabled()) {
-				logger.debug("remote notification dataRemoved( clusterCacheDataFqn = "+clusteredCacheDataFqn+"), lastElement " + lastElement);
+				logger.debug("remote notification dataRemoved, lastElement " + key);
 			}
-			final TimerTask task = localRunningTasks.remove(lastElement);
+			final TimerTask task = localRunningTasks.remove(key);
 			if (task != null) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("remote notification dataRemoved( task = "+task.getData().getTaskID()+" removed locally cancelling it");
