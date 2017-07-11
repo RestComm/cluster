@@ -92,7 +92,7 @@ public class MobicentsClusterFactory {
 
 		MobicentsCache sleeCache = null;
 		if(this.jBossCacheContainer!=null)
-			sleeCache = new MobicentsCache(name,jBossCacheContainer, classLoader);
+			sleeCache = new MobicentsCache(name,jBossCacheContainer, classLoader, cacheExecutorService);
 		else {			
 			Boolean loadDefault=false;
 			try {
@@ -116,7 +116,7 @@ public class MobicentsClusterFactory {
 			}
 			
 			if(this.jBossCacheContainer!=null) {
-				sleeCache = new MobicentsCache(name, jBossCacheContainer, classLoader);
+				sleeCache = new MobicentsCache(name, jBossCacheContainer, classLoader, cacheExecutorService);
 			}
 		}
 		

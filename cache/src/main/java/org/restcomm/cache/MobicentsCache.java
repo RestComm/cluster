@@ -49,33 +49,38 @@ public class MobicentsCache {
 
     private final CacheContainer jBossCacheContainer;
 
-    private  Cache<Object,Object> cache;
+    private Cache<Object, Object> cache;
 
     private boolean localMode;
     private final boolean managedCache;
     private String name;
-    
-    private AtomicBoolean isStarted=new AtomicBoolean(false);
-    public MobicentsCache(String name,CacheContainer jBossCacheContainer,
-                          ClassLoader classLoader) {
-    	this.jBossCacheContainer = jBossCacheContainer;
 
+    private CacheDataExecutorService cacheDataExecutorService;
+
+    private AtomicBoolean isStarted = new AtomicBoolean(false);
+
+    public MobicentsCache(String name, CacheContainer jBossCacheContainer, ClassLoader classLoader,
+            CacheDataExecutorService cacheDataExecutorService) {
+        this.jBossCacheContainer = jBossCacheContainer;
+        this.cacheDataExecutorService = cacheDataExecutorService;
         if (this.jBossCacheContainer.getCache().getCacheConfiguration().clustering().cacheMode().isClustered()) {
-        	this.cache=new DecoratedCache<Object,Object>(this.jBossCacheContainer.getCache(name).getAdvancedCache(), classLoader);
+            this.cache = new DecoratedCache<Object, Object>(this.jBossCacheContainer.getCache(name).getAdvancedCache(),
+                    classLoader);
         } else {
-        	this.cache=this.jBossCacheContainer.getCache(name);
+            this.cache = this.jBossCacheContainer.getCache(name);
         }
 
-        this.name=name;
+        this.name = name;
         this.managedCache = false;
         setLocalMode();
     }
 
-    public MobicentsCache(String name,CacheContainer jBossCacheContainer) {
+    public MobicentsCache(String name, CacheContainer jBossCacheContainer, CacheDataExecutorService cacheDataExecutorService) {
         this.jBossCacheContainer = jBossCacheContainer;
-        this.cache=this.jBossCacheContainer.getCache(name);
+        this.cacheDataExecutorService = cacheDataExecutorService;
+        this.cache = this.jBossCacheContainer.getCache(name);
         this.managedCache = false;
-        this.name=name;
+        this.name = name;
         setLocalMode();
     }
 
@@ -90,44 +95,45 @@ public class MobicentsCache {
         if (isStarted.compareAndSet(false, true)) {
             logger.info("Starting JBoss Cache " + name + " ...");
             this.cache.start();
-            	
+
             if (logger.isInfoEnabled()) {
-            	logger.info("Mobicents Cache  " + name + " started, status: " + cache.getStatus() + ", Mode: " + cache.getCacheConfiguration().clustering().cacheMode());
-            }            
-        }            
+                logger.info("Mobicents Cache  " + name + " started, status: " + cache.getStatus() + ", Mode: "
+                        + cache.getCacheConfiguration().clustering().cacheMode());
+            }
+        }
     }
 
     public Address getLocalAddresss() {
-    	return cache.getCacheManager().getAddress();
+        return cache.getCacheManager().getAddress();
     }
-    
+
     protected CacheContainer getJBossCacheContainer() {
         return jBossCacheContainer;
     }
 
-    protected Cache<Object,Object> getJBossCache() {
+    protected Cache<Object, Object> getJBossCache() {
         return cache;
     }
 
     public boolean isBuddyReplicationEnabled() {
-        //only for JBoss Cache based MobicentsCache
+        // only for JBoss Cache based MobicentsCache
         return false;
     }
 
     public void setForceDataGravitation(boolean enableDataGravitation) {
-        //only for JBoss Cache based MobicentsCache
+        // only for JBoss Cache based MobicentsCache
     }
 
-    public TransactionManager getTxManager(String name) {
+    public TransactionManager getTxManager() {
         return cache.getAdvancedCache().getTransactionManager();
-    }    
-    
+    }
+
     public void stopCache() {
         if (!managedCache) {
             if (logger.isInfoEnabled()) {
                 logger.info("Mobicents Cache " + name + " stopping...");
             }
-            //this.jBossCacheManager.destroy();
+            // this.jBossCacheManager.destroy();
         }
         if (logger.isInfoEnabled()) {
             logger.info("Mobicents Cache " + name + " stopped.");
@@ -142,62 +148,63 @@ public class MobicentsCache {
     public boolean isLocalMode() {
         return localMode;
     }
-    
+
     /*
-     * Retreives all the values stored in specific cache
-     * beware of using this operation , its very very expensive
+     * Retreives all the values stored in specific cache beware of using this operation , its very very expensive
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-	public Set getAllValues() {
-    	CloseableIterator<Object> values=getJBossCache().values().iterator();
-    	Set output=new HashSet();
-    	while(values.hasNext()) {
-    		output.add(values.next());
-    	}
-    	
-    	return output;
+    public Set getAllValues() {
+        CloseableIterator<Object> values = getJBossCache().values().iterator();
+        Set output = new HashSet();
+        while (values.hasNext()) {
+            output.add(values.next());
+        }
+
+        return output;
     }
-    
+
     /*
-     * Retreives all the keys stored in specific cache
-     * beware of using this operation , its very very expensive
+     * Retreives all the keys stored in specific cache beware of using this operation , its very very expensive
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-	public Set getAllKeys() {
-    	CloseableIterator<Object> values=getJBossCache().keySet().iterator();
-    	Set output=new HashSet();
-    	while(values.hasNext()) {
-    		output.add(values.next());
-    	}
-    	
-    	return output;
+    public Set getAllKeys() {
+        CloseableIterator<Object> values = getJBossCache().keySet().iterator();
+        Set output = new HashSet();
+        while (values.hasNext()) {
+            output.add(values.next());
+        }
+
+        return output;
     }
-    
+
     /*
-     * Retreives all the keys stored in specific cache
-     * beware of using this operation , its very very expensive
+     * Retreives all the keys stored in specific cache beware of using this operation , its very very expensive
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-	public Map getAllElements() {
-    	CloseableIterator<Map.Entry<Object,Object>> values=getJBossCache().entrySet().iterator();
-    	Map output=new HashMap();
-    	while(values.hasNext()) {
-    		Map.Entry<Object,Object> curr=values.next();
-    		output.put(curr.getKey(),curr.getValue());
-    	}
-    	
-    	return output;
+    public Map getAllElements() {
+        CloseableIterator<Map.Entry<Object, Object>> values = getJBossCache().entrySet().iterator();
+        Map output = new HashMap();
+        while (values.hasNext()) {
+            Map.Entry<Object, Object> curr = values.next();
+            output.put(curr.getKey(), curr.getValue());
+        }
+
+        return output;
     }
-    
+
     public void addListener(Object listener) {
-    	cache.addListener(listener);
+        cache.addListener(listener);
     }
-    
+
     public void addManagerListener(Object listener) {
-    	cache.getCacheManager().addListener(listener);
+        cache.getCacheManager().addListener(listener);
     }
-    
+
     public List<Address> getCurrentView() {
-    	return new ArrayList<Address>(cache.getCacheManager().getMembers());
-    }    
+        return new ArrayList<Address>(cache.getCacheManager().getMembers());
+    }
+
+    protected CacheDataExecutorService getCacheDataExecutorService() {
+        return this.cacheDataExecutorService;
+    }
 }

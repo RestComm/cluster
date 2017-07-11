@@ -22,7 +22,6 @@ package org.restcomm.cluster.cache;
 
 import org.infinispan.remoting.transport.Address;
 import org.restcomm.cache.CacheData;
-import org.restcomm.cache.CacheDataExecutorService;
 import org.restcomm.cluster.MobicentsCluster;
 
 /**
@@ -40,7 +39,7 @@ public class ClusteredCacheData<K,V> extends CacheData<K,ClustedCacheWrapper<V>>
 	 * @param mobicentsCluster
 	 */
 	public ClusteredCacheData(K key, MobicentsCluster mobicentsCluster) {
-		super(key, mobicentsCluster.getMobicentsCache(), mobicentsCluster.getCacheExecutorService());		
+		super(key, mobicentsCluster.getMobicentsCache());		
 	}
 
 	public boolean create() {

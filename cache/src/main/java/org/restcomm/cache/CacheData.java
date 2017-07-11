@@ -10,10 +10,10 @@ public class CacheData<K, V> {
     private MobicentsCache cache;
     private CacheDataExecutorService cacheExecutorService;
 
-    public CacheData(K key, MobicentsCache cache, CacheDataExecutorService cacheExecutorService) {
+    public CacheData(K key, MobicentsCache cache) {
         this.key = key;
         this.cache = cache;
-        this.cacheExecutorService = cacheExecutorService;
+        this.cacheExecutorService = cache.getCacheDataExecutorService();
     }
 
     public K getKey() {
@@ -59,6 +59,7 @@ public class CacheData<K, V> {
          * Infinispan returns invalid state exception while expecting to do nothing on set there modifying the logic to simply
          * ignore rolledback transaction
          */
+        
         if (!isCurrentTransactionInRollback())
             this.cache.getJBossCache().put(key, value);
     }
@@ -99,5 +100,9 @@ public class CacheData<K, V> {
 
     public Boolean isLocal() {
         return this.cache.isLocalMode();
+    }
+    
+    public void evict() {
+        this.cache.getJBossCache().evict(key);
     }
 }
