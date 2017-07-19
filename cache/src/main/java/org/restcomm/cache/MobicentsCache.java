@@ -207,4 +207,8 @@ public class MobicentsCache {
     protected CacheDataExecutorService getCacheDataExecutorService() {
         return this.cacheDataExecutorService;
     }
+    
+    public String getName() {
+        return this.name;
+    }
 }

@@ -495,7 +495,7 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 	public void stopCluster() {
 		synchronized (this) {
 			if (!started) {
-				throw new IllegalStateException("cluster already started");
+				throw new IllegalStateException("cluster already stopped");
 			}
 			mobicentsCache.stopCache();
 			started = false;
