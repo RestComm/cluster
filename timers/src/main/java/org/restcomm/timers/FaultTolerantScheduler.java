@@ -184,7 +184,7 @@ public class FaultTolerantScheduler {
 	 * @return null if there is no such timer task data
 	 */
 	public TimerTaskData getTimerTaskData(Serializable taskID) {
-		TimerTaskCacheData timerTaskCacheData = new TimerTaskCacheData(taskID, cluster);
+		TimerTaskCacheData timerTaskCacheData = new TimerTaskCacheData(taskID, cluster.getMobicentsCache());
 		return timerTaskCacheData.getTaskData();		
 	}
 	
@@ -276,7 +276,7 @@ public class FaultTolerantScheduler {
 		}
 		
 		// store the task and data
-		final TimerTaskCacheData timerTaskCacheData = new TimerTaskCacheData(taskID, cluster);
+		final TimerTaskCacheData timerTaskCacheData = new TimerTaskCacheData(taskID, cluster.getMobicentsCache());
 		if (timerTaskCacheData.create()) {
 			if (logger.isInfoEnabled()) {
 				logger.info("Storing task data " + taskID);
@@ -329,7 +329,7 @@ public class FaultTolerantScheduler {
 		TimerTask task = localRunningTasks.get(taskID);
 		if (task != null) {
 			// remove task data
-			new TimerTaskCacheData(taskID, cluster).removeElement();
+			new TimerTaskCacheData(taskID, cluster.getMobicentsCache()).removeElement();
 
 			final SetTimerAfterTxCommitRunnable setAction = task.getSetTimerTransactionalAction();
 			if (setAction != null) {
@@ -389,7 +389,7 @@ public class FaultTolerantScheduler {
 								logger.debug("removing");
 								task = r.task;
 								// remove from cluster
-								new TimerTaskCacheData(taskID, cluster).removeElement();
+								new TimerTaskCacheData(taskID, cluster.getMobicentsCache()).removeElement();
 							}							
 						}											
 					}
@@ -411,7 +411,7 @@ public class FaultTolerantScheduler {
 		
 		localRunningTasks.remove(taskID);
 		if(removeFromCache)
-			new TimerTaskCacheData(taskID, cluster).removeElement();
+			new TimerTaskCacheData(taskID, cluster.getMobicentsCache()).removeElement();
 	}
 	
 	/**
@@ -516,7 +516,7 @@ public class FaultTolerantScheduler {
 			try {
 				@SuppressWarnings("unchecked")
 				Serializable taskID = TimerTaskCacheData.getTaskID(clusteredCacheData);
-				TimerTaskCacheData timerTaskCacheData = new TimerTaskCacheData(taskID, cluster);
+				TimerTaskCacheData timerTaskCacheData = new TimerTaskCacheData(taskID, cluster.getMobicentsCache());
 				recover(timerTaskCacheData.getTaskData());
 			}
 			catch (Throwable e) {

@@ -251,7 +251,7 @@ public class DefaultMobicentsCluster implements MobicentsCluster {
 					// Here in values we store data and... inet node., we must match
 					// passed one.
 					@SuppressWarnings({ "rawtypes", "unchecked" })
-					final ClusteredCacheData clusteredCacheData = new ClusteredCacheData(children.next(),this);
+					final ClusteredCacheData clusteredCacheData = new ClusteredCacheData(children.next(),this.getMobicentsCache());					
 					Address address = clusteredCacheData.getClusterNodeAddress();
 					if (address != null && address.equals(lostMember)) {
 						// may need to do election using client local listener

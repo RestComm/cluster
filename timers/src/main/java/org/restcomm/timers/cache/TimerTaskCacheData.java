@@ -21,7 +21,7 @@ package org.restcomm.timers.cache;
 
 import java.io.Serializable;
 
-import org.restcomm.cluster.MobicentsCluster;
+import org.restcomm.cache.MobicentsCache;
 import org.restcomm.cluster.cache.ClusteredCacheData;
 import org.restcomm.timers.TimerTask;
 import org.restcomm.timers.TimerTaskData;
@@ -40,8 +40,8 @@ public class TimerTaskCacheData extends ClusteredCacheData<Serializable,TimerTas
 	 * 
 	 */
 	//@SuppressWarnings("unchecked")
-	public TimerTaskCacheData(Serializable taskID, MobicentsCluster mobicentsCluster) {
-		super(taskID,mobicentsCluster);
+	public TimerTaskCacheData(Serializable taskID, MobicentsCache cache) {
+		super(taskID,cache);
 	}
 
 	/**
