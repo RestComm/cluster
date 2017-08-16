@@ -1,6 +1,6 @@
 /*
  * TeleStax, Open Source Cloud Communications
- * Copyright 2011-2016, Telestax Inc and individual contributors
+ * Copyright 2011-2017, Telestax Inc and individual contributors
  * by the @authors tag.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -23,7 +23,6 @@ package org.restcomm.cluster.cache;
 import org.infinispan.remoting.transport.Address;
 import org.restcomm.cache.CacheData;
 import org.restcomm.cache.MobicentsCache;
-import org.restcomm.cluster.MobicentsCluster;
 
 /**
  * 
@@ -103,6 +102,10 @@ public class ClusteredCacheData<K,V> extends CacheData<K,ClustedCacheWrapper<V>>
 	
 	public V removeElement()
 	{
+	    // in case we will try to remove directly we may get looped in cluster mode through removal listener
+	    if(!exists())
+	        return null;
+	    
 		ClustedCacheWrapper<V> wrappedData=super.remove();
 		if(wrappedData!=null)
 			return wrappedData.getRealObject();
