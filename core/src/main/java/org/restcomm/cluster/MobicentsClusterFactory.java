@@ -86,12 +86,13 @@ public class MobicentsClusterFactory {
 	}
 
 	public void stop() {
-		Iterator<Entry<String, MobicentsCluster>> iterator=clustersMap.entrySet().iterator();
+	    Iterator<Entry<String, MobicentsCluster>> iterator=clustersMap.entrySet().iterator();
 		while(iterator.hasNext())
 		{
 			Entry<String, MobicentsCluster> curr=iterator.next();
-			MobicentsCluster cluster=curr.getValue();
-			cluster.stopCluster();			
+			MobicentsCluster cluster=clustersMap.remove(curr.getKey());
+			if(cluster!=null)
+			    cluster.stopCluster();			
 		}
 		
 		if(this.jBossCacheContainer!=null) {
