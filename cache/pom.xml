@@ -1,31 +1,30 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
 		<groupId>org.restcomm.cluster</groupId>
 		<artifactId>restcomm-cluster</artifactId>
-		<version>7.2.0-TelScale-SNAPSHOT</version>
+		<version>3.0.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>cache</artifactId>
 
 	<name>Restcomm Cluster Framework Cache</name>
 	<description>Restcomm Cluster Framework Cache</description>
-	<url>https://github.com/Restcomm/cluster</url>	
+	<url>https://github.com/Restcomm/cluster</url>
 
 	<dependencies>
-		<!--dependency>
-			<groupId>org.jboss.cache</groupId>
-			<artifactId>jbosscache-core</artifactId>
-		</dependency-->
+		<!--dependency> <groupId>org.jboss.cache</groupId> <artifactId>jbosscache-core</artifactId> 
+			</dependency -->
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 		</dependency>
-		
+
 	</dependencies>
-	
+
 	<build>
 		<finalName>restcomm-slee-core-cache</finalName>
 		<plugins>
@@ -41,48 +40,48 @@
 					<excludePoms />
 					<classpathExcludes>
 						<exclude>xml-apis:xml-apis</exclude>
-						<exclude>jtidy:jtidy</exclude>						
+						<exclude>jtidy:jtidy</exclude>
 					</classpathExcludes>
 					<resolveTransitiveDependencies>
 						true
-  				</resolveTransitiveDependencies>
+					</resolveTransitiveDependencies>
 					<eclipseProjectName>
 						${build.finalName}
-  				</eclipseProjectName>
+					</eclipseProjectName>
 				</configuration>
 			</plugin>
 			<plugin>
-        		<artifactId>maven-javadoc-plugin</artifactId>
-        		<!-- Note: Older versions will not work. -->
-        		<version>2.7</version>        	
-        			<configuration>
-					    <doclet>org.jboss.apiviz.APIviz</doclet>
-						<docletArtifact>
-							<groupId>org.jboss.apiviz</groupId>
-							<artifactId>apiviz</artifactId>
-							<version>1.3.2.GA</version>
-						</docletArtifact>
-						<useStandardDocletOptions>true</useStandardDocletOptions>
-						<charset>UTF-8</charset>
-						<encoding>UTF-8</encoding>
-						<docencoding>UTF-8</docencoding>
-						<breakiterator>true</breakiterator>
-						<version>true</version>
-						<author>true</author>
-						<keywords>true</keywords>
-						<additionalparam>
-							-sourceclasspath ${project.build.outputDirectory}
-					     </additionalparam>
- 				         <stylesheetfile>${basedir}/src/javadoc/stylesheet.css</stylesheetfile>
-          				 <javadocDirectory>${basedir}/src/javadoc</javadocDirectory>
-          				 <docfilessubdirs>true</docfilessubdirs>
-          				 <overview>${basedir}/src/javadoc/overview.html</overview>
-          				  <detectLinks />
-          				  <detectOfflineLinks />
-          				  <includeDependencySources />
-          				  <includeTransitiveDependencySources />          				  
-			        </configuration>			        
-      		</plugin>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<!-- Note: Older versions will not work. -->
+				<version>2.7</version>
+				<configuration>
+					<doclet>org.jboss.apiviz.APIviz</doclet>
+					<docletArtifact>
+						<groupId>org.jboss.apiviz</groupId>
+						<artifactId>apiviz</artifactId>
+						<version>1.3.2.GA</version>
+					</docletArtifact>
+					<useStandardDocletOptions>true</useStandardDocletOptions>
+					<charset>UTF-8</charset>
+					<encoding>UTF-8</encoding>
+					<docencoding>UTF-8</docencoding>
+					<breakiterator>true</breakiterator>
+					<version>true</version>
+					<author>true</author>
+					<keywords>true</keywords>
+					<additionalparam>
+						-sourceclasspath ${project.build.outputDirectory}
+					</additionalparam>
+					<stylesheetfile>${basedir}/src/javadoc/stylesheet.css</stylesheetfile>
+					<javadocDirectory>${basedir}/src/javadoc</javadocDirectory>
+					<docfilessubdirs>true</docfilessubdirs>
+					<overview>${basedir}/src/javadoc/overview.html</overview>
+					<detectLinks />
+					<detectOfflineLinks />
+					<includeDependencySources />
+					<includeTransitiveDependencySources />
+				</configuration>
+			</plugin>
 		</plugins>
-	</build>	
+	</build>
 </project>

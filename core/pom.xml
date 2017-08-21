@@ -1,14 +1,15 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
 		<groupId>org.restcomm.cluster</groupId>
 		<artifactId>restcomm-cluster</artifactId>
-		<version>7.2.0-TelScale-SNAPSHOT</version>
+		<version>3.0.0-SNAPSHOT</version>
 	</parent>
-	
+
 	<artifactId>core</artifactId>
-	
+
 	<name>Restcomm Cluster Framework Core</name>
 	<description>Restcomm Cluster Framework Core</description>
 	<url>https://github.com/Restcomm/cluster</url>
@@ -16,45 +17,45 @@
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-           	<artifactId>cache</artifactId>
-           	<version>${project.version}</version>           	
-		</dependency>	
+			<artifactId>cache</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 	</dependencies>
 
 	<build>
-		<plugins>			
+		<plugins>
 			<plugin>
-        		<artifactId>maven-javadoc-plugin</artifactId>
-        		<!-- Note: Older versions will not work. -->
-        		<version>2.7</version>        	
-        			<configuration>
-					    <doclet>org.jboss.apiviz.APIviz</doclet>
-						<docletArtifact>
-							<groupId>org.jboss.apiviz</groupId>
-							<artifactId>apiviz</artifactId>
-							<version>1.3.2.GA</version>
-						</docletArtifact>
-						<useStandardDocletOptions>true</useStandardDocletOptions>
-						<charset>UTF-8</charset>
-						<encoding>UTF-8</encoding>
-						<docencoding>UTF-8</docencoding>
-						<breakiterator>true</breakiterator>
-						<version>true</version>
-						<author>true</author>
-						<keywords>true</keywords>
-						<additionalparam>
-							-sourceclasspath ${project.build.outputDirectory}
-					     </additionalparam>
- 				         <stylesheetfile>${basedir}/src/javadoc/stylesheet.css</stylesheetfile>
-          				 <javadocDirectory>${basedir}/src/javadoc</javadocDirectory>
-          				 <docfilessubdirs>true</docfilessubdirs>
-          				 <overview>${basedir}/src/javadoc/overview.html</overview>
-          				  <detectLinks />
-          				  <detectOfflineLinks />
-          				  <includeDependencySources />
-          				  <includeTransitiveDependencySources />          				  
-			        </configuration>			        
-      		</plugin>
-		</plugins>		
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<!-- Note: Older versions will not work. -->
+				<version>2.7</version>
+				<configuration>
+					<doclet>org.jboss.apiviz.APIviz</doclet>
+					<docletArtifact>
+						<groupId>org.jboss.apiviz</groupId>
+						<artifactId>apiviz</artifactId>
+						<version>1.3.2.GA</version>
+					</docletArtifact>
+					<useStandardDocletOptions>true</useStandardDocletOptions>
+					<charset>UTF-8</charset>
+					<encoding>UTF-8</encoding>
+					<docencoding>UTF-8</docencoding>
+					<breakiterator>true</breakiterator>
+					<version>true</version>
+					<author>true</author>
+					<keywords>true</keywords>
+					<additionalparam>
+						-sourceclasspath ${project.build.outputDirectory}
+					</additionalparam>
+					<stylesheetfile>${basedir}/src/javadoc/stylesheet.css</stylesheetfile>
+					<javadocDirectory>${basedir}/src/javadoc</javadocDirectory>
+					<docfilessubdirs>true</docfilessubdirs>
+					<overview>${basedir}/src/javadoc/overview.html</overview>
+					<detectLinks />
+					<detectOfflineLinks />
+					<includeDependencySources />
+					<includeTransitiveDependencySources />
+				</configuration>
+			</plugin>
+		</plugins>
 	</build>
 </project>

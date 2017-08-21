@@ -1,22 +1,23 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	
+
 	<parent>
-		<groupId>org.mobicents</groupId>
-		<artifactId>mobicents-parent</artifactId>
-		<version>7.0.4.28</version>
+		<groupId>org.restcomm</groupId>
+		<artifactId>restcomm-parent</artifactId>
+		<version>3.0.4</version>
 	</parent>
-	
+
 	<groupId>org.restcomm.cluster</groupId>
 	<artifactId>restcomm-cluster</artifactId>
-	<version>7.2.0-TelScale-SNAPSHOT</version>
-	
+	<version>3.0.0-SNAPSHOT</version>
+
 	<packaging>pom</packaging>
-	
+
 	<name>Restcomm Cluster Framework Parent</name>
 	<description>Restcomm Cluster Framework Parent</description>
 	<url>https://github.com/Restcomm/cluster</url>
-	
+
 	<scm>
 		<connection>scm:git:https://github.com/RestComm/cluster.git</connection>
 		<developerConnection>scm:git:git@github.com:RestComm/cluster.git</developerConnection>
@@ -24,7 +25,8 @@
 	</scm>
 
 	<properties>
-		<!-- default versions for restcomm maven plugins and other base restcomm APIs -->
+		<!-- default versions for restcomm maven plugins and other base restcomm 
+			APIs -->
 		<restcomm.tools.mavenplugin.eclipse.version>1.0.1.FINAL</restcomm.tools.mavenplugin.eclipse.version>
 	</properties>
 
@@ -68,27 +70,27 @@
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-release-plugin</artifactId>
 						<configuration>
-							<autoVersionSubmodules>true</autoVersionSubmodules>							
-							<arguments>-Dmaven.test.skip</arguments>						
+							<autoVersionSubmodules>true</autoVersionSubmodules>
+							<arguments>-Dmaven.test.skip</arguments>
 						</configuration>
 					</plugin>
 				</plugins>
-			</build>		
+			</build>
 		</profile>
 	</profiles>
-	
+
 	<build>
 		<plugins>
 			<plugin>
 				<artifactId>maven-eclipse-plugin</artifactId>
-   				<groupId>org.mobicents.tools</groupId>
+				<groupId>org.mobicents.tools</groupId>
 				<inherited>false</inherited>
 				<executions />
 				<configuration>
 					<excludePoms />
 					<classpathExcludes>
 						<exclude>xml-apis:xml-apis</exclude>
-						<exclude>jtidy:jtidy</exclude>																							
+						<exclude>jtidy:jtidy</exclude>
 					</classpathExcludes>
 					<resolveTransitiveDependencies>true</resolveTransitiveDependencies>
 					<eclipseProjectName>restcomm-cluster</eclipseProjectName>
@@ -138,52 +140,27 @@
 						<phase>site</phase>
 					</execution>
 				</executions>
-      		</plugin>
-		</plugins>		
+			</plugin>
+		</plugins>
 	</build>
-	
-	<!-- dupe info from parent, but it's only way to retrieve the parent without checkout -->
+
+	<!-- dupe info from parent, but it's only way to retrieve the parent without 
+		checkout -->
 
 	<repositories>
 		<repository>
-		  <id>telscale-releases-repository</id>
-		  <name>TelScale Releases Repository</name>
-		  <url>http://telestax.artifactoryonline.com/telestax/releases</url>
-		  <releases>
-		    <enabled>true</enabled>
-		    <updatePolicy>never</updatePolicy>
-		  </releases>
-		  <snapshots>
-		    <enabled>false</enabled>
-		    <updatePolicy>never</updatePolicy>
-		  </snapshots>		  		  
-		</repository>
-		<repository>
-		  <id>telscale-snapshots-repository</id>
-		  <name>TelScale Snapshots Repository</name>
-		  <url>http://telestax.artifactoryonline.com/telestax/snapshots</url>
-		  <releases>
-		    <enabled>false</enabled>
-		    <updatePolicy>never</updatePolicy>
-		  </releases>
-		  <snapshots>
-		    <enabled>true</enabled>
-		    <updatePolicy>never</updatePolicy>
-		  </snapshots>		  		  
-		</repository>
-		<repository>
-			  <id>restcomm-public-repository-group</id>
-			  <name>Restcomm Public Maven Repository Group</name>
-			  <url>https://oss.sonatype.org/content/groups/public</url>
-			  <layout>default</layout>
-			  <releases>
-			    <enabled>true</enabled>
-			    <updatePolicy>never</updatePolicy>
-			  </releases>
-			  <snapshots>
-			    <enabled>true</enabled>
-			    <updatePolicy>never</updatePolicy>
-			  </snapshots>
+			<id>restcomm-public-repository-group</id>
+			<name>Restcomm Public Maven Repository Group</name>
+			<url>https://oss.sonatype.org/content/groups/public</url>
+			<layout>default</layout>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>never</updatePolicy>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>never</updatePolicy>
+			</snapshots>
 		</repository>
 		<repository>
 			<id>jboss-public-repository-group</id>
@@ -214,5 +191,5 @@
 			</snapshots>
 		</repository>
 	</repositories>
-	
+
 </project>
