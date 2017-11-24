@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.restcomm</groupId>
 		<artifactId>restcomm-parent</artifactId>
-		<version>3.0.7</version>
+		<version>4.1.0-17</version>
 	</parent>
 	
 	<groupId>org.restcomm.cluster</groupId>
@@ -22,6 +22,27 @@
 		<developerConnection>scm:git:git@github.com:RestComm/cluster.git</developerConnection>
 		<url>https://github.com/RestComm/cluster</url>
 	</scm>
+
+	<properties>
+		<jboss.cache.version>3.1.0.GA</jboss.cache.version>
+		<log4j.version>1.2.17</log4j.version>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.jboss.cache</groupId>
+				<artifactId>jbosscache-core</artifactId>
+				<version>${jboss.cache.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>log4j</groupId>
+				<artifactId>log4j</artifactId>
+				<version>${log4j.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
 
 	<modules>
 		<module>cache</module>
