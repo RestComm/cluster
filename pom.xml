@@ -38,9 +38,6 @@
 		</profile>
 		<profile>
 			<id>maven-release</id>
-			<modules>
-				<module>example</module>
-			</modules>
 			<build>
 				<plugins>
 					<plugin>
