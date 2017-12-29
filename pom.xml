@@ -10,7 +10,7 @@
 
 	<groupId>org.restcomm.cluster</groupId>
 	<artifactId>restcomm-cluster</artifactId>
-	<version>7.0.0-SNAPSHOT</version>
+	<version>3.0.1-116</version>
 
 	<packaging>pom</packaging>
 
